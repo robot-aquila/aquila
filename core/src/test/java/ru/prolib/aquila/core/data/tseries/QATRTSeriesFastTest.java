@@ -12,7 +12,9 @@ import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
@@ -210,6 +212,7 @@ public class QATRTSeriesFastTest {
 		
 	}
 
+	@Rule public ExpectedException eex = ExpectedException.none();
 	private IMocksControl control;
 	private TSeries<Candle> sourceMock;
 	private TSeriesImpl<Candle> sourceStub;
@@ -545,6 +548,30 @@ public class QATRTSeriesFastTest {
 		assertEquals(of("358.574336"), service.getFirstBefore(T("2018-06-01T10:55:00Z")));
 		assertEquals(of("395.119307"), service.getFirstBefore(T("2018-06-01T11:45:00Z")));
 		assertEquals(of("395.119307"), service.getFirstBefore(T("2018-12-31T00:00:00Z")));
+	}
+
+	@Test
+	public void testBugFix_SpecialCase_IndexOutOfRange() throws Exception {
+		eex.expect(ValueOutOfRangeException.class);
+		eex.expectMessage("For index: 0");
+		
+		service.get(0);
+	}
+	
+	@Test
+	public void testBugFix_SpecialCase_SourceEmptyAndRefreshRangeEqPeriodMinus1() throws Exception {
+		eex.expect(ValueOutOfRangeException.class);
+		eex.expectMessage("For index: 4");
+
+		service.get(4); // period is 5 -> starting from 4
+	}
+
+	@Test
+	public void testBugFix_SpecialCase_SourceEmptyAndRefreshRangeGtPeriodMinus1() throws Exception {
+		eex.expect(ValueOutOfRangeException.class);
+		eex.expectMessage("For index: 10");
+
+		service.get(10);
 	}
 
 }

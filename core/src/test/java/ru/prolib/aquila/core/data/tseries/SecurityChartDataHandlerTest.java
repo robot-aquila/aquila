@@ -5,11 +5,13 @@ import static org.easymock.EasyMock.*;
 import static ru.prolib.aquila.core.data.tseries.SecurityChartDataHandler.*;
 
 import org.easymock.IMocksControl;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.Candle;
@@ -28,7 +30,7 @@ public class SecurityChartDataHandlerTest {
 	private EventQueue queueMock;
 	private STSeries sourceMock;
 	private TSeriesCacheControllerETS<Candle> cacheCtrlMock;
-	private CandleSeriesByLastTrade ohlcProducerMock;
+	private Starter ohlcProducerMock;
 	private EditableTSeries<Candle> ohlcMock;
 	private SecurityChartDataHandler service;
 
@@ -41,7 +43,7 @@ public class SecurityChartDataHandlerTest {
 		queueMock = control.createMock(EventQueue.class);
 		sourceMock = control.createMock(STSeries.class);
 		cacheCtrlMock = control.createMock(TSeriesCacheControllerETS.class);
-		ohlcProducerMock = control.createMock(CandleSeriesByLastTrade.class);
+		ohlcProducerMock = control.createMock(Starter.class);
 		ohlcMock = control.createMock(EditableTSeries.class);
 		service = new SecurityChartDataHandler(setupMock, factoryMock);
 	}
@@ -84,9 +86,10 @@ public class SecurityChartDataHandlerTest {
 		expect(setupMock.getSymbol()).andReturn(symbol);
 		control.replay();
 		
-		CandleSeriesByLastTrade actual = service.createOhlcProducer(ohlcMock);
+		Starter actual = service.createOhlcProducer(ohlcMock);
 		
 		assertNotNull(actual);
+		assertThat(actual, IsInstanceOf.instanceOf(CandleSeriesByLastTrade.class));
 	}
 	
 	@Test
@@ -150,7 +153,6 @@ public class SecurityChartDataHandlerTest {
 		service.initialize();
 		control.resetToStrict();
 		ohlcProducerMock.start();
-		expectLastCall().andReturn(ohlcProducerMock);
 		setupMock.onStart();
 		control.replay();
 		
@@ -163,7 +165,6 @@ public class SecurityChartDataHandlerTest {
 	public void testStartDataHandling_SkipIfStarted() {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
-		expectLastCall().andReturn(ohlcProducerMock);
 		setupMock.onStart();
 		control.replay();
 		service.initialize();
@@ -192,11 +193,9 @@ public class SecurityChartDataHandlerTest {
 	public void testStartDataHandling_ThrowsIfClosed() {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
-		expectLastCall().andReturn(ohlcProducerMock);
 		setupMock.onStart();
 		setupMock.onStop();
 		ohlcProducerMock.stop();
-		expectLastCall().andReturn(ohlcProducerMock);
 		control.replay();
 		service.initialize();
 		service.startDataHandling();
@@ -216,7 +215,6 @@ public class SecurityChartDataHandlerTest {
 	public void testStopDataHandling_OK() {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
-		expectLastCall().andReturn(ohlcProducerMock);
 		setupMock.onStart();
 		control.replay();
 		service.initialize();
@@ -224,7 +222,6 @@ public class SecurityChartDataHandlerTest {
 		control.resetToStrict();
 		setupMock.onStop();
 		ohlcProducerMock.stop();
-		expectLastCall().andReturn(ohlcProducerMock);
 		control.replay();
 		
 		service.stopDataHandling();
@@ -236,11 +233,9 @@ public class SecurityChartDataHandlerTest {
 	public void testStopDataHandling_SkipIfNotStarted() {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
-		expectLastCall().andReturn(ohlcProducerMock);
 		setupMock.onStart();
 		setupMock.onStop();
 		ohlcProducerMock.stop();
-		expectLastCall().andReturn(ohlcProducerMock);
 		control.replay();
 		service.initialize();
 		service.startDataHandling();
@@ -266,7 +261,6 @@ public class SecurityChartDataHandlerTest {
 	public void testClose_ThrowsIfStarted() {
 		setExpectationsForInitialize();
 		ohlcProducerMock.start();
-		expectLastCall().andReturn(ohlcProducerMock);
 		setupMock.onStart();
 		control.replay();
 		service.initialize();

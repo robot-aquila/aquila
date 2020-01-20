@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.data.tseries;
 
 import ru.prolib.aquila.core.EventQueue;
+import ru.prolib.aquila.core.Starter;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.ZTFrame;
@@ -34,11 +35,11 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 	public interface Factory {
 		STSeries createSeries();
 		TSeriesCacheControllerETS<Candle> createCacheCtrl(EditableTSeries<Candle> ohlc);
-		CandleSeriesByLastTrade createOhlcProducer(EditableTSeries<Candle> ohlc);
+		Starter createOhlcProducer(EditableTSeries<Candle> ohlc);
 	}
 	
 	public static class FactoryImpl implements Factory {
-		private final HandlerSetup setup;
+		protected final HandlerSetup setup;
 		
 		public FactoryImpl(HandlerSetup setup) {
 			this.setup = setup;
@@ -59,12 +60,8 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 		}
 
 		@Override
-		public CandleSeriesByLastTrade createOhlcProducer(EditableTSeries<Candle> ohlc) {
-			return new CandleSeriesByLastTrade(
-					ohlc,
-					setup.getTerminal(),
-					setup.getSymbol()
-				);
+		public Starter createOhlcProducer(EditableTSeries<Candle> ohlc) {
+			return new CandleSeriesByLastTrade(ohlc, setup.getTerminal(), setup.getSymbol());
 		}
 
 	}
@@ -73,9 +70,9 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 	private final Factory factory;
 	private boolean initialized, started, closed;
 	private STSeries source;
-	private CandleSeriesByLastTrade ohlcProducer;
+	private Starter ohlcProducer;
 	
-	SecurityChartDataHandler(HandlerSetup setup, Factory factory) {
+	public SecurityChartDataHandler(HandlerSetup setup, Factory factory) {
 		this.setup = setup;
 		this.factory = factory;
 	}
@@ -92,7 +89,7 @@ public class SecurityChartDataHandler implements STSeriesHandler {
 		return factory;
 	}
 	
-	public CandleSeriesByLastTrade getOhlcProducer() {
+	public Starter getOhlcProducer() {
 		return ohlcProducer;
 	}
 	

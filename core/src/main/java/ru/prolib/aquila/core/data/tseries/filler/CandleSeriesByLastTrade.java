@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -63,6 +64,11 @@ public class CandleSeriesByLastTrade extends FillBySecurityEvent<Candle> {
 				logger.error("Unexpected exception: ", e);
 			}
 		}
+	}
+
+	@Override
+	protected MDLevel requiredMDLevel() {
+		return MDLevel.L1;
 	}
 
 }

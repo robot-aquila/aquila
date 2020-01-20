@@ -5,14 +5,17 @@ import org.slf4j.LoggerFactory;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.EventListener;
+import ru.prolib.aquila.core.Starter;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.data.EditableTSeries;
 
-public abstract class FillBySecurityEvent<T> implements EventListener {
+public abstract class FillBySecurityEvent<T> implements EventListener, Starter {
 	private static final Logger logger;
 	
 	static {
@@ -24,6 +27,7 @@ public abstract class FillBySecurityEvent<T> implements EventListener {
 	protected final Symbol symbol;
 	protected Security security;
 	protected boolean started = false;
+	protected SubscrHandler subscription;
 
 	public FillBySecurityEvent(EditableTSeries<T> series,
 			Terminal terminal, Symbol symbol)
@@ -62,17 +66,30 @@ public abstract class FillBySecurityEvent<T> implements EventListener {
 	 * Service method. For testing purposes only.
 	 * <p>
 	 * @param started - true if started, false - otherwise
+	 * @param subscription - subscription handler 
 	 */
-	protected synchronized void setStarted(boolean started) {
+	protected synchronized void setStarted(boolean started, SubscrHandler subscription) {
 		this.started = started;
+		this.subscription = subscription;
+	}
+	
+	/**
+	 * Return current subscription handler. For testing purposes only.
+	 * <p>
+	 * @return subscription handler or null if not subscribed
+	 */
+	protected synchronized SubscrHandler getSubscription() {
+		return subscription;
 	}
 
 	public synchronized boolean isStarted() {
 		return started;
 	}
 
-	public synchronized FillBySecurityEvent<T> start() {
+	@Override
+	public synchronized void start() {
 		if ( ! started ) {
+			subscription = terminal.subscribe(symbol, requiredMDLevel());
 			if ( security == null ) {
 				terminal.lock();
 				try {
@@ -92,18 +109,18 @@ public abstract class FillBySecurityEvent<T> implements EventListener {
 			}
 			started = true;
 		}
-		return this;
 	}
 
-	public synchronized FillBySecurityEvent<T> stop() {
+	@Override
+	public synchronized void stop() {
 		if ( started ) {
+			subscription.close();
 			terminal.onSecurityAvailable().removeListener(this);
 			if ( security != null ) {
 				stopListening(security);
 			}
 			started = false;
 		}
-		return this;
 	}
 
 	@Override
@@ -126,5 +143,6 @@ public abstract class FillBySecurityEvent<T> implements EventListener {
 	protected abstract void processEvent(Event event);
 	protected abstract void stopListening(Security security);
 	protected abstract void startListening(Security security);
+	protected abstract MDLevel requiredMDLevel();
 
 }

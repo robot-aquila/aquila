@@ -6,6 +6,7 @@ import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandlerStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class DataProviderStub implements DataProvider {
@@ -38,12 +39,12 @@ public class DataProviderStub implements DataProvider {
 
 	@Override
 	public SubscrHandler subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
-		return null;
+		return new SubscrHandlerStub();
 	}
 
 	@Override
 	public SubscrHandler subscribe(Account account, EditableTerminal terminal) {
-		return null;
+		return new SubscrHandlerStub();
 	}
 
 	@Override

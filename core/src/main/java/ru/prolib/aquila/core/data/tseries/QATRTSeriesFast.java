@@ -97,10 +97,11 @@ public class QATRTSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 	public CDecimal get(int index) throws ValueException {
 		lock();
 		try {
+			int src_length = source.getLength();
 			if ( index < 0 ) {
-				index = source.getLength() - 1 + index;
+				index = src_length - 1 + index;
 			}
-			if ( index < 0 ) {
+			if ( index < 0 || index >= src_length ) {
 				throw new ValueOutOfRangeException("For index: " + index);
 			}
 			if ( index > lastValidIndex ) {
@@ -197,9 +198,9 @@ public class QATRTSeriesFast implements TSeries<CDecimal>, TSeriesCache {
 					curr = curr.divide(d_period);
 				} else {
 					curr = cache.get(index - 1)
-							.multiply(d_periodMinus1)
-							.add(math.tr(source, index))
-							.divide(d_period);
+						.multiply(d_periodMinus1)
+						.add(math.tr(source, index))
+						.divide(d_period);
 				}
 			}
 			lengthCache = updateCache(index, curr, lengthCache);

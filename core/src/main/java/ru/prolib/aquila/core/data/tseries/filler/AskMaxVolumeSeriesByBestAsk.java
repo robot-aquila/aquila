@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.BusinessEntities.CDecimal;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -42,6 +43,11 @@ public class AskMaxVolumeSeriesByBestAsk extends FillBySecurityEvent<CDecimal> {
 	@Override
 	protected void startListening(Security security) {
 		security.onBestAsk().addListener(this);
+	}
+
+	@Override
+	protected MDLevel requiredMDLevel() {
+		return MDLevel.L1_BBO;
 	}
 
 }

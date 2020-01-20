@@ -14,12 +14,14 @@ import ru.prolib.aquila.core.BusinessEntities.BasicTerminalBuilder;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
+import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.Candle;
-import ru.prolib.aquila.core.data.DataProviderStub;
+import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TSeriesImpl;
 import ru.prolib.aquila.core.data.ZTFrame;
@@ -33,6 +35,8 @@ public class CandleSeriesByLastTradeTest {
 	
 	private IMocksControl control;
 	private CandleSeriesAggregator<Tick> aggregatorMock;
+	private DataProvider dpMock;
+	private SubscrHandler shMock;
 	private EditableTSeries<Candle> series;
 	private EditableTerminal terminal;
 	private CandleSeriesByLastTrade filler;
@@ -42,9 +46,11 @@ public class CandleSeriesByLastTradeTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		aggregatorMock = control.createMock(CandleSeriesAggregator.class);
+		dpMock = control.createMock(DataProvider.class);
+		shMock = control.createMock(SubscrHandler.class);
 		series = new TSeriesImpl<Candle>(ZTFrame.M1);
 		terminal = new BasicTerminalBuilder()
-				.withDataProvider(new DataProviderStub())
+				.withDataProvider(dpMock)
 				.buildTerminal();
 		filler = new CandleSeriesByLastTrade(series, terminal, symbol1, aggregatorMock);
 	}
@@ -59,10 +65,12 @@ public class CandleSeriesByLastTradeTest {
 
 	@Test
 	public void testStart_SkipIfStarted() {
-		filler.setStarted(true);
+		filler.setStarted(true, null);
+		control.replay();
 		
-		assertSame(filler, filler.start());
+		filler.start();
 		
+		control.verify();
 		assertFalse(terminal.onSecurityAvailable().isListener(filler));
 		assertTrue(filler.isStarted());
 	}
@@ -71,35 +79,47 @@ public class CandleSeriesByLastTradeTest {
 	public void testStart_IfSecurityAlreadyDefined() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		filler.setSecurity(security);
+		expect(dpMock.subscribe(symbol1, MDLevel.L1, terminal)).andReturn(shMock);
+		control.replay();
 		
-		assertSame(filler, filler.start());
+		filler.start();
 		
+		control.verify();
 		assertFalse(terminal.onSecurityAvailable().isListener(filler));
 		assertTrue(filler.isStarted());
 		assertSame(security, filler.getSecurity());
 		assertTrue(security.onLastTrade().isListener(filler));
+		assertSame(shMock, filler.getSubscription());
 	}
 	
 	@Test
 	public void testStart_IfSecurityNotAvailable() {
+		expect(dpMock.subscribe(symbol1, MDLevel.L1, terminal)).andReturn(shMock);
+		control.replay();
 		
-		assertSame(filler, filler.start());
+		filler.start();
 		
+		control.verify();
 		assertTrue(terminal.onSecurityAvailable().isListener(filler));
 		assertTrue(filler.isStarted());
 		assertNull(filler.getSecurity());
+		assertSame(shMock, filler.getSubscription());
 	}
 	
 	@Test
 	public void testStart_IfSecurityAvailable() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
+		expect(dpMock.subscribe(symbol1, MDLevel.L1, terminal)).andReturn(shMock);
+		control.replay();
 		
-		assertSame(filler, filler.start());
+		filler.start();
 		
+		control.verify();
 		assertFalse(terminal.onSecurityAvailable().isListener(filler));
 		assertTrue(filler.isStarted());
 		assertSame(security, filler.getSecurity());
 		assertTrue(security.onLastTrade().isListener(filler));
+		assertSame(shMock, filler.getSubscription());
 	}
 	
 	@Test
@@ -108,9 +128,11 @@ public class CandleSeriesByLastTradeTest {
 		security.onLastTrade().addListener(filler);
 		filler.setSecurity(security);
 		terminal.onSecurityAvailable().addListener(filler);
+		control.replay();
 		
-		assertSame(filler, filler.stop());
+		filler.stop();
 		
+		control.verify();
 		assertTrue(security.onLastTrade().isListener(filler));
 		assertTrue(terminal.onSecurityAvailable().isListener(filler));
 		assertFalse(filler.isStarted());
@@ -119,10 +141,13 @@ public class CandleSeriesByLastTradeTest {
 	@Test
 	public void testStop_IfSecurityNotDefined() {
 		terminal.onSecurityAvailable().addListener(filler);
-		filler.setStarted(true);
+		filler.setStarted(true, shMock);
+		shMock.close();
+		control.replay();
 		
-		assertSame(filler, filler.stop());
+		filler.stop();
 		
+		control.verify();
 		assertFalse(terminal.onSecurityAvailable().isListener(filler));
 		assertFalse(filler.isStarted());
 	}
@@ -133,10 +158,13 @@ public class CandleSeriesByLastTradeTest {
 		security.onLastTrade().addListener(filler);
 		filler.setSecurity(security);
 		terminal.onSecurityAvailable().addListener(filler);
-		filler.setStarted(true);
+		filler.setStarted(true, shMock);
+		shMock.close();
+		control.replay();
 		
-		assertSame(filler, filler.stop());
+		filler.stop();
 		
+		control.verify();
 		assertFalse(terminal.onSecurityAvailable().isListener(filler));
 		assertFalse(security.onLastTrade().isListener(filler));
 		assertSame(security, filler.getSecurity());
@@ -147,10 +175,12 @@ public class CandleSeriesByLastTradeTest {
 	public void testOnEvent_OnSecurityAvailable_SkipIfNotStarted() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		terminal.onSecurityAvailable().addListener(filler);
-		filler.setStarted(false);
+		filler.setStarted(false, null);
+		control.replay();
 		
 		filler.onEvent(new SecurityEvent(terminal.onSecurityAvailable(), security, Instant.EPOCH));
 		
+		control.verify();
 		assertTrue(terminal.onSecurityAvailable().isListener(filler)); // still listener
 		assertNull(filler.getSecurity());
 	}
@@ -159,10 +189,12 @@ public class CandleSeriesByLastTradeTest {
 	public void testOnEvent_OnSecurityAvailable_UncontrolledSecurity() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol2);
 		terminal.onSecurityAvailable().addListener(filler);
-		filler.setStarted(true);
+		filler.setStarted(true, null);
+		control.replay();
 		
 		filler.onEvent(new SecurityEvent(terminal.onSecurityAvailable(), security, Instant.EPOCH));
 		
+		control.verify();
 		assertTrue(terminal.onSecurityAvailable().isListener(filler)); // still listener
 		assertNull(filler.getSecurity());
 	}
@@ -171,10 +203,12 @@ public class CandleSeriesByLastTradeTest {
 	public void testOnEvent_OnSecurityAvailable_ControlledSecurity() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		terminal.onSecurityAvailable().addListener(filler);
-		filler.setStarted(true);
+		filler.setStarted(true, null);
+		control.replay();
 		
 		filler.onEvent(new SecurityEvent(terminal.onSecurityAvailable(), security, Instant.EPOCH));
 		
+		control.verify();
 		assertFalse(terminal.onSecurityAvailable().isListener(filler));
 		assertSame(security, filler.getSecurity());
 		assertTrue(security.onLastTrade().isListener(filler));
@@ -185,7 +219,7 @@ public class CandleSeriesByLastTradeTest {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		SecurityTickEvent e = new SecurityTickEvent(security.onLastTrade(), security,
 				Instant.EPOCH, Tick.ofTrade(T("2017-08-31T00:00:00Z"), CDecimalBD.of(100L), CDecimalBD.of(1000L)));
-		filler.setStarted(false);
+		filler.setStarted(false, null);
 		control.replay();
 		
 		filler.onEvent(e);
@@ -198,7 +232,7 @@ public class CandleSeriesByLastTradeTest {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		Tick trade = Tick.ofTrade(T("2017-08-31T00:00:00Z"), CDecimalBD.of(100L), CDecimalBD.of(1000L));
 		SecurityTickEvent e = new SecurityTickEvent(security.onLastTrade(), security, Instant.EPOCH, trade);
-		filler.setStarted(true);
+		filler.setStarted(true, null);
 		filler.setSecurity(security);
 		aggregatorMock.aggregate(series, trade);
 		control.replay();
