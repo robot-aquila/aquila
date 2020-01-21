@@ -1,6 +1,9 @@
 package ru.prolib.aquila.qforts.impl;
 
 import static org.junit.Assert.*;
+
+import java.util.concurrent.TimeUnit;
+
 import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
@@ -56,16 +59,17 @@ public class QFSymbolSubscrHandlerTest {
 	}
 
 	@Test
-	public void testEquals() {
+	public void testEquals() throws Exception {
 		Variant<QFReactor> vRea = new Variant<>(reactorMock1, reactorMock2);
 		Variant<EditableSecurity> vSec = new Variant<>(vRea, securityMock1, securityMock2);
 		Variant<MDLevel> vLev = new Variant<>(vSec, MDLevel.L2, MDLevel.L1_BBO);
-		Variant<Boolean> vCls = new Variant<>(vLev, false, true);
-		Variant<?> iterator = vCls;
+		Variant<Boolean> vCls = new Variant<>(vLev, false, true),
+				vConf = new Variant<>(vCls, true, false);
+		Variant<?> iterator = vConf;
 		int found_cnt = 0;
 		QFSymbolSubscrHandler x, found = null;
 		do {
-			x = new QFSymbolSubscrHandler(vRea.get(), vSec.get(), vLev.get());
+			x = new QFSymbolSubscrHandler(vRea.get(), vSec.get(), vLev.get(), vConf.get());
 			if ( vCls.get() ) {
 				x.close();
 			}
@@ -79,6 +83,7 @@ public class QFSymbolSubscrHandlerTest {
 		assertEquals(securityMock1, found.getSecurity());
 		assertEquals(MDLevel.L2, found.getLevel());
 		assertFalse(found.isClosed());
+		assertTrue(found.getConfirmation().get(1, TimeUnit.SECONDS));
 	}
 
 }

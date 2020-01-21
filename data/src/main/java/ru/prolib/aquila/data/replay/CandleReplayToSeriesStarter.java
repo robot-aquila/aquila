@@ -28,6 +28,7 @@ public class CandleReplayToSeriesStarter implements Starter {
 	public synchronized void start() throws StarterException {
 		if ( started.compareAndSet(false, true) ) {
 			handler = service.subscribe(new TFSymbol(symbol, target.getTimeFrame()), new CandleReplayToSeries(target));
+			handler.getConfirmation().join();
 		}
 	}
 

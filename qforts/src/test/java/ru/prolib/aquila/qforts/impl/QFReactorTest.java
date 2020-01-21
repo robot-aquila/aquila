@@ -161,7 +161,7 @@ public class QFReactorTest {
 	}
 
 	@Test
-	public void testSubscribe_Symbol_IfAlreadySubscribed() {
+	public void testSubscribe_Symbol_IfAlreadySubscribed() throws Exception {
 		SymbolSubscrCounter counter = symbolSubsFactory.produce(symbolSubsMock, symbol);
 		counter.consume(new DeltaUpdateBuilder()
 				.withToken(Field.NUM_L0, 2)

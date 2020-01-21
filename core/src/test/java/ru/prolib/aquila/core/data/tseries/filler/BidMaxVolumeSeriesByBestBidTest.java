@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
 
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -51,6 +52,12 @@ public class BidMaxVolumeSeriesByBestBidTest {
 		filler = new BidMaxVolumeSeriesByBestBid(series, terminal, symbol1);
 	}
 	
+	CompletableFuture<Boolean> confirm(boolean result) {
+		CompletableFuture<Boolean> f = new CompletableFuture<>();
+		f.complete(result);
+		return f;
+	}
+	
 	@Test
 	public void testCtor3() {
 		assertSame(series, filler.getSeries());
@@ -76,6 +83,7 @@ public class BidMaxVolumeSeriesByBestBidTest {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		filler.setSecurity(security);
 		expect(dpMock.subscribe(symbol1, MDLevel.L1_BBO, terminal)).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		filler.start();
@@ -91,6 +99,7 @@ public class BidMaxVolumeSeriesByBestBidTest {
 	@Test
 	public void testStart_IfSecurityNotAvailable() {
 		expect(dpMock.subscribe(symbol1, MDLevel.L1_BBO, terminal)).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		filler.start();
@@ -106,6 +115,7 @@ public class BidMaxVolumeSeriesByBestBidTest {
 	public void testStart_IfSecurityAvailable() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		expect(dpMock.subscribe(symbol1, MDLevel.L1_BBO, terminal)).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		filler.start();

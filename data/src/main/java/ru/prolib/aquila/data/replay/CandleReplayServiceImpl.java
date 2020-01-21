@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -64,11 +65,16 @@ public class CandleReplayServiceImpl implements CandleReplayService {
 		private final Node node;
 		private final CandleListener listener;
 		private final AtomicBoolean closed;
+		private final boolean confirm;
+		private final CompletableFuture<Boolean> f_confirm;
 		
-		NodeSubscrHandler(Node node, CandleListener listener) {
+		NodeSubscrHandler(Node node, CandleListener listener, boolean confirm) {
 			this.node = node;
 			this.listener = listener;
 			this.closed = new AtomicBoolean(false);
+			this.confirm = confirm;
+			this.f_confirm = new CompletableFuture<>();
+			this.f_confirm.complete(confirm);
 		}
 		
 		@Override
@@ -85,7 +91,12 @@ public class CandleReplayServiceImpl implements CandleReplayService {
 			if ( other == null ) {
 				return false;
 			}
-			return other.node == node && other.listener == listener;
+			return other.node == node && other.listener == listener && other.confirm == confirm;
+		}
+
+		@Override
+		public CompletableFuture<Boolean> getConfirmation() {
+			return f_confirm;
 		}
 		
 	}
@@ -188,7 +199,7 @@ public class CandleReplayServiceImpl implements CandleReplayService {
 					return null;
 				}
 				listeners.add(listener);
-				return new NodeSubscrHandler(this, listener);
+				return new NodeSubscrHandler(this, listener, true);
 			} finally {
 				lock.unlock();
 			}
@@ -202,7 +213,7 @@ public class CandleReplayServiceImpl implements CandleReplayService {
 					throw new IllegalStateException("Cannot subscribe on closed node");
 				}
 				listeners.add(listener);
-				return new NodeSubscrHandler(this, listener);
+				return new NodeSubscrHandler(this, listener, true);
 			} finally {
 				lock.unlock();
 			}

@@ -183,7 +183,7 @@ public class CandleReplayServiceImplTest {
 	
 	@Test
 	public void testNodeSubscrHandler_Close() throws Exception {
-		NodeSubscrHandler service = new NodeSubscrHandler(nodeMock1, listenerMock1);
+		NodeSubscrHandler service = new NodeSubscrHandler(nodeMock1, listenerMock1, true);
 		nodeMock1.unsubscribe(listenerMock1);
 		control.replay();
 		
@@ -253,7 +253,7 @@ public class CandleReplayServiceImplTest {
 		SubscrHandler actual = node_service.subscribeIfNotClosed(listenerMock1);
 		
 		control.verify();
-		assertTrue(new NodeSubscrHandler(node_service, listenerMock1).isEqualTo((NodeSubscrHandler) actual));
+		assertTrue(new NodeSubscrHandler(node_service, listenerMock1, true).isEqualTo((NodeSubscrHandler) actual));
 	}
 	
 	@Test
@@ -278,7 +278,7 @@ public class CandleReplayServiceImplTest {
 		SubscrHandler actual = node_service.subscribe(listenerMock3);
 		
 		control.verify();
-		assertTrue(new NodeSubscrHandler(node_service, listenerMock3).isEqualTo((NodeSubscrHandler) actual));
+		assertTrue(new NodeSubscrHandler(node_service, listenerMock3, true).isEqualTo((NodeSubscrHandler) actual));
 	}
 	
 	@Test

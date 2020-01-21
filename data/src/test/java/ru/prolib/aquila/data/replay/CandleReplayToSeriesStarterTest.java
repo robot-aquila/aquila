@@ -1,6 +1,9 @@
 package ru.prolib.aquila.data.replay;
 
 import static org.junit.Assert.*;
+
+import java.util.concurrent.CompletableFuture;
+
 import static org.easymock.EasyMock.*;
 
 import org.easymock.Capture;
@@ -34,11 +37,17 @@ public class CandleReplayToSeriesStarterTest {
 		service = new CandleReplayToSeriesStarter(crsMock, symbol, targetMock);
 	}
 	
+	private CompletableFuture<Boolean> confirm(boolean r) {
+		CompletableFuture<Boolean> f = new CompletableFuture<>();
+		f.complete(r);
+		return f;
+	}
 	@Test
 	public void testStart() throws Exception {
 		expect(targetMock.getTimeFrame()).andStubReturn(ZTFrame.M5MSK);
 		Capture<CandleListener> cap = Capture.newInstance();
 		expect(crsMock.subscribe(eq(new TFSymbol(symbol, ZTFrame.M5MSK)), capture(cap))).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		service.start();
@@ -65,6 +74,7 @@ public class CandleReplayToSeriesStarterTest {
 		expect(targetMock.getTimeFrame()).andStubReturn(ZTFrame.M5MSK);
 		Capture<CandleListener> cap = Capture.newInstance();
 		expect(crsMock.subscribe(eq(new TFSymbol(symbol, ZTFrame.M5MSK)), capture(cap))).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		service.start();
 		control.resetToStrict();

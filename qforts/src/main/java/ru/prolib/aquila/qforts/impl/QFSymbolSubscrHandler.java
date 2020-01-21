@@ -1,5 +1,6 @@
 package ru.prolib.aquila.qforts.impl;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -13,12 +14,21 @@ public class QFSymbolSubscrHandler implements SubscrHandler {
 	private final EditableSecurity security;
 	private final MDLevel level;
 	private final AtomicBoolean closed;
+	private final boolean confirm;
+	private final CompletableFuture<Boolean> f_confirm;
 	
-	public QFSymbolSubscrHandler(QFReactor reactor, EditableSecurity security, MDLevel level) {
+	public QFSymbolSubscrHandler(QFReactor reactor, EditableSecurity security, MDLevel level, boolean confirm) {
 		this.reactor = reactor;
 		this.security = security;
 		this.level = level;
 		this.closed = new AtomicBoolean(false);
+		this.confirm = confirm;
+		f_confirm = new CompletableFuture<>();
+		f_confirm.complete(confirm);
+	}
+	
+	public QFSymbolSubscrHandler(QFReactor reactor, EditableSecurity security, MDLevel level) {
+		this(reactor, security, level, true);
 	}
 	
 	public QFReactor getReactor() {
@@ -58,7 +68,13 @@ public class QFSymbolSubscrHandler implements SubscrHandler {
 				.append(o.security, security)
 				.append(o.level, level)
 				.append(o.closed.get(), closed.get())
+				.append(o.confirm, confirm)
 				.build();
+	}
+
+	@Override
+	public CompletableFuture<Boolean> getConfirmation() {
+		return f_confirm;
 	}
 
 }

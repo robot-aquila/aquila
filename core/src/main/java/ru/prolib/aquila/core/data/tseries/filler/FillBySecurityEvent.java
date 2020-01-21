@@ -90,6 +90,7 @@ public abstract class FillBySecurityEvent<T> implements EventListener, Starter {
 	public synchronized void start() {
 		if ( ! started ) {
 			subscription = terminal.subscribe(symbol, requiredMDLevel());
+			subscription.getConfirmation().join();
 			if ( security == null ) {
 				terminal.lock();
 				try {

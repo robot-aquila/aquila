@@ -3,6 +3,7 @@ package ru.prolib.aquila.core.data.tseries.filler;
 import static org.junit.Assert.*;
 
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 
 import static org.easymock.EasyMock.*;
 
@@ -55,6 +56,12 @@ public class CandleSeriesByLastTradeTest {
 		filler = new CandleSeriesByLastTrade(series, terminal, symbol1, aggregatorMock);
 	}
 	
+	CompletableFuture<Boolean> confirm(boolean result) {
+		CompletableFuture<Boolean> f = new CompletableFuture<>();
+		f.complete(result);
+		return f;
+	}
+
 	@Test
 	public void testCtor4() {
 		assertSame(series, filler.getSeries());
@@ -80,6 +87,7 @@ public class CandleSeriesByLastTradeTest {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		filler.setSecurity(security);
 		expect(dpMock.subscribe(symbol1, MDLevel.L1, terminal)).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		filler.start();
@@ -95,6 +103,7 @@ public class CandleSeriesByLastTradeTest {
 	@Test
 	public void testStart_IfSecurityNotAvailable() {
 		expect(dpMock.subscribe(symbol1, MDLevel.L1, terminal)).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		filler.start();
@@ -110,6 +119,7 @@ public class CandleSeriesByLastTradeTest {
 	public void testStart_IfSecurityAvailable() {
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		expect(dpMock.subscribe(symbol1, MDLevel.L1, terminal)).andReturn(shMock);
+		expect(shMock.getConfirmation()).andReturn(confirm(true));
 		control.replay();
 		
 		filler.start();
