@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -125,7 +125,7 @@ public class CandleReplayServiceImpl implements CandleReplayService {
 		}
 		
 		public NodeImpl(Symbol symbol, String id, CloseableIterator<Candle> reader) {
-			this(symbol, id, reader, new HashSet<>(), new ReentrantLock(), new AtomicBoolean(false));
+			this(symbol, id, reader, new LinkedHashSet<>(), new ReentrantLock(), new AtomicBoolean(false));
 		}
 		
 		Symbol getSymbol() {
