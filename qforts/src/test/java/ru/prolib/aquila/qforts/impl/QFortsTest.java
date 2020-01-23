@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
@@ -30,6 +32,14 @@ public class QFortsTest {
 	private EditableTerminal terminal;
 	private QForts service;
 	
+	static List<EditableOrder> toList(EditableOrder ...args) {
+		List<EditableOrder> list = new ArrayList<>();
+		for ( EditableOrder order : args ) {
+			list.add(order);
+		}
+		return list;
+	}
+	
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		account1 = new Account("TEST1");
@@ -51,6 +61,11 @@ public class QFortsTest {
 		terminal.getEditablePortfolio(account1);
 		terminal.getEditablePortfolio(account2);
 		terminal.getEditablePortfolio(account3);
+	}
+	
+	@Test
+	public void testGetters() {
+		assertEquals(QForts.LIQUIDITY_LIMITED, service.getLiquidityMode());
 	}
 	
 	@Test
@@ -153,6 +168,44 @@ public class QFortsTest {
 		
 		service.handleOrders(terminal.getEditableSecurity(symbol1), CDecimalBD.of(18L), CDecimalBD.of("54.26"));
 		
+		control.verify();
+	}
+	
+	@Test
+	public void testHandleOrders_LiquidityMode_ApplyToOrder() throws Exception {
+		service = new QForts(registryMock, transactionsMock, QForts.LIQUIDITY_APPLY_TO_ORDER);
+		EditableOrder
+			order1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(10L)),
+			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, CDecimalBD.of(5L)),
+			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L));
+		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(toList(order1, order2, order3));
+		transactionsMock.executeOrder(order1, of(10L), of("54.26"));
+		transactionsMock.executeOrder(order2,  of(5L), of("54.26"));
+		transactionsMock.executeOrder(order3, of(10L), of("54.26"));
+		control.replay();
+		
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(10L), of("54.26"));
+
+		control.verify();
+	}
+	
+	@Test
+	public void testHandleOrders_LiquidityMode_Unlimited() throws Exception {
+		service = new QForts(registryMock, transactionsMock, QForts.LIQUIDITY_UNLIMITED);
+		EditableOrder
+			o1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(10L)),
+			o2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, CDecimalBD.of(5L)),
+			o3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L)),
+			o4 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(49088812L));
+		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(toList(o1, o2, o3, o4));
+		transactionsMock.executeOrder(o1, of(10L), of("54.26"));
+		transactionsMock.executeOrder(o2,  of(5L), of("54.26"));
+		transactionsMock.executeOrder(o3, of(20L), of("54.26"));
+		transactionsMock.executeOrder(o4, of(49088812L), of("54.26"));
+		control.replay();
+		
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(1L), of("54.26"));
+
 		control.verify();
 	}
 	

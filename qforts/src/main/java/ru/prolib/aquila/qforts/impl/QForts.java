@@ -12,17 +12,31 @@ import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
 public class QForts {
+	public static final int LIQUIDITY_LIMITED = 0;
+	public static final int LIQUIDITY_APPLY_TO_ORDER = 1;
+	public static final int LIQUIDITY_UNLIMITED = 2;
 	private static final CDecimal ZERO = CDecimalBD.ZERO;
+	private static final CDecimal MAX_LIQUIDITY = CDecimalBD.of(Long.MAX_VALUE);
 	private final QFObjectRegistry registry;
 	private final QFTransactionService transactions;
+	private final int liquidityMode;
 	
-	public QForts(QFObjectRegistry registry, QFTransactionService transactions) {
+	public QForts(QFObjectRegistry registry, QFTransactionService transactions, int liquidity_mode) {
 		this.registry = registry;
 		this.transactions = transactions;
+		this.liquidityMode = liquidity_mode;
 	}
 	
-	public QForts(QFObjectRegistry registry, AtomicLong seqExecutionID) {
-		this(registry, new QFTransactionService(registry, seqExecutionID));
+	public QForts(QFObjectRegistry registry, QFTransactionService transactions) {
+		this(registry, transactions, LIQUIDITY_LIMITED);
+	}
+	
+	public QForts(QFObjectRegistry registry, AtomicLong seqExecutionID, int unlimited_liquidity) {
+		this(registry, new QFTransactionService(registry, seqExecutionID), unlimited_liquidity);
+	}
+	
+	public int getLiquidityMode() {
+		return liquidityMode;
 	}
 	
 	public void registerPortfolio(EditablePortfolio portfolio) {
@@ -50,6 +64,9 @@ public class QForts {
 	public void handleOrders(Security security, CDecimal availableVolume, CDecimal price)
 			throws QFTransactionException
 	{
+		if ( liquidityMode == LIQUIDITY_UNLIMITED ) {
+			availableVolume = MAX_LIQUIDITY;
+		}
 		for ( EditableOrder order : registry.getOrderList(security.getSymbol(), price) ) {
 			CDecimal volume = availableVolume.min(order.getCurrentVolume());
 			if ( volume.compareTo(ZERO) > 0 ) {
@@ -59,9 +76,11 @@ public class QForts {
 					transactions.rejectOrder(order, e.getMessage());
 				}
 			}
-			availableVolume = availableVolume.subtract(volume);
-			if ( availableVolume.compareTo(ZERO) <= 0 ) {
-				break;
+			if ( liquidityMode == 0 ) {
+				availableVolume = availableVolume.subtract(volume);
+				if ( availableVolume.compareTo(ZERO) <= 0 ) {
+					break;
+				}
 			}
 		}
 	}

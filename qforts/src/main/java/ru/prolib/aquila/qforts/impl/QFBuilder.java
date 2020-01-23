@@ -17,6 +17,7 @@ public class QFBuilder {
 	private QFSessionSchedule schedule;
 	private DataSource dataSource;
 	private EventQueue eventQueue;
+	private int liquidityMode = QForts.LIQUIDITY_LIMITED;
 	
 	public DataProvider buildDataProvider() {
 		return new QFReactor(
@@ -35,7 +36,7 @@ public class QFBuilder {
 	
 	private QForts getFacade() {
 		if ( facade == null ) {
-			facade = new QForts(getRegistry(), getTransactions());
+			facade = new QForts(getRegistry(), getTransactions(), liquidityMode);
 		}
 		return facade;
 	}
@@ -100,6 +101,17 @@ public class QFBuilder {
 	
 	public QFBuilder withEventQueue(EventQueue queue) {
 		this.eventQueue = queue;
+		return this;
+	}
+	
+	public QFBuilder withLiquidityMode(int liquidity_mode) {
+		if ( liquidity_mode != QForts.LIQUIDITY_LIMITED
+		  && liquidity_mode != QForts.LIQUIDITY_APPLY_TO_ORDER
+		  && liquidity_mode != QForts.LIQUIDITY_UNLIMITED )
+		{
+			throw new IllegalArgumentException("Unknown liquidity mode: " + liquidity_mode);
+		}
+		this.liquidityMode = liquidity_mode;
 		return this;
 	}
 
