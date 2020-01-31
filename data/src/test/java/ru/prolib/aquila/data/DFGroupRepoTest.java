@@ -2,11 +2,9 @@ package ru.prolib.aquila.data;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
@@ -87,10 +85,29 @@ public class DFGroupRepoTest {
 		Collection<String> actual = service.getPendingSubscr(FEED2);
 		
 		control.verify();
-		List<String> expected = new ArrayList<>();
-		expected.add("foo");
-		expected.add("buz");
-		assertEquals(expected, actual);
+		assertEquals(Arrays.asList("foo", "buz"), actual);
+	}
+	
+	@Test
+	public void testGetSubscribed() {
+		groups.put("foo", gMock1);
+		groups.put("bar", gMock2);
+		groups.put("buz", gMock3);
+		groups.put("lol", gMock4);
+		groups.put("dup", gMock5);
+		lockMock.lock();
+		expect(gMock1.getFeedStatus(FEED3)).andReturn(DFSubscrStatus.SUBSCR);
+		expect(gMock2.getFeedStatus(FEED3)).andReturn(DFSubscrStatus.NOT_SUBSCR);
+		expect(gMock3.getFeedStatus(FEED3)).andReturn(DFSubscrStatus.PENDING_SUBSCR);
+		expect(gMock4.getFeedStatus(FEED3)).andReturn(DFSubscrStatus.SUBSCR);
+		expect(gMock5.getFeedStatus(FEED3)).andReturn(DFSubscrStatus.SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		Collection<String> actual = service.getSubscribed(FEED3);
+		
+		control.verify();
+		assertEquals(Arrays.asList("foo", "lol", "dup"), actual);
 	}
 
 	@Test
@@ -112,7 +129,34 @@ public class DFGroupRepoTest {
 	}
 	
 	@Test
-	public void testSubscribed2() {
+	public void testSubscribed2_Key() {
+		groups.put("foo", gMock1);
+		lockMock.lock();
+		gMock1.setFeedStatus(FEED3, DFSubscrStatus.SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		service.subscribed("foo", FEED3);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testSubscribed2_Key_AKeyPointsToNonExistentGroup() {
+		lockMock.lock();
+		expect(factoryMock.produce("boo")).andReturn(gMock1);
+		gMock1.setFeedStatus(FEED2, DFSubscrStatus.SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		service.subscribed("boo", FEED2);
+		
+		control.verify();
+		assertSame(gMock1, groups.get("boo"));
+	}
+
+	@Test
+	public void testSubscribed2_Coll() {
 		groups.put("one", gMock1);
 		groups.put("bat", gMock2);
 		groups.put("foo", gMock3);
@@ -131,7 +175,27 @@ public class DFGroupRepoTest {
 	}
 	
 	@Test
-	public void testUnsubscribed2() {
+	public void testSubscribed2_Coll_AKeyPointsToNonExistingGroup() {
+		groups.put("one", gMock1);
+		groups.put("top", gMock2);
+		lockMock.lock();
+		expect(factoryMock.produce("bat")).andReturn(gMock3);
+		gMock3.setFeedStatus(FEED2, DFSubscrStatus.SUBSCR);
+		expect(factoryMock.produce("zoo")).andReturn(gMock4);
+		gMock4.setFeedStatus(FEED2, DFSubscrStatus.SUBSCR);
+		gMock2.setFeedStatus(FEED2, DFSubscrStatus.SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		service.subscribed(Arrays.asList("bat", "zoo", "top"), FEED2);
+
+		control.verify();
+		assertSame(gMock3, groups.get("bat"));
+		assertSame(gMock4, groups.get("zoo"));
+	}
+	
+	@Test
+	public void testUnsubscribed2_Coll() {
 		groups.put("one", gMock1);
 		groups.put("bat", gMock2);
 		groups.put("foo", gMock3);
@@ -147,6 +211,58 @@ public class DFGroupRepoTest {
 		service.unsubscribed(Arrays.asList("one", "foo", "top"), FEED1);
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testUnsubscribed2_Coll_AKeyPointsToNonExistingGroup() {
+		groups.put("one", gMock1);
+		groups.put("bat", gMock2);
+		groups.put("foo", gMock3);
+		lockMock.lock();
+		gMock2.setFeedStatus(FEED1, DFSubscrStatus.NOT_SUBSCR);
+		expect(factoryMock.produce("zad")).andReturn(gMock4);
+		gMock4.setFeedStatus(FEED1, DFSubscrStatus.NOT_SUBSCR);
+		expect(factoryMock.produce("daf")).andReturn(gMock5);
+		gMock5.setFeedStatus(FEED1, DFSubscrStatus.NOT_SUBSCR);
+		gMock3.setFeedStatus(FEED1, DFSubscrStatus.NOT_SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		service.unsubscribed(Arrays.asList("bat", "zad", "daf", "foo"), FEED1);
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUnsubscribed2_Key() {
+		groups.put("one", gMock1);
+		groups.put("bat", gMock2);
+		groups.put("foo", gMock3);
+		lockMock.lock();
+		gMock2.setFeedStatus(FEED2, DFSubscrStatus.NOT_SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		service.unsubscribed("bat", FEED2);
+		
+		control.verify();
+	}
+
+	@Test
+	public void testUnsubscribed2_Key_AKeyPointsToNonExistentGroup() {
+		groups.put("one", gMock1);
+		groups.put("bat", gMock2);
+		groups.put("foo", gMock3);
+		lockMock.lock();
+		expect(factoryMock.produce("gap")).andReturn(gMock5);
+		gMock5.setFeedStatus(FEED2, DFSubscrStatus.NOT_SUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		service.unsubscribed("gap", FEED2);
+		
+		control.verify();
+		assertSame(gMock5, groups.get("gap"));
 	}
 	
 	@Test
@@ -295,7 +411,7 @@ public class DFGroupRepoTest {
 	}
 	
 	@Test
-	public void testIsNotAvailable_Exist_NotAvailable() {
+	public void testIsNotAvailable_Exists_NotAvailable() {
 		groups.put("one", gMock1);
 		groups.put("bat", gMock2);
 		lockMock.lock();
@@ -306,6 +422,30 @@ public class DFGroupRepoTest {
 		assertTrue(service.isNotAvailable("bat"));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testHaveToUnsubscribeAll() {
+		groups.put("one", gMock1);
+		groups.put("bat", gMock2);
+		groups.put("foo", gMock3);
+		groups.put("bar", gMock4);
+		groups.put("top", gMock5);
+		lockMock.lock();
+		expect(gMock1.getFeedStatus(FEED2)).andReturn(DFSubscrStatus.NOT_AVAILABLE);
+		expect(gMock2.getFeedStatus(FEED2)).andReturn(DFSubscrStatus.NOT_SUBSCR);
+		expect(gMock3.getFeedStatus(FEED2)).andReturn(DFSubscrStatus.PENDING_UNSUBSCR);
+		expect(gMock4.getFeedStatus(FEED2)).andReturn(DFSubscrStatus.PENDING_SUBSCR);
+		gMock4.setFeedStatus(FEED2, DFSubscrStatus.NOT_SUBSCR);
+		expect(gMock5.getFeedStatus(FEED2)).andReturn(DFSubscrStatus.SUBSCR);
+		gMock5.setFeedStatus(FEED2, DFSubscrStatus.PENDING_UNSUBSCR);
+		lockMock.unlock();
+		control.replay();
+		
+		Collection<String> actual = service.haveToUnsubscribeAll(FEED2);
+		
+		control.verify();
+		assertEquals(Arrays.asList("foo", "top"), actual);
 	}
 
 }

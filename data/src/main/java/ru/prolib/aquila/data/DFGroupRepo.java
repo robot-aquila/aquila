@@ -78,8 +78,17 @@ public class DFGroupRepo<KeyType, FeedType> implements Lockable {
 		lock();
 		try {
 			for ( KeyType key : keys ) {
-				groups.get(key).setFeedStatus(feed_id, new_status);
+				getOrCreate(key).setFeedStatus(feed_id, new_status);
 			}
+		} finally {
+			unlock();
+		}
+	}
+	
+	private void setFeedStatus(KeyType key, FeedType feed_id, DFSubscrStatus new_status) {
+		lock();
+		try {
+			getOrCreate(key).setFeedStatus(feed_id, new_status);
 		} finally {
 			unlock();
 		}
@@ -93,6 +102,16 @@ public class DFGroupRepo<KeyType, FeedType> implements Lockable {
 	 */
 	public Collection<KeyType> getPendingSubscr(FeedType feed_id) {
 		return getKeysWithStatus(feed_id, DFSubscrStatus.PENDING_SUBSCR);
+	}
+	
+	/**
+	 * Get keys which are subscribed for specified data feed.
+	 * <p>
+	 * @param feed_id - data feed ID
+	 * @return collection of keys
+	 */
+	public Collection<KeyType> getSubscribed(FeedType feed_id) {
+		return getKeysWithStatus(feed_id, DFSubscrStatus.SUBSCR);
 	}
 	
 	/**
@@ -116,6 +135,16 @@ public class DFGroupRepo<KeyType, FeedType> implements Lockable {
 	}
 	
 	/**
+	 * Mark specified key is subscribed for the data feed.
+	 * <p>
+	 * @param key - key
+	 * @param feed_id - data feed ID
+	 */
+	public void subscribed(KeyType key, FeedType feed_id) {
+		setFeedStatus(key, feed_id, DFSubscrStatus.SUBSCR);
+	}
+	
+	/**
 	 * Mark that specified keys are not subscribed for the data feed.
 	 * <p>
 	 * @param keys - keys
@@ -123,6 +152,16 @@ public class DFGroupRepo<KeyType, FeedType> implements Lockable {
 	 */
 	public void unsubscribed(Collection<KeyType> keys, FeedType feed_id) {
 		setFeedStatus(keys, feed_id, DFSubscrStatus.NOT_SUBSCR);
+	}
+	
+	/**
+	 * Mark specified key is not subscribed for the data feed.
+	 * <p>
+	 * @param key - key
+	 * @param feed_id - data feed ID
+	 */
+	public void unsubscribed(KeyType key, FeedType feed_id) {
+		setFeedStatus(key, feed_id, DFSubscrStatus.NOT_SUBSCR);
 	}
 	
 	/**
@@ -185,11 +224,60 @@ public class DFGroupRepo<KeyType, FeedType> implements Lockable {
 		}
 	}
 	
+	/**
+	 * Check that data for specified key is not available.
+	 * <p>
+	 * @param key - the key
+	 * @return true if data is not available. Note that false does not mean
+	 * that data is available. It may be just not determined yet.
+	 */
 	public boolean isNotAvailable(KeyType key) {
 		lock();
 		try {
 			DFGroup<KeyType, FeedType> group = groups.get(key);
 			return group != null && group.isNotFound();
+		} finally {
+			unlock();
+		}
+	}
+	
+	/**
+	 * Prepare all groups to cancel subscriptions for specified data feed completely.
+	 * <p>
+	 * In result of this call:
+	 * <li>data feeds in {@link DFSubscrStatus#NOT_AVAILABLE}, {@link DFSubscrStatus#NOT_SUBSCR},
+	 * {@link DFSubscrStatus#PENDING_UNSUBSCR} statuses aren't changed;</li>
+	 * <li>data feeds in {@link DFSubscrStatus#PENDING_SUBSCR} status switched to
+	 * {@link DFSubscrStatus#NOT_SUBSCR};</li>
+	 * <li>data feeds in {@link DFSubscrStatus#SUBSCR} status switched to
+	 * {@link DFSubscrStatus#PENDING_UNSUBSCR}</li>
+	 * Thus, the next step is to cancel subscription of all which were actually established and
+	 * switch them to {@link DFSubscrStatus#NOT_SUBSCR}.
+	 * <p>
+	 * @param feed_id - data feed ID
+	 * @return collection of keys in {@link DFSubscrStatus#PENDING_UNSUBSCR} status
+	 */
+	public Collection<KeyType> haveToUnsubscribeAll(FeedType feed_id) {
+		lock();
+		try {
+			List<KeyType> keys = new ArrayList<>();
+			Iterator<Map.Entry<KeyType, DFGroup<KeyType, FeedType>>> it = groups.entrySet().iterator();
+			while ( it.hasNext() ) {
+				Map.Entry<KeyType, DFGroup<KeyType, FeedType>> entry = it.next();
+				switch ( entry.getValue().getFeedStatus(feed_id) ) {
+				case PENDING_SUBSCR:
+					entry.getValue().setFeedStatus(feed_id, DFSubscrStatus.NOT_SUBSCR);
+					break;
+				case SUBSCR:
+					entry.getValue().setFeedStatus(feed_id, DFSubscrStatus.PENDING_UNSUBSCR);
+					keys.add(entry.getKey());
+					break;
+				case PENDING_UNSUBSCR:
+					keys.add(entry.getKey());
+				default:
+				}
+			}
+			return keys;
 		} finally {
 			unlock();
 		}
