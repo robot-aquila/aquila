@@ -301,6 +301,12 @@ public class SymbolDataServiceDFBTest {
 	
 	@Test
 	public void testOnSubscribe_ThrowsIfDataSourceNotDefined() {
+		// It must cause exception after all checks
+		// Otherwise it will throw an exception even if not connected
+		makeConnected();
+		expect(ssrMock.subscribe(symbol4, MDLevel.L0)).andReturn(counterMock1);
+		expect(dfssMock.isNotAvailable(symbol4)).andReturn(false);
+		expect(insiderMock.syncSubscrState(symbol4, counterMock1, dfssMock)).andReturn(true);
 		service.setDataSource(null);
 		control.replay();
 		eex.expect(NullPointerException.class);
@@ -311,6 +317,12 @@ public class SymbolDataServiceDFBTest {
 	
 	@Test
 	public void testOnSubscribe_ThrowsIfTerminalNotDefined() {
+		// It must cause exception after all checks
+		// Otherwise it will throw an exception even if not connected
+		makeConnected();
+		expect(ssrMock.subscribe(symbol4, MDLevel.L0)).andReturn(counterMock1);
+		expect(dfssMock.isNotAvailable(symbol4)).andReturn(false);
+		expect(insiderMock.syncSubscrState(symbol4, counterMock1, dfssMock)).andReturn(true);
 		service.setTerminal(null);
 		control.replay();
 		eex.expect(NullPointerException.class);
@@ -370,22 +382,34 @@ public class SymbolDataServiceDFBTest {
 	
 	@Test
 	public void testOnUnsubscribe_ThrowsIfDataSourceNotDefined() {
+		// It must cause exception after all checks
+		// Otherwise it will throw an exception even if not connected
+		makeConnected();
+		expect(ssrMock.unsubscribe(symbol2, MDLevel.L2)).andReturn(counterMock1);
+		expect(dfssMock.isNotAvailable(symbol2)).andReturn(false);
+		expect(insiderMock.syncSubscrState(symbol2, counterMock1, dfssMock)).andReturn(true);
 		service.setDataSource(null);
 		control.replay();
 		eex.expect(NullPointerException.class);
 		eex.expectMessage("Data source not defined");
 		
-		service.onUnsubscribe(symbol4, MDLevel.L0);
+		service.onUnsubscribe(symbol2, MDLevel.L2);
 	}
 
 	@Test
 	public void testOnUnsubscribe_ThrowsIfTerminalNotDefined() {
+		// It must cause exception after all checks
+		// Otherwise it will throw an exception even if not connected
+		makeConnected();
+		expect(ssrMock.unsubscribe(symbol2, MDLevel.L2)).andReturn(counterMock1);
+		expect(dfssMock.isNotAvailable(symbol2)).andReturn(false);
+		expect(insiderMock.syncSubscrState(symbol2, counterMock1, dfssMock)).andReturn(true);
 		service.setTerminal(null);
 		control.replay();
 		eex.expect(NullPointerException.class);
 		eex.expectMessage("Terminal not defined");
 		
-		service.onUnsubscribe(symbol4, MDLevel.L0);
+		service.onUnsubscribe(symbol2, MDLevel.L2);
 	}
 
 	@Test

@@ -146,29 +146,25 @@ public class SymbolDataServiceDFB implements SymbolDataService, SymbolSubscrHand
 	
 	@Override
 	public synchronized SubscrHandler onSubscribe(Symbol symbol, MDLevel level) {
-		DataSource ds = getDataSource();
-		EditableTerminal tm = getTerminal();
 		SymbolSubscrHandler handler = new SymbolSubscrHandler(this, symbol, level, true);
 		SymbolSubscrCounter counter = consumerSubscriptionCounters.subscribe(symbol, level);
 		if ( connected
 		  && dataFeedSubscriptionStates.isNotAvailable(symbol) == false
 		  && insider.syncSubscrState(symbol, counter, dataFeedSubscriptionStates) )
 		{
-			insider.applyPendingChanges(ds, tm, dataFeedSubscriptionStates);
+			insider.applyPendingChanges(getDataSource(), getTerminal(), dataFeedSubscriptionStates);
 		}
 		return handler;
 	}
 
 	@Override
 	public synchronized void onUnsubscribe(Symbol symbol, MDLevel level) {
-		DataSource ds = getDataSource();
-		EditableTerminal tm = getTerminal();
 		SymbolSubscrCounter counter = consumerSubscriptionCounters.unsubscribe(symbol, level);
 		if ( connected
 		  && dataFeedSubscriptionStates.isNotAvailable(symbol) == false
 		  && insider.syncSubscrState(symbol, counter, dataFeedSubscriptionStates) )
 		{
-			insider.applyPendingChanges(ds, tm, dataFeedSubscriptionStates);
+			insider.applyPendingChanges(getDataSource(), getTerminal(), dataFeedSubscriptionStates);
 		}
 	}
 
