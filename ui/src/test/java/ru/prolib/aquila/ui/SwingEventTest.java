@@ -53,7 +53,7 @@ public class SwingEventTest {
 		
 		queue.enqueue(type, SimpleEventFactory.getInstance());
 		
-		assertTrue(finished.await(1, TimeUnit.SECONDS));
+		assertTrue(finished.await(5, TimeUnit.SECONDS));
 	}
 	
 	@Test
