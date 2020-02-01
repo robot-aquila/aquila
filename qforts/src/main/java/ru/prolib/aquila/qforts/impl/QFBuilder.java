@@ -25,8 +25,7 @@ public class QFBuilder {
 				getRegistry(),
 				getSchedule(),
 				getOrderIDSequence(),
-				getDataSource(),
-				getSymbolSubscrRepository()
+				getSymbolDataService()
 			);
 	}
 	
@@ -97,6 +96,12 @@ public class QFBuilder {
 			throw new IllegalStateException("Event queue was not specified");
 		}
 		return eventQueue;
+	}
+	
+	private QFSymbolDataService getSymbolDataService() {
+		QFSymbolDataService service = new QFSymbolDataServiceLegacy(getFacade(), getSymbolSubscrRepository());
+		service.setDataSource(getDataSource());
+		return service;
 	}
 	
 	public QFBuilder withEventQueue(EventQueue queue) {

@@ -12,7 +12,6 @@ import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
-import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
@@ -24,13 +23,10 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandlerStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
-import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounter;
-import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrRepository;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.DataProvider;
-import ru.prolib.aquila.data.DataSource;
 
 public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private static final Logger logger;
@@ -43,8 +39,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private final QFObjectRegistry registry;
 	private final AtomicLong seqOrderID;
 	private final QFSessionSchedule schedule;
-	private final DataSource dataSource;
-	private final SymbolSubscrRepository symbolSubs;
+	private final QFSymbolDataService symbolDataService;
 	private EditableTerminal terminal;
 	private TaskHandler taskHandler;
 	
@@ -52,15 +47,13 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 					 QFObjectRegistry registry,
 					 QFSessionSchedule schedule,
 					 AtomicLong seqOrderID,
-					 DataSource dataSource,
-					 SymbolSubscrRepository symbolSubs)
+					 QFSymbolDataService symbol_data_service)
 	{
 		this.facade = facade;
 		this.registry = registry;
 		this.schedule = schedule;
 		this.seqOrderID = seqOrderID;
-		this.dataSource = dataSource;
-		this.symbolSubs = symbolSubs;
+		this.symbolDataService = symbol_data_service;
 	}
 	
 	/**
@@ -154,6 +147,8 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		}
 		terminal.onSecurityUpdate().addListener(this);
 		terminal.onSecurityLastTrade().addListener(this);
+		symbolDataService.setTerminal(terminal);
+		symbolDataService.onConnectionStatusChange(true);
 		taskHandler = terminal.schedule(this);
 		logger.debug("Reactor started for: {}", terminal.getTerminalID());
 	}
@@ -171,6 +166,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		}
 		terminal.onSecurityUpdate().removeListener(this);
 		terminal.onSecurityLastTrade().removeListener(this);
+		symbolDataService.onConnectionStatusChange(false);
 		th.cancel();
 		logger.debug("Reactor stopped for: {}", terminal.getTerminalID());
 	}
@@ -238,55 +234,8 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 
 	@Override
 	public SubscrHandler subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
-		boolean doit = false;
-		SymbolSubscrCounter subs = null;
-		EditableSecurity security = terminal.getEditableSecurity(symbol);
-		symbolSubs.lock();
-		try {
-			subs = symbolSubs.subscribe(symbol, level);
-			subs.lock();
-		} finally {
-			symbolSubs.unlock();
-		}
-		try {
-			if ( subs.getNumL0() == 1 ) {
-				doit = true;
-			}
-		} finally {
-			subs.unlock();
-		}
-		if ( doit ) {
-			facade.registerSecurity(security);
-			dataSource.subscribeL1(symbol, security);
-			dataSource.subscribeMD(symbol, security);
-			dataSource.subscribeSymbol(symbol, security);
-		}
-		return new QFSymbolSubscrHandler(this, security, level);
-	}
-	
-	void unsubscribe(EditableSecurity security, MDLevel level) {
-		boolean doit = false;
-		SymbolSubscrCounter subs = null;
-		Symbol symbol = security.getSymbol();
-		symbolSubs.lock();
-		try {
-			subs = symbolSubs.unsubscribe(symbol, level);
-			subs.lock();
-		} finally {
-			symbolSubs.unlock();
-		}
-		try {
-			if ( subs.getNumL0() == 0 ) {
-				doit = true;
-			}
-		} finally {
-			subs.unlock();
-		}
-		if ( doit ) {
-			dataSource.unsubscribeL1(symbol, security);
-			dataSource.unsubscribeMD(symbol, security);
-			dataSource.unsubscribeSymbol(symbol, security);
-		}
+		symbolDataService.setTerminal(terminal);
+		return symbolDataService.onSubscribe(symbol, level);
 	}
 
 	@Override
