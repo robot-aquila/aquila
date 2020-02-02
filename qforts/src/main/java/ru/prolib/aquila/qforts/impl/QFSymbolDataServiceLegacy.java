@@ -91,4 +91,9 @@ public class QFSymbolDataServiceLegacy implements QFSymbolDataService, Owner {
 		
 	}
 
+	@Override
+	public SymbolSubscrRepository getSymbolSubscrRepository() {
+		return symbolSubs;
+	}
+
 }

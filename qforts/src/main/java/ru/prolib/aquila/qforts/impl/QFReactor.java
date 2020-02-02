@@ -23,6 +23,7 @@ import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandlerStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
+import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrRepository;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
@@ -54,6 +55,10 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		this.schedule = schedule;
 		this.seqOrderID = seqOrderID;
 		this.symbolDataService = symbol_data_service;
+	}
+	
+	public SymbolSubscrRepository getSymbolSubscrRepository() {
+		return symbolDataService.getSymbolSubscrRepository();
 	}
 	
 	/**

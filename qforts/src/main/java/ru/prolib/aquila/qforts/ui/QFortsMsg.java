@@ -17,5 +17,7 @@ public class QFortsMsg {
 	public static final MsgID VMARGIN = newMsgID("TXT_VMARGIN");
 	public static final MsgID VMARGIN_INTER = newMsgID("TXT_VMARGIN_INTER");
 	public static final MsgID VMARGIN_CLOSE = newMsgID("TXT_VMARGIN_CLOSE");
+	public static final MsgID SERVICE_MENU = newMsgID("SERVICE_MENU");
+	public static final MsgID SYMBOL_SUBSCRIBERS = newMsgID("SYMBOL_SUBSCRIBERS");
 	
 }

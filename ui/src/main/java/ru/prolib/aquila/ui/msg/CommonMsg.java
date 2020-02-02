@@ -105,7 +105,14 @@ public class CommonMsg {
 	public static final MsgID MDD_BID_SIZE = newMsgID("MDD_BID_SIZE");
 	public static final MsgID MDD_ASK_SIZE = newMsgID("MDD_ASK_SIZE");
 	public static final MsgID MDD_PRICE = newMsgID("MDD_PRICE");
-
+	
+	// Symbol Subscription Repository View Dialog
+	public static final MsgID SSRV_DEFAULT_TITLE = newMsgID("SSRV_DEFAULT_TITLE");
+	public static final MsgID SSRV_SYMBOL = newMsgID("SSRV_SYMBOL");
+	public static final MsgID SSRV_L0 = newMsgID("SSRV_L0");
+	public static final MsgID SSRV_L1_BBO = newMsgID("SSRV_L1_BBO");
+	public static final MsgID SSRV_L1 = newMsgID("SSRV_L1");
+	public static final MsgID SSRV_L2 = newMsgID("SSRV_L2");
 	
 	private static MsgID newMsgID(String messageID) {
 		return new MsgID(SECTION_ID, messageID);
