@@ -34,7 +34,7 @@ public class QFTransactionServiceTest {
 	private static Account account;
 	private static Symbol symbol1, symbol2, symbol3;
 	private IMocksControl control;
-	private QFObjectRegistry registryMock;
+	private IQFObjectRegistry registryMock;
 	private QFAssembler assemblerMock;
 	private QFCalculator calculatorMock;
 	private Multilock multilockMock;
@@ -279,7 +279,7 @@ public class QFTransactionServiceTest {
 	
 	@Test
 	public void testExecuteOrder_Complete_InsufficientFunds() throws Exception {
-		QFObjectRegistry obj_reg = new QFObjectRegistry();
+		IQFObjectRegistry obj_reg = new QFObjectRegistry();
 		service = new QFTransactionService(obj_reg, seqExecutionID);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		security.consume(new DeltaUpdateBuilder()
@@ -311,7 +311,7 @@ public class QFTransactionServiceTest {
 	
 	@Test
 	public void testExecuteOrder_Partial_InsufficientFunds() throws Exception {
-		QFObjectRegistry obj_reg = new QFObjectRegistry();
+		IQFObjectRegistry obj_reg = new QFObjectRegistry();
 		service = new QFTransactionService(obj_reg, seqExecutionID);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		security.consume(new DeltaUpdateBuilder()

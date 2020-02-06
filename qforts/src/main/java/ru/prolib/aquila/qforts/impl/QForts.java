@@ -17,21 +17,21 @@ public class QForts {
 	public static final int LIQUIDITY_UNLIMITED = 2;
 	private static final CDecimal ZERO = CDecimalBD.ZERO;
 	private static final CDecimal MAX_LIQUIDITY = CDecimalBD.of(Long.MAX_VALUE);
-	private final QFObjectRegistry registry;
+	private final IQFObjectRegistry registry;
 	private final QFTransactionService transactions;
 	private final int liquidityMode;
 	
-	public QForts(QFObjectRegistry registry, QFTransactionService transactions, int liquidity_mode) {
+	public QForts(IQFObjectRegistry registry, QFTransactionService transactions, int liquidity_mode) {
 		this.registry = registry;
 		this.transactions = transactions;
 		this.liquidityMode = liquidity_mode;
 	}
 	
-	public QForts(QFObjectRegistry registry, QFTransactionService transactions) {
+	public QForts(IQFObjectRegistry registry, QFTransactionService transactions) {
 		this(registry, transactions, LIQUIDITY_LIMITED);
 	}
 	
-	public QForts(QFObjectRegistry registry, AtomicLong seqExecutionID, int unlimited_liquidity) {
+	public QForts(IQFObjectRegistry registry, AtomicLong seqExecutionID, int unlimited_liquidity) {
 		this(registry, new QFTransactionService(registry, seqExecutionID), unlimited_liquidity);
 	}
 	
@@ -43,6 +43,7 @@ public class QForts {
 		registry.register(portfolio);
 	}
 	
+	@Deprecated
 	public void registerSecurity(EditableSecurity security) {
 		registry.register(security);
 	}

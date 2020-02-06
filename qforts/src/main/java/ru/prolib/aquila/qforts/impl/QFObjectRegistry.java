@@ -17,7 +17,7 @@ import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 
-public class QFObjectRegistry {
+public class QFObjectRegistry implements IQFObjectRegistry {
 	
 	static class OrderInfo {
 		private final Symbol symbol;
@@ -51,36 +51,62 @@ public class QFObjectRegistry {
 		this(new LinkedHashSet<>(), new LinkedHashSet<>(), new LinkedHashMap<>());
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#isRegistered(ru.prolib.aquila.core.BusinessEntities.Portfolio)
+	 */
+	@Override
 	public boolean isRegistered(Portfolio portfolio) {
 		synchronized ( monitor ) {
 			return portfolios.contains(portfolio);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#isRegistered(ru.prolib.aquila.core.BusinessEntities.Security)
+	 */
+	@Override
+	@Deprecated
 	public boolean isRegistered(Security security) {
 		synchronized ( monitor ) {
 			return securities.contains(security);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#isRegistered(ru.prolib.aquila.core.BusinessEntities.Order)
+	 */
+	@Override
 	public boolean isRegistered(Order order) {
 		synchronized ( monitor ) {
 			return cachedOrderInfo.containsKey(order);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#register(ru.prolib.aquila.core.BusinessEntities.EditablePortfolio)
+	 */
+	@Override
 	public void register(EditablePortfolio portfolio) {
 		synchronized ( monitor ) {
 			portfolios.add(portfolio);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#register(ru.prolib.aquila.core.BusinessEntities.EditableSecurity)
+	 */
+	@Override
+	@Deprecated
 	public void register(EditableSecurity security) {
 		synchronized ( monitor ) {
 			securities.add(security);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#register(ru.prolib.aquila.core.BusinessEntities.EditableOrder)
+	 */
+	@Override
 	public void register(EditableOrder order) {
 		Symbol symbol;
 		OrderInfo order_info;
@@ -102,18 +128,30 @@ public class QFObjectRegistry {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#getSecurityList()
+	 */
+	@Override
 	public List<EditableSecurity> getSecurityList() {
 		synchronized ( monitor ) {
 			return new ArrayList<>(securities);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#getPortfolioList()
+	 */
+	@Override
 	public List<EditablePortfolio> getPortfolioList() {
 		synchronized ( monitor ) {
 			return new ArrayList<>(portfolios);
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#getOrderList(ru.prolib.aquila.core.BusinessEntities.Symbol, ru.prolib.aquila.core.BusinessEntities.CDecimal)
+	 */
+	@Override
 	public List<EditableOrder> getOrderList(Symbol symbol, CDecimal price) {
 		synchronized ( monitor ) {
 			List<EditableOrder> result = new ArrayList<>();
@@ -138,6 +176,10 @@ public class QFObjectRegistry {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see ru.prolib.aquila.qforts.impl.IQFObjectRegistry#purgeOrder(ru.prolib.aquila.core.BusinessEntities.Order)
+	 */
+	@Override
 	public void purgeOrder(Order order) {
 		synchronized ( monitor ) {
 			OrderInfo order_info = cachedOrderInfo.remove(order);

@@ -2,6 +2,9 @@ package ru.prolib.aquila.qforts.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
 import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounterFactory;
@@ -12,12 +15,13 @@ import ru.prolib.aquila.data.DataSource;
 public class QFBuilder {
 	private AtomicLong seqOrderID, seqExecutionID;
 	private QForts facade;
-	private QFObjectRegistry registry;
 	private QFTransactionService transactions;
 	private QFSessionSchedule schedule;
 	private DataSource dataSource;
 	private EventQueue eventQueue;
 	private int liquidityMode = QForts.LIQUIDITY_LIMITED;
+	private boolean sds_legacy = false;
+	private ApplicationContext context;
 	
 	public DataProvider buildDataProvider() {
 		return new QFReactor(
@@ -33,6 +37,17 @@ public class QFBuilder {
 		return new QFortsEnv(terminal, getFacade());
 	}
 	
+	public void setBuildingContext(ApplicationContext context) {
+		this.context = context;
+	}
+	
+	private ApplicationContext getContext() {
+		if ( context == null ) {
+			context = new AnnotationConfigApplicationContext(QFBuildingContextConfig.class);
+		}
+		return context;
+	}
+	
 	private QForts getFacade() {
 		if ( facade == null ) {
 			facade = new QForts(getRegistry(), getTransactions(), liquidityMode);
@@ -40,11 +55,8 @@ public class QFBuilder {
 		return facade;
 	}
 	
-	private QFObjectRegistry getRegistry() {
-		if ( registry == null ) {
-			registry = new QFObjectRegistry();
-		}
-		return registry;
+	private IQFObjectRegistry getRegistry() {
+		return getContext().getBean(IQFObjectRegistry.class);
 	}
 	
 	private QFTransactionService getTransactions() {
@@ -98,8 +110,16 @@ public class QFBuilder {
 		return eventQueue;
 	}
 	
+	private QFSymbolDataService getSymbolDataServiceModern() {
+		return new QFSymbolDataServiceModern(getEventQueue(), true);
+	}
+	
+	private QFSymbolDataService getSymbolDataServiceLegacy() {
+		return new QFSymbolDataServiceLegacy(getFacade(), getSymbolSubscrRepository());
+	}
+	
 	private QFSymbolDataService getSymbolDataService() {
-		QFSymbolDataService service = new QFSymbolDataServiceLegacy(getFacade(), getSymbolSubscrRepository());
+		QFSymbolDataService service = sds_legacy ? getSymbolDataServiceLegacy() : getSymbolDataServiceModern();
 		service.setDataSource(getDataSource());
 		return service;
 	}

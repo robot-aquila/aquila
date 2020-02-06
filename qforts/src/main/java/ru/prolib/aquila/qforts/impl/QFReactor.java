@@ -37,7 +37,6 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 	
 	private final QForts facade;
-	private final QFObjectRegistry registry;
 	private final AtomicLong seqOrderID;
 	private final QFSessionSchedule schedule;
 	private final QFSymbolDataService symbolDataService;
@@ -45,13 +44,12 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private TaskHandler taskHandler;
 	
 	public QFReactor(QForts facade,
-					 QFObjectRegistry registry,
+					 IQFObjectRegistry registry,
 					 QFSessionSchedule schedule,
 					 AtomicLong seqOrderID,
 					 QFSymbolDataService symbol_data_service)
 	{
 		this.facade = facade;
-		this.registry = registry;
 		this.schedule = schedule;
 		this.seqOrderID = seqOrderID;
 		this.symbolDataService = symbol_data_service;
@@ -198,9 +196,6 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	public void onEvent(Event event) {
 		if ( event instanceof SecurityEvent ) {
 			Security security = ((SecurityEvent) event).getSecurity();
-			if ( ! registry.isRegistered(security) ) {
-				return;
-			}
 			Terminal terminal = security.getTerminal();
 			if ( event.isType(terminal.onSecurityLastTrade()) ) {
 				onSecurityTradeEvent((SecurityTickEvent) event);			

@@ -13,6 +13,7 @@ import org.easymock.Capture;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ru.prolib.aquila.core.Event;
@@ -39,7 +40,7 @@ public class QFReactorTest {
 	private static final Symbol symbol = new Symbol("MSFT");
 	private IMocksControl control;
 	private QForts facadeMock;
-	private QFObjectRegistry registryMock;
+	private IQFObjectRegistry registryMock;
 	private QFSessionSchedule scheduleMock;
 	private QFSymbolDataService sdsMock;
 	private AtomicLong seqOrderID;
@@ -291,6 +292,7 @@ public class QFReactorTest {
 	}
 	
 	@Test
+	@Ignore // It does not use security registration/check anymore
 	public void testOnEvent_SkipIfNotRegistered() throws Exception {
 		expect(registryMock.isRegistered(security)).andStubReturn(false);
 		control.replay();
@@ -303,7 +305,6 @@ public class QFReactorTest {
 	
 	@Test
 	public void testOnEvent_SecurityLastTrade() throws Exception {
-		expect(registryMock.isRegistered(security)).andReturn(true);
 		facadeMock.handleOrders(security, CDecimalBD.of(2500L), CDecimalBD.of("54.02"));
 		control.replay();
 		
@@ -315,7 +316,6 @@ public class QFReactorTest {
 	
 	@Test
 	public void testOnEvent_InitialMarginUpdate_SkipIfNotUpdated() throws Exception {
-		expect(registryMock.isRegistered(security)).andReturn(true);
 		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
 		Set<Integer> updatedTokens = new HashSet<>();
 		updatedTokens.add(SecurityField.SETTLEMENT_PRICE);
@@ -335,7 +335,6 @@ public class QFReactorTest {
 	
 	private void testOnEvent_InitialMarginUpdate_AllowedPeriod(int periodID) throws Exception {
 		setUp();
-		expect(registryMock.isRegistered(security)).andReturn(true);
 		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
 		Set<Integer> updatedTokens = new HashSet<>();
 		updatedTokens.add(SecurityField.INITIAL_MARGIN);
@@ -366,7 +365,6 @@ public class QFReactorTest {
 	
 	private void testOnEvent_InitialMarginUpdate_DisallowedPeriod(int periodID) throws Exception {
 		setUp();
-		expect(registryMock.isRegistered(security)).andReturn(true);
 		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
 		Set<Integer> updatedTokens = new HashSet<>();
 		updatedTokens.add(SecurityField.INITIAL_MARGIN);

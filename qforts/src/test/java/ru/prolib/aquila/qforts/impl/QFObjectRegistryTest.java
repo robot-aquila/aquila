@@ -40,7 +40,7 @@ public class QFObjectRegistryTest {
 	private LinkedHashSet<EditablePortfolio> portfolios;
 	private LinkedHashSet<EditableSecurity> securities;
 	private LinkedHashMap<Symbol, LinkedHashSet<EditableOrder>> orders;
-	private QFObjectRegistry registry;
+	private IQFObjectRegistry registry;
 	private static Account account1, account2, account3;
 	private static Symbol symbol1, symbol2, symbol3;
 	private EditableTerminal terminal;
@@ -462,11 +462,11 @@ public class QFObjectRegistryTest {
 	}
 	
 	static class OrderLockerOT_LockAndWait extends OrderLockerOT {
-		protected final QFObjectRegistry registry;
+		protected final IQFObjectRegistry registry;
 
 		public OrderLockerOT_LockAndWait(AccessorOT accessor,
 				EditableOrder order,
-				QFObjectRegistry registry)
+				IQFObjectRegistry registry)
 		{
 			super(accessor, order);
 			this.registry = registry;
@@ -487,11 +487,11 @@ public class QFObjectRegistryTest {
 	}
 	
 	static class OrderLockerOT_WeakWaitAndEnter extends OrderLockerOT {
-		protected final QFObjectRegistry registry;
+		protected final IQFObjectRegistry registry;
 
 		public OrderLockerOT_WeakWaitAndEnter(AccessorOT accessor,
 				EditableOrder order,
-				QFObjectRegistry registry)
+				IQFObjectRegistry registry)
 		{
 			super(accessor, order);
 			this.registry = registry;

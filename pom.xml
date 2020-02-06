@@ -9,7 +9,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<powermock.version>1.7.1</powermock.version>
-		<!-- spring.version>4.3.4.RELEASE</spring.version --><!-- DEPRECATED but still used -->
+		<spring.version>5.2.3.RELEASE</spring.version>
 	</properties>
 
 	<modules>

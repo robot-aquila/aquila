@@ -27,7 +27,7 @@ public class QFortsTest {
 	private static Account account1, account2, account3;
 	private static Symbol symbol1;
 	private IMocksControl control;
-	private QFObjectRegistry registryMock;
+	private IQFObjectRegistry registryMock;
 	private QFTransactionService transactionsMock;
 	private EditableTerminal terminal;
 	private QForts service;

@@ -24,13 +24,13 @@ public class QFTransactionService {
 		logger = LoggerFactory.getLogger(QFTransactionService.class);
 	}
 	
-	private final QFObjectRegistry registry;
+	private final IQFObjectRegistry registry;
 	private final AtomicLong seqExecutionID;
 	private final QFCalculator calculator;
 	private final QFAssembler assembler;
 	private final QFValidator validator;
 	
-	public QFTransactionService(QFObjectRegistry registry, AtomicLong seqExecutionID,
+	public QFTransactionService(IQFObjectRegistry registry, AtomicLong seqExecutionID,
 			QFCalculator calculator, QFAssembler assembler, QFValidator validator)
 	{
 		this.registry = registry;
@@ -40,7 +40,7 @@ public class QFTransactionService {
 		this.validator = validator;
 	}
 	
-	public QFTransactionService(QFObjectRegistry registry, AtomicLong seqExecutionID) {
+	public QFTransactionService(IQFObjectRegistry registry, AtomicLong seqExecutionID) {
 		this(registry, seqExecutionID, new QFCalculator(), new QFAssembler(), new QFValidator());
 	}
 	

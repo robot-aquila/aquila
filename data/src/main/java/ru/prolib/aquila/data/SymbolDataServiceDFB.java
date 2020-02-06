@@ -96,12 +96,12 @@ public class SymbolDataServiceDFB implements SymbolDataService, SymbolSubscrHand
 		
 	}
 	
-	private final Insider insider;
-	private final SymbolSubscrRepository consumerSubscriptionCounters;
-	private final DFGroupRepo<Symbol, MDLevel> dataFeedSubscriptionStates;
-	private DataSource dataSource;
-	private EditableTerminal terminal;
-	private boolean connected = false;
+	protected final Insider insider;
+	protected final SymbolSubscrRepository consumerSubscriptionCounters;
+	protected final DFGroupRepo<Symbol, MDLevel> dataFeedSubscriptionStates;
+	protected DataSource dataSource;
+	protected EditableTerminal terminal;
+	protected boolean connected = false;
 	
 	public SymbolDataServiceDFB(Insider insider,
 			SymbolSubscrRepository consumer_subscription_counters,
