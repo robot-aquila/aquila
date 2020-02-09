@@ -214,11 +214,16 @@ public class OHLCScalableSeriesTest {
 		return new ExpectNoEvents(queue, service.onUpdate());
 	}
 	
-	private void assertSeriesEquals(List<Candle> expected_list) throws Exception {
-		assertEquals(expected_list.size(), service.getLength());
+	private void assertSeriesEquals(String msg_prefix, List<Candle> expected_list) throws Exception {
+		if ( msg_prefix == null ) {
+			msg_prefix = "";
+		} else {
+			msg_prefix = msg_prefix + " ";
+		}
+		assertEquals(msg_prefix + "series length mismatch", expected_list.size(), service.getLength());
 		for ( int i = 0; i < expected_list.size(); i ++ ) {
 			Candle expected = expected_list.get(i), actual = service.get(i);
-			assertEquals("At #" + i, expected, actual);
+			assertEquals(msg_prefix + "At #" + i, expected, actual);
 		}
 	}
 	
@@ -271,7 +276,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.01] first tick to first candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -284,7 +289,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(0, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.02] second tick to first candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -297,7 +302,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(0, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.03] third tick to first candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -310,7 +315,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(0, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.04] fourth tick to first candle", expected_list);
 		
 		// new tick
 		prev = null;
@@ -323,7 +328,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.05] fifth tick and NEW candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -336,7 +341,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(1, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.06] sixth tick to second candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -349,7 +354,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(1, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.07] seventh tick to second candle", expected_list);
 		
 		// new tick
 		prev = null;
@@ -362,7 +367,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.08] eighth tick and NEW third candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -375,7 +380,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(2, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.09] ninth tick to third candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -388,7 +393,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(2, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.10] tenth tick to third candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -401,7 +406,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(2, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.11] eleventh tick to third candle", expected_list);
 		
 		// new tick
 		prev = curr;
@@ -414,7 +419,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.set(2, curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[0.12] twelfth tick to third candle", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Now let's test how it will go up to next level - the 5 minutes time frame
@@ -430,7 +435,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[1.01] to grow up M1 series up to 4 elements", expected_list);
 		
 		// new tick, M1 candle #4. Next candle should cause series compaction
 		prev = null;
@@ -443,7 +448,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[1.02] to grow up M1 series up to 5 elements", expected_list);
 		
 		// new tick, M1 candle #5. Must cause series compaction
 		tf = new ZTFMinutes(5, ZONE_ID);
@@ -460,7 +465,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-25T18:55:00", "12340.00", "24930.07", "10012.00", "23750.98", 7));
 		expected_list.add(OHLCV(tf, "2019-03-25T19:00:00", "13486.05", "28441.15", "10107.18", "28441.15", 6));
 		expected_list.add(OHLCV(tf, "2019-03-25T19:05:00", "17220.02", "17220.02", "12519.28", "12519.28", 2));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[1.03] to cause M1 series compact up to M5", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Let's go up to M15. Need two more entries.
@@ -476,7 +481,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[2.01] to grow M5 series up to 4 elements", expected_list);
 		
 		// new tick
 		prev = null;
@@ -489,7 +494,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[2.02] to grow M5 series up to 5 elements", expected_list);
 		
 		// New tick. Must cause series compacting.
 		// BTW. This is special case: time frame was changed but length is not.
@@ -510,7 +515,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-25T19:15:00", "16505.44"));
 		expected_list.add(OHLCV(tf, "2019-03-25T19:30:00", "21013.00"));
 		expected_list.add(OHLCV(tf, "2019-03-25T19:45:00", "17000.99"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[2.03] to cause M5 series compact up to M15", expected_list);
 	
 		// --------------------------------------------------------------------
 		// Go to M30
@@ -530,7 +535,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-25T19:00:00", "13486.05", "28441.15", "10107.18", "16505.44", 9));
 		expected_list.add(OHLCV(tf, "2019-03-25T19:30:00", "21013.00", "21013.00", "17000.99", "17000.99", 2));
 		expected_list.add(OHLCV(tf, "2019-03-25T20:00:00", "13426.19"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[3.01] to cause M15 series compact up to M30", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Go to H1
@@ -546,7 +551,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[4.01] to grow M30 series up to 5 elements", expected_list);
 
 		// New tick
 		tf = new ZTFHours(1, ZONE_ID);
@@ -563,7 +568,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-25T19:00:00", "13486.05", "28441.15", "10107.18", "17000.99", 11));
 		expected_list.add(OHLCV(tf, "2019-03-25T20:00:00", "13426.19", "15409.26", "13426.19", "15409.26",  2));
 		expected_list.add(OHLCV(tf, "2019-03-25T21:00:00", "13002.93"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[4.02] to cause M30 series compact up to H1", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Go to H3
@@ -579,7 +584,7 @@ public class OHLCScalableSeriesTest {
 		expect_event1.await();
 		expect_event2.await();
 		expected_list.add(curr);
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[5.01] to grow H1 up to 5 elements", expected_list);
 		
 		// New tick
 		tf = new ZTFHours(3, ZONE_ID);
@@ -595,7 +600,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-25T18:00:00", "12340.00", "28441.15", "10012.00", "15409.26", 20));
 		expected_list.add(OHLCV(tf, "2019-03-25T21:00:00", "13002.93", "13002.93", "12209.15", "12209.15",  2));
 		expected_list.add(OHLCV(tf, "2019-03-26T12:00:00", "14662.99"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[5.02] to cause H1 series compact up to H3", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Go to H6
@@ -618,7 +623,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-25T18:00:00", "12340.00", "28441.15", "10012.00", "12209.15", 22));
 		expected_list.add(OHLCV(tf, "2019-03-26T12:00:00", "14662.99", "17205.00", "14662.99", "17205.00",  2));
 		expected_list.add(OHLCV(tf, "2019-03-26T18:00:00", "18557.97", "18557.97", "16442.22", "16442.22",  2));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[6.01] to cause H3 series compact up to H6", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Go to H12
@@ -638,7 +643,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-26T12:00:00", "14662.99", "18557.97", "14662.99", "16442.22",  4));
 		expected_list.add(OHLCV(tf, "2019-03-27T12:00:00", "11404.00", "29190.00", "11404.00", "29190.00",  2));
 		expected_list.add(OHLCV(tf, "2019-03-28T00:00:00", "19015.00"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[7.01] to cause H6 series compact up to H12", expected_list);
 
 		// --------------------------------------------------------------------
 		// Go to D1
@@ -662,7 +667,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-27T00:00:00", "11404.00", "29190.00", "11404.00", "29190.00",  2));
 		expected_list.add(OHLCV(tf, "2019-03-28T00:00:00", "19015.00", "22515.27", "19015.00", "22515.27",  2));
 		expected_list.add(OHLCV(tf, "2019-03-29T00:00:00", "25500.00"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[8.01] to cause H12 series compact up to D1", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Go to D2
@@ -679,7 +684,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-26T00:00:00", "14662.99", "29190.00", "11404.00", "29190.00",  6));
 		expected_list.add(OHLCV(tf, "2019-03-28T00:00:00", "19015.00", "25500.00", "19015.00", "25500.00",  3));
 		expected_list.add(OHLCV(tf, "2019-04-01T00:00:00", "18902.12"));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[9.01] to cause D1 series compact up to D2", expected_list);
 
 		// --------------------------------------------------------------------
 		// Go to D4
@@ -697,7 +702,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-26T00:00:00", "14662.99", "29190.00", "11404.00", "25500.00",  9));
 		expected_list.add(OHLCV(tf, "2019-03-30T00:00:00", "18902.12"));
 		expected_list.add(OHLCV(tf, "2019-04-03T00:00:00", "14803.00", "22551.00", "14803.00", "22551.00",  2));
-		assertSeriesEquals(expected_list);
+		assertSeriesEquals("[10.01] to cause D2 series compact up to D4", expected_list);
 		
 		// --------------------------------------------------------------------
 		// Go to D8
@@ -714,7 +719,7 @@ public class OHLCScalableSeriesTest {
 		expected_list.add(OHLCV(tf, "2019-03-22T00:00:00", "12340.00", "29190.00", "10012.00", "25500.00", 31));
 		expected_list.add(OHLCV(tf, "2019-03-30T00:00:00", "18902.12", "22551.00", "14803.00", "22551.00",  3));
 		expected_list.add(OHLCV(tf, "2019-04-07T00:00:00", "17209.00", "17209.00", "11208.00", "11208.00",  2));
-		assertSeriesEquals(expected_list);		
+		assertSeriesEquals("[11.01] to cause D4 series compact up to D8", expected_list);
 	}
 	
 	@Test
