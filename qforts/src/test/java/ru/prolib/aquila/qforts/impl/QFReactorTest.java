@@ -40,7 +40,7 @@ public class QFReactorTest {
 	private static final Symbol symbol = new Symbol("MSFT");
 	private IMocksControl control;
 	private QForts facadeMock;
-	private IQFObjectRegistry registryMock;
+	private QFObjectRegistry registryMock;
 	private QFSessionSchedule scheduleMock;
 	private QFSymbolDataService sdsMock;
 	private AtomicLong seqOrderID;
@@ -63,7 +63,7 @@ public class QFReactorTest {
 	public void setUp() throws Exception {
 		control = createStrictControl();
 		facadeMock = control.createMock(QForts.class);
-		registryMock = control.createMock(QFObjectRegistry.class);
+		registryMock = control.createMock(QFObjectRegistryImpl.class);
 		scheduleMock = control.createMock(QFSessionSchedule.class);
 		sdsMock = control.createMock(QFSymbolDataService.class);
 		seqOrderID = new AtomicLong(1000L);

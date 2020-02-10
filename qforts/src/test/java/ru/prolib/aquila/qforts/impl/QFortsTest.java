@@ -27,7 +27,7 @@ public class QFortsTest {
 	private static Account account1, account2, account3;
 	private static Symbol symbol1;
 	private IMocksControl control;
-	private IQFObjectRegistry registryMock;
+	private QFObjectRegistry registryMock;
 	private QFTransactionService transactionsMock;
 	private EditableTerminal terminal;
 	private QForts service;
@@ -51,7 +51,7 @@ public class QFortsTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		registryMock = control.createMock(QFObjectRegistry.class);
+		registryMock = control.createMock(QFObjectRegistryImpl.class);
 		transactionsMock = control.createMock(QFTransactionService.class);
 		terminal = new BasicTerminalBuilder()
 				.withDataProvider(new DataProviderStub())

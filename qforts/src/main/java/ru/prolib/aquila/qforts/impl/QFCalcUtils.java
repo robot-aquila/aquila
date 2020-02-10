@@ -14,7 +14,7 @@ public class QFCalcUtils {
 	private CDecimal getCurrentPrice(Security security) {
 		Tick x = security.getLastTrade();
 		if ( x == null ) {
-			return security.getSettlementPrice();
+			return security.getSettlementPrice(); // TODO: this does not work cuz settlement price isn't mandatory
 		}
 		return x.getPrice();
 	}

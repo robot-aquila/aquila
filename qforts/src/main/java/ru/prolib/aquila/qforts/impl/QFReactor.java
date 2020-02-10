@@ -44,7 +44,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	private TaskHandler taskHandler;
 	
 	public QFReactor(QForts facade,
-					 IQFObjectRegistry registry,
+					 QFObjectRegistry registry,
 					 QFSessionSchedule schedule,
 					 AtomicLong seqOrderID,
 					 QFSymbolDataService symbol_data_service)
@@ -55,6 +55,8 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		this.symbolDataService = symbol_data_service;
 	}
 	
+	// This is bad idea. Gain an access to this object thru builder -> app context -> get bean
+	@Deprecated
 	public SymbolSubscrRepository getSymbolSubscrRepository() {
 		return symbolDataService.getSymbolSubscrRepository();
 	}

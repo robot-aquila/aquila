@@ -1,90 +1,29 @@
 package ru.prolib.aquila.qforts.impl;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
-import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounterFactory;
-import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrRepository;
 import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.data.DataSource;
 
 public class QFBuilder {
-	private AtomicLong seqOrderID, seqExecutionID;
-	private QForts facade;
-	private QFTransactionService transactions;
-	private QFSessionSchedule schedule;
 	private DataSource dataSource;
 	private EventQueue eventQueue;
 	private int liquidityMode = QForts.LIQUIDITY_LIMITED;
 	private boolean sds_legacy = false;
 	private ApplicationContext context;
 	
-	public DataProvider buildDataProvider() {
-		return new QFReactor(
-				getFacade(),
-				getRegistry(),
-				getSchedule(),
-				getOrderIDSequence(),
-				getSymbolDataService()
-			);
-	}
-	
-	public QFortsEnv buildEnvironment(EditableTerminal terminal) {
-		return new QFortsEnv(terminal, getFacade());
-	}
-	
-	public void setBuildingContext(ApplicationContext context) {
-		this.context = context;
-	}
-	
-	private ApplicationContext getContext() {
-		if ( context == null ) {
-			context = new AnnotationConfigApplicationContext(QFBuildingContextConfig.class);
+	private EventQueue getEventQueue() {
+		if ( eventQueue == null ) {
+			throw new IllegalStateException("Event queue was not specified");
 		}
-		return context;
+		return eventQueue;
 	}
 	
-	private QForts getFacade() {
-		if ( facade == null ) {
-			facade = new QForts(getRegistry(), getTransactions(), liquidityMode);
-		}
-		return facade;
-	}
-	
-	private IQFObjectRegistry getRegistry() {
-		return getContext().getBean(IQFObjectRegistry.class);
-	}
-	
-	private QFTransactionService getTransactions() {
-		if ( transactions == null ) {
-			transactions = new QFTransactionService(getRegistry(), getExecutionIDSequence());
-		}
-		return transactions;
-	}
-	
-	private AtomicLong getExecutionIDSequence() {
-		if ( seqExecutionID == null ) {
-			seqExecutionID = new AtomicLong();
-		}
-		return seqExecutionID;
-	}
-	
-	private AtomicLong getOrderIDSequence() {
-		if ( seqOrderID == null ) {
-			seqOrderID = new AtomicLong();
-		}
-		return seqOrderID;
-	}
-	
-	private QFSessionSchedule getSchedule() {
-		if ( schedule == null ) {
-			schedule = new QFSessionSchedule();
-		}
-		return schedule;
+	private Integer getLiquidityMode() {
+		return liquidityMode;
 	}
 	
 	private DataSource getDataSource() {
@@ -94,34 +33,24 @@ public class QFBuilder {
 		return dataSource;
 	}
 	
-	public QFBuilder withDataSource(DataSource data_source) {
-		this.dataSource = data_source;
-		return this;
+	public void setBuildingContext(ApplicationContext context) {
+		this.context = context;
 	}
 	
-	private SymbolSubscrRepository getSymbolSubscrRepository() {
-		return new SymbolSubscrRepository(new SymbolSubscrCounterFactory(getEventQueue()), "QFORTS-SYMBOL-SUBSCR");
-	}
-	
-	private EventQueue getEventQueue() {
-		if ( eventQueue == null ) {
-			throw new IllegalStateException("Event queue was not specified");
+	protected ApplicationContext getContext() {
+		if ( context == null ) {
+			AnnotationConfigApplicationContext c = new AnnotationConfigApplicationContext();
+			if ( sds_legacy ) {
+				c.getEnvironment().setActiveProfiles("legacy");
+			}
+			c.registerBean("eventQueue", EventQueue.class, () -> getEventQueue());
+			c.registerBean("liquidityMode", Integer.class, () -> getLiquidityMode());
+			c.registerBean("dataSource", DataSource.class, () -> getDataSource());
+			c.register(QFBuildingContextConfig.class);
+			c.refresh();
+			context = c;
 		}
-		return eventQueue;
-	}
-	
-	private QFSymbolDataService getSymbolDataServiceModern() {
-		return new QFSymbolDataServiceModern(getEventQueue(), true);
-	}
-	
-	private QFSymbolDataService getSymbolDataServiceLegacy() {
-		return new QFSymbolDataServiceLegacy(getFacade(), getSymbolSubscrRepository());
-	}
-	
-	private QFSymbolDataService getSymbolDataService() {
-		QFSymbolDataService service = sds_legacy ? getSymbolDataServiceLegacy() : getSymbolDataServiceModern();
-		service.setDataSource(getDataSource());
-		return service;
+		return context;
 	}
 	
 	public QFBuilder withEventQueue(EventQueue queue) {
@@ -138,6 +67,20 @@ public class QFBuilder {
 		}
 		this.liquidityMode = liquidity_mode;
 		return this;
+	}
+	
+	public QFBuilder withDataSource(DataSource data_source) {
+		this.dataSource = data_source;
+		return this;
+	}
+	
+	
+	public QFortsEnv buildEnvironment(EditableTerminal terminal) {
+		return new QFortsEnv(terminal, getContext().getBean(QForts.class));
+	}
+	
+	public DataProvider buildDataProvider() {
+		return getContext().getBean(DataProvider.class);
 	}
 
 }

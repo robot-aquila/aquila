@@ -34,7 +34,7 @@ public class QFTransactionServiceTest {
 	private static Account account;
 	private static Symbol symbol1, symbol2, symbol3;
 	private IMocksControl control;
-	private IQFObjectRegistry registryMock;
+	private QFObjectRegistry registryMock;
 	private QFAssembler assemblerMock;
 	private QFCalculator calculatorMock;
 	private Multilock multilockMock;
@@ -59,7 +59,7 @@ public class QFTransactionServiceTest {
 			.withDataProvider(new DataProviderStub())
 			.buildTerminal();
 		control = createStrictControl();
-		registryMock = control.createMock(QFObjectRegistry.class);
+		registryMock = control.createMock(QFObjectRegistryImpl.class);
 		assemblerMock = control.createMock(QFAssembler.class);
 		calculatorMock = control.createMock(QFCalculator.class);
 		multilockMock = control.createMock(Multilock.class);
@@ -83,7 +83,7 @@ public class QFTransactionServiceTest {
 		QFOrderStatusUpdate updateMock = control.createMock(QFOrderStatusUpdate.class);
 		expect(calculatorMock.updateOrderStatus(order, OrderStatus.ACTIVE, null)).andReturn(updateMock);
 		assemblerMock.update(order, updateMock);
-		registryMock.register(order);
+		expect(registryMock.register(order)).andReturn(true);
 		multilockMock.unlock();
 		control.replay();
 		
@@ -115,7 +115,7 @@ public class QFTransactionServiceTest {
 		QFOrderStatusUpdate updateMock = control.createMock(QFOrderStatusUpdate.class);
 		expect(calculatorMock.updateOrderStatus(order, OrderStatus.CANCELLED, null)).andReturn(updateMock);
 		assemblerMock.update(order, updateMock);
-		registryMock.purgeOrder(order);
+		expect(registryMock.purgeOrder(order)).andReturn(true);
 		multilockMock.unlock();
 		control.replay();
 		
@@ -169,7 +169,7 @@ public class QFTransactionServiceTest {
 		expect(calculatorMock.updateOrderStatus(order, OrderStatus.REJECTED, "test message"))
 			.andReturn(updateMock);
 		assemblerMock.update(order, updateMock);
-		registryMock.purgeOrder(order);
+		expect(registryMock.purgeOrder(order)).andReturn(true);
 		multilockMock.unlock();
 		control.replay();
 		
@@ -279,7 +279,7 @@ public class QFTransactionServiceTest {
 	
 	@Test
 	public void testExecuteOrder_Complete_InsufficientFunds() throws Exception {
-		IQFObjectRegistry obj_reg = new QFObjectRegistry();
+		QFObjectRegistry obj_reg = new QFObjectRegistryImpl();
 		service = new QFTransactionService(obj_reg, seqExecutionID);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		security.consume(new DeltaUpdateBuilder()
@@ -311,7 +311,7 @@ public class QFTransactionServiceTest {
 	
 	@Test
 	public void testExecuteOrder_Partial_InsufficientFunds() throws Exception {
-		IQFObjectRegistry obj_reg = new QFObjectRegistry();
+		QFObjectRegistry obj_reg = new QFObjectRegistryImpl();
 		service = new QFTransactionService(obj_reg, seqExecutionID);
 		EditableSecurity security = terminal.getEditableSecurity(symbol1);
 		security.consume(new DeltaUpdateBuilder()
@@ -378,7 +378,7 @@ public class QFTransactionServiceTest {
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
 		assemblerMock.update(order, oeuStub, 1006L);
 		assemblerMock.update(portfolio, pcuMock);
-		registryMock.purgeOrder(order);
+		expect(registryMock.purgeOrder(order)).andReturn(true);
 		multilockMock.unlock();
 		control.replay();
 		
