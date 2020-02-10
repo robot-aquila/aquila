@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -61,6 +63,7 @@ public class TerminalImplTest {
 	private ObjectFactory objectFactoryMock;
 	private TerminalImpl terminal, terminalWithMocks;
 	private EventListenerStub listenerStub;
+	Lock lock;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -75,6 +78,7 @@ public class TerminalImplTest {
 
 	@Before
 	public void setUp() throws Exception {
+		lock = new ReentrantLock();
 		control = createStrictControl();
 		schedulerMock = control.createMock(Scheduler.class);
 		dataProviderMock = control.createMock(DataProvider.class);
@@ -84,11 +88,13 @@ public class TerminalImplTest {
 		params.setTerminalID("DummyTerminal");
 		params.setDataProvider(dataProviderStub);
 		params.setEventQueue(new TestEventQueueImpl());
+		params.setLock(lock);
 		terminal = new TerminalImpl(params);
 		params = new TerminalParams();
 		params.setDataProvider(dataProviderMock);
 		params.setScheduler(schedulerMock);
 		params.setObjectFactory(objectFactoryMock);
+		params.setLock(lock);
 		terminalWithMocks = new TerminalImpl(params);
 		listenerStub = new EventListenerStub();
 		
@@ -195,6 +201,7 @@ public class TerminalImplTest {
 		assertEquals(prefix + "PORTFOLIO_CLOSE", terminal.onPortfolioClose().getId());
 		assertNotNull(terminal.getLID());
 		//assertTrue(LID.isLastCreatedLID(terminalWithMocks.getLID()));
+		assertSame(lock, terminal.getLock());
 	}
 
 	@Test
@@ -211,6 +218,7 @@ public class TerminalImplTest {
 		assertTrue(actual.onLastTrade().isAlternateType(terminal.onSecurityLastTrade()));
 		assertTrue(actual.onMarketDepthUpdate().isAlternateType(terminal.onSecurityMarketDepthUpdate()));
 		assertTrue(actual.onClose().isAlternateType(terminal.onSecurityClose()));
+		assertSame(lock, ((SecurityImpl) actual).getLock());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -238,6 +246,7 @@ public class TerminalImplTest {
 		assertTrue(actual.onLastTrade().isAlternateType(terminal.onSecurityLastTrade()));
 		assertTrue(actual.onMarketDepthUpdate().isAlternateType(terminal.onSecurityMarketDepthUpdate()));
 		assertTrue(actual.onClose().isAlternateType(terminal.onSecurityClose()));
+		assertSame(lock, ((SecurityImpl) actual).getLock());
 	}
 	
 	@Test
@@ -279,6 +288,7 @@ public class TerminalImplTest {
 			new PortfolioImpl(new PortfolioParamsBuilder(terminalWithMocks.getEventQueue())
 				.withTerminal(terminalWithMocks)
 				.withAccount(account1)
+				.withObjectFactory(new ObjectFactoryImpl(lock))
 				.buildParams());
 		expect(objectFactoryMock.createPortfolio(terminalWithMocks, account1)).andReturn(portfolioStub);
 		control.replay();
@@ -325,6 +335,7 @@ public class TerminalImplTest {
 		assertTrue(actual.onUpdate().isAlternateType(terminal.onPortfolioUpdate()));
 		assertTrue(actual.onClose().isAlternateType(terminal.onPortfolioClose()));
 		assertTrue(actual.onPositionClose().isAlternateType(terminal.onPositionClose()));
+		assertSame(lock, ((PortfolioImpl) actual).getLock());
 	}
 	
 	@Test
@@ -399,6 +410,7 @@ public class TerminalImplTest {
 		assertEquals(834L, order.getID());
 		assertNull(order.getStatus());
 		assertOrderAlternateEventTypes(order);
+		assertSame(lock, ((OrderImpl) order).getLock());
 	}
 	
 	@Test
@@ -468,6 +480,7 @@ public class TerminalImplTest {
 		assertNull(order.getStatus());
 		assertSame(order, terminal.getOrder(1000L));
 		assertOrderAlternateEventTypes(order);
+		assertSame(lock, ((OrderImpl) order).getLock());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -590,7 +603,7 @@ public class TerminalImplTest {
 			new PortfolioImpl(new PortfolioParamsBuilder(terminalWithMocks.getEventQueue())
 				.withTerminal(terminalWithMocks)
 				.withAccount(account3)
-				.withObjectFactory(new ObjectFactoryImpl())
+				.withObjectFactory(new ObjectFactoryImpl(lock))
 				.withController(new OSCControllerStub())
 				.buildParams());
 		EditableOrder orderStub =
@@ -641,7 +654,7 @@ public class TerminalImplTest {
 			new PortfolioImpl(new PortfolioParamsBuilder(terminalWithMocks.getEventQueue())
 				.withTerminal(terminalWithMocks)
 				.withAccount(account1)
-				.withObjectFactory(new ObjectFactoryImpl())
+				.withObjectFactory(new ObjectFactoryImpl(lock))
 				.withController(new OSCControllerStub())
 				.buildParams());
 		EditableOrder orderStub = new OrderImpl(new OrderParamsBuilder(terminalWithMocks.getEventQueue())
@@ -714,6 +727,7 @@ public class TerminalImplTest {
 		assertNull(order.getComment());
 		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
+		assertSame(lock, ((OrderImpl) order).getLock());
 	}
 	
 	@Test
@@ -761,6 +775,7 @@ public class TerminalImplTest {
 		assertNull(order.getComment());
 		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
+		assertSame(lock, ((OrderImpl) order).getLock());
 	}
 	
 	@Test
@@ -810,6 +825,7 @@ public class TerminalImplTest {
 		assertEquals("test order", order.getComment());
 		assertNull(order.getExecutedValue());
 		assertOrderAlternateEventTypes(order);
+		assertSame(lock, ((OrderImpl) order).getLock());
 	}
 	
 	@Test

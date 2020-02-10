@@ -1,6 +1,10 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
@@ -58,6 +62,15 @@ public class BasicTerminalBuilderTest {
 		terminal = (TerminalImpl) builder.withDataProvider(dataProvider).buildTerminal();
 				
 		assertSame(dataProvider, terminal.getDataProvider());
+	}
+	
+	@Test
+	public void testWithLock() {
+		Lock lock = new ReentrantLock();
+		terminal = (TerminalImpl) builder.withLock(lock).buildTerminal();
+		
+		assertSame(lock, terminal.getLock());
+		assertEquals(new ObjectFactoryImpl(lock), terminal.getObjectFactory());
 	}
 
 }

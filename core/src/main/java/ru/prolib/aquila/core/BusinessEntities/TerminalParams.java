@@ -1,5 +1,8 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventDispatcherImpl;
 import ru.prolib.aquila.core.EventQueue;
@@ -21,6 +24,7 @@ public class TerminalParams {
 	private DataProvider dataProvider;
 	private ObjectFactory objectFactory;
 	private EventDispatcher eventDispatcher;
+	private Lock globalLock;
 	
 	public static synchronized int getCurrentGeneratedNumber() {
 		return lastAssignedNum;
@@ -56,9 +60,16 @@ public class TerminalParams {
 		return terminalID == null ? generateNextGeneratedID() : terminalID;
 	}
 	
+	public Lock getLock() {
+		if ( globalLock == null ) {
+			globalLock = new ReentrantLock();
+		}
+		return globalLock;
+	}
+	
 	public ObjectFactory getObjectFactory() {
 		if ( objectFactory == null ) {
-			objectFactory = new ObjectFactoryImpl();
+			objectFactory = new ObjectFactoryImpl(getLock());
 		}
 		return objectFactory;
 	}
@@ -92,6 +103,10 @@ public class TerminalParams {
 	
 	public void setEventDispatcher(EventDispatcher dispatcher) {
 		this.eventDispatcher = dispatcher;
+	}
+	
+	public void setLock(Lock global_lock) {
+		this.globalLock = global_lock;
 	}
 
 }

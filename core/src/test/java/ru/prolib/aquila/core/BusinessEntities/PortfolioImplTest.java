@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.*;
 
@@ -31,6 +33,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	private SchedulerStub schedulerStub;
 	private PortfolioController controller;
 	private PortfolioImpl portfolio;
+	Lock lock;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -39,6 +42,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 	
 	@Before
 	public void setUp() throws Exception {
+		lock = new ReentrantLock();
 		controller = new PortfolioController();
 		super.setUp();
 	}
@@ -60,6 +64,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 				.withEventQueue(queue)
 				.withDataProvider(new DataProviderStub())
 				.withScheduler(schedulerStub)
+				.withLock(lock)
 				.buildTerminal();
 		terminal.getEditableSecurity(new Symbol("SBER"));
 		terminal.getEditableSecurity(new Symbol("GAZP"));
@@ -74,6 +79,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		portfolio = new PortfolioImpl(new PortfolioParamsBuilder(queue)
 				.withTerminal(terminal)
 				.withAccount(account)
+				.withObjectFactory(new ObjectFactoryImpl(lock))
+				.withLock(lock)
 				.buildParams());
 		return portfolio;
 	}
@@ -85,6 +92,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 				.withTerminal(terminal)
 				.withAccount(account)
 				.withController(controller)
+				.withObjectFactory(new ObjectFactoryImpl(lock))
+				.withLock(lock)
 				.buildParams());
 		return portfolio;
 	}
@@ -99,6 +108,8 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 				.withAccount(account)
 				.withEventDispatcher(eventDispatcher)
 				.withController(controller)
+				.withObjectFactory(new ObjectFactoryImpl(lock))
+				.withLock(lock)
 				.buildParams());
 		return portfolio;
 	}
@@ -121,6 +132,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertEquals(prefix + ".POSITION_PRICE_CHANGE", portfolio.onPositionCurrentPriceChange().getId());
 		assertEquals(prefix + ".POSITION_UPDATE", portfolio.onPositionUpdate().getId());
 		assertEquals(prefix + ".POSITION_CLOSE", portfolio.onPositionClose().getId());
+		assertSame(lock, portfolio.getLock());
 	}
 	
 	@Test
@@ -355,6 +367,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertTrue(position.onUpdate().isAlternateType(portfolio.onPositionUpdate()));
 		assertTrue(position.onClose().isAlternateType(portfolio.onPositionClose()));
 		assertSame(position, portfolio.getEditablePosition(new Symbol("MSFT")));
+		assertSame(lock, ((PositionImpl) position).getLock());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -565,7 +578,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		final CountDownLatch started = new CountDownLatch(1),
 				successPoints = new CountDownLatch(4);
 		final List<String> log = new Vector<>();
-		ObjectFactory objectFactory = new ObjectFactoryImpl() {
+		ObjectFactory objectFactory = new ObjectFactoryImpl(lock) {
 			@Override
 			public EditablePosition createPosition(EditableTerminal terminal, Account account, Symbol symbol) {
 				try {
@@ -577,7 +590,7 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 					e.printStackTrace(System.err);
 				}
 				log.add("OF: exit");
-				return new ObjectFactoryImpl().createPosition(terminal, account, symbol);
+				return new ObjectFactoryImpl(lock).createPosition(terminal, account, symbol);
 			}
 		};
 		portfolio = new PortfolioImpl(new PortfolioParamsBuilder(queue)

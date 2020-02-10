@@ -6,7 +6,6 @@ import ru.prolib.aquila.core.EventDispatcher;
 import ru.prolib.aquila.core.EventQueue;
 import ru.prolib.aquila.core.BusinessEntities.Account;
 import ru.prolib.aquila.core.BusinessEntities.ObjectFactory;
-import ru.prolib.aquila.core.BusinessEntities.ObjectFactoryImpl;
 import ru.prolib.aquila.core.BusinessEntities.PortfolioImpl;
 import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
@@ -86,7 +85,7 @@ public class PortfolioParamsBuilder extends OSCParamsBuilder {
 	
 	protected ObjectFactory getObjectFactory() {
 		if ( objectFactory == null ) {
-			return getDefaultObjectFactory();
+			throw new NullPointerException("Object factory was not defined");
 		}
 		return objectFactory;
 	}
@@ -99,10 +98,6 @@ public class PortfolioParamsBuilder extends OSCParamsBuilder {
 	@Override
 	protected OSCController getDefaultController() {
 		return new PortfolioImpl.PortfolioController();
-	}
-	
-	protected ObjectFactory getDefaultObjectFactory() {
-		return new ObjectFactoryImpl();
 	}
 	
 	@Override

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.concurrency.LID;
@@ -64,7 +63,7 @@ public class TerminalImpl implements EditableTerminal {
 	public TerminalImpl(TerminalParams params) {
 		super();
 		this.lid = LID.createInstance();
-		this.lock = new ReentrantLock();
+		this.lock = params.getLock();
 		this.terminalID = params.getTerminalID();
 		this.queue = params.getEventQueue();
 		this.dispatcher = params.getEventDispatcher();
@@ -105,6 +104,17 @@ public class TerminalImpl implements EditableTerminal {
 		onOrderClose = newEventType("ORDER_CLOSE");
 		onPositionClose = newEventType("POSITION_CLOSE");
 		onPortfolioClose = newEventType("PORTFOLIO_CLOSE");
+	}
+	
+	/**
+	 * Get lock instance. For testing purposes only.
+	 * Note that locking mechanism will be changed in future.
+	 * Avoid using a lock instance obtained by calling this method.
+	 * <p>
+	 * @return lock instance
+	 */
+	public Lock getLock() {
+		return lock;
 	}
 	
 	@Override

@@ -32,6 +32,17 @@ public class UpdatableStateContainerImpl implements UpdatableStateContainer {
 	public UpdatableStateContainerImpl(String id) {
 		this(id, new ReentrantLock());
 	}
+	
+	/**
+	 * Get lock instance. For testing purposes only.
+	 * Note that locking mechanism will be changed in future.
+	 * Avoid using a lock instance obtained by calling this method.
+	 * <p>
+	 * @return lock instance
+	 */
+	public Lock getLock() {
+		return lock;
+	}
 
 	@Override
 	public String getContainerID() {

@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.util.concurrent.locks.Lock;
+
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.data.DataProvider;
 
@@ -54,6 +56,11 @@ public class BasicTerminalBuilder extends TerminalParams {
 	
 	public BasicTerminalBuilder withObjectFactory(ObjectFactory factory) {
 		setObjectFactory(factory);
+		return this;
+	}
+	
+	public BasicTerminalBuilder withLock(Lock lock) {
+		setLock(lock);
 		return this;
 	}
 	

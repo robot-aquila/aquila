@@ -1,9 +1,14 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import static org.easymock.EasyMock.*;
 
 import org.easymock.IMocksControl;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,6 +27,7 @@ public class TerminalParamsTest {
 	private EventQueue queue;
 	private EventDispatcher dispatcherMock;
 	private TerminalParams params;
+	Lock lockMock;
 
 	@Before
 	public void setUp() throws Exception {
@@ -30,6 +36,7 @@ public class TerminalParamsTest {
 		dataProvider = control.createMock(DataProvider.class);
 		objectFactory = control.createMock(ObjectFactory.class);
 		dispatcherMock = control.createMock(EventDispatcher.class);
+		lockMock = control.createMock(Lock.class);
 		queue = new EventQueueFactory().createDefault();
 		params = new TerminalParams();
 	}
@@ -42,6 +49,7 @@ public class TerminalParamsTest {
 		params.setTerminalID("DummyTerminal");
 		params.setObjectFactory(objectFactory);
 		params.setEventDispatcher(dispatcherMock);
+		params.setLock(lockMock);
 		
 		assertSame(scheduler, params.getScheduler());
 		assertSame(queue, params.getEventQueue());
@@ -49,6 +57,7 @@ public class TerminalParamsTest {
 		assertEquals("DummyTerminal", params.getTerminalID());
 		assertSame(objectFactory, params.getObjectFactory());
 		assertSame(dispatcherMock, params.getEventDispatcher());
+		assertSame(lockMock, params.getLock());
 	}
 	
 	@Test
@@ -67,9 +76,16 @@ public class TerminalParamsTest {
 	
 	@Test
 	public void testGetObjectFactory_DefaultInstance() {
+		params.setLock(lockMock);
+		
 		ObjectFactoryImpl factory = (ObjectFactoryImpl) params.getObjectFactory();
+		
 		assertNotNull(factory);
 		assertSame(factory, params.getObjectFactory());
+		
+		// So, object factory now must use a global lock which shared
+		// across all objects of terminal and terminal itself.
+		assertEquals(new ObjectFactoryImpl(lockMock), factory);
 	}
 	
 	@Test
@@ -90,6 +106,14 @@ public class TerminalParamsTest {
 		
 		assertNotNull(dispatcher);
 		assertSame(queue, dispatcher.getEventQueue());
+	}
+	
+	@Test
+	public void testGetLock_DefaultInstance() throws Exception {
+		Lock lock = params.getLock();
+		
+		assertNotNull(lock);
+		assertThat(lock, IsInstanceOf.instanceOf(ReentrantLock.class));
 	}
 
 }
