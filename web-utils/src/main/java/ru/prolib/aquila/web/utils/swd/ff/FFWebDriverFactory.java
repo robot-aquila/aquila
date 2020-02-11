@@ -9,6 +9,7 @@ import org.ini4j.Profile.Section;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 import ru.prolib.aquila.web.utils.WebDriverFactory;
@@ -112,6 +113,14 @@ public class FFWebDriverFactory implements WebDriverFactory {
 				if ( x.length() > 0 ) {
 					System.setProperty("webdriver.gecko.driver", x);
 				}
+			}
+			if ( sec.containsKey("log-level") ) {
+				String log_level_str = sec.get("log-level");
+				FirefoxDriverLogLevel log_level = FirefoxDriverLogLevel.fromString(log_level_str);
+				if ( log_level == null ) {
+					throw new IllegalArgumentException("Unsupported Firefox log level: " + log_level_str);
+				}
+				ffo.setLogLevel(log_level);
 			}
 		}
 		ffo.setBinary(ffb);

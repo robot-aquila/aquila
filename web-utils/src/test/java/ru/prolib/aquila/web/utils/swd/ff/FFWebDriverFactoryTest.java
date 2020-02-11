@@ -14,10 +14,13 @@ import org.apache.commons.io.FileUtils;
 import org.easymock.IMocksControl;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory.DriverInstantiator;
@@ -38,7 +41,7 @@ public class FFWebDriverFactoryTest {
 		return result;
 	}
 	
-	
+	@Rule public ExpectedException eex = ExpectedException.none();
 	private IMocksControl control;
 	private FirefoxOptions ffoStub;
 	private DriverInstantiator diMock;
@@ -122,56 +125,66 @@ public class FFWebDriverFactoryTest {
 		assertSame(service, service.loadIni(temp));
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected List<String> getArgs() {
-		return (List<String>) ((Map)service.getFirefoxOptions().toJson().get("moz:firefoxOptions")).get("args");
+	@SuppressWarnings("rawtypes")
+	Map getFFOptions() {
+		return (Map) service.getFirefoxOptions().toJson().get("moz:firefoxOptions");
+	}
+	
+	@SuppressWarnings("unchecked")
+	List<String> getFFArgs() {
+		return (List<String>) getFFOptions().get("args");
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	Map getFFLog() {
+		return (Map) getFFOptions().get("log");
 	}
 	
 	@Test
 	public void testLoadIni_Headless() throws Exception {
 		FileUtils.writeStringToFile(temp, "\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=true\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList("--headless"), getArgs());
+		assertEquals(toList("--headless"), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=1\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList("--headless"), getArgs());
+		assertEquals(toList("--headless"), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=y\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList("--headless"), getArgs());
+		assertEquals(toList("--headless"), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=Y\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList("--headless"), getArgs());
+		assertEquals(toList("--headless"), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=false\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=0\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=n\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 		
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\nheadless=N\n\n\n");
 		service.loadIni(temp);
-		assertEquals(toList(), getArgs());
+		assertEquals(toList(), getFFArgs());
 	}
 	
 	@Test (expected=IllegalStateException.class)
@@ -195,6 +208,24 @@ public class FFWebDriverFactoryTest {
 		FileUtils.writeStringToFile(temp, "[firefox-driver]\ngeckodriver-binary=/foo/bar\n\n\n");
 		service.loadIni(temp);
 		assertEquals("/foo/bar", System.getProperty("webdriver.gecko.driver"));
+	}
+	
+	@Test
+	public void testLoadIni_LogLevel_SupportedLevels() throws Exception {
+		for ( String log_level : toList("TRACE", "DEBUG", "CONFIG", "INFO", "WARN", "ERROR", "FATAL") ) {
+			FileUtils.writeStringToFile(temp, "[firefox-driver]\nlog-level=" + log_level + "\n");
+			service.loadIni(temp);
+			assertEquals(FirefoxDriverLogLevel.fromString(log_level), getFFLog().get("level"));
+		}
+	}
+	
+	@Test
+	public void testLoadIni_LogLevel_UnsupportedLevelCausesException() throws Exception {
+		FileUtils.writeStringToFile(temp, "[firefox-driver]\nlog-level=bambuka\n");
+		eex.expect(IllegalArgumentException.class);
+		eex.expectMessage("Unsupported Firefox log level: bambuka");
+		
+		service.loadIni(temp);
 	}
 
 }
