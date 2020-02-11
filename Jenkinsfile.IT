@@ -5,14 +5,10 @@ pipeline {
         }
     }
     stages {
-        stage('Build') { 
+        stage('IT') {
             steps {
-                sh 'mvn -B -DskipTests clean package' 
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'xvfb-run mvn -B test'
+                sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
+                sh 'xvfb-run -s \"-screen 0 1920x1080x16\" mvn -B -DskipTests -DskipITs=false'
             }
             post {
                 always {
