@@ -8,11 +8,11 @@ pipeline {
         stage('IT') {
             steps {
                 sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
-                sh 'xvfb-run -s \"-screen 0 1920x1080x16\" mvn -B -DskipTests -DskipITs=false test'
+                sh 'xvfb-run -s \"-screen 0 1920x1080x16\" mvn -B -DskipTests -DskipITs=false verify'
             }
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml'
+                    junit '**/target/failsafe-reports/*.xml'
                 }
             }
         }
