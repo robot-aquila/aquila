@@ -45,11 +45,6 @@ public class Moex implements Closeable {
 	public void close() throws IOException {
 		if ( closeResources ) {
 			try {
-				webDriver.close();
-			} catch ( WebDriverException e ) {
-				logger.error("WebDriver close error: ", e);
-			}
-			try {
 				webDriver.quit();
 			} catch ( WebDriverException e ) {
 				logger.error("WebDriver quit error: ", e);
