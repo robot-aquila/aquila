@@ -1,5 +1,6 @@
 [firefox-driver]
 headless=false
+log-level=TRACE
 
 [apache-http-client]
 socketTimeout=

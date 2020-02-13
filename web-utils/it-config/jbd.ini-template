@@ -1,4 +1,4 @@
-; rev0.4
+; rev0.5
 ;
 ; This file contains configuration of transport layer to use for integration
 ; tests. If this file has an extension equal to ini-template then this is
@@ -96,6 +96,10 @@ ajaxResourceTimeout=5000
 headless=false
 firefox-binary=C:\\Program Files\\Mozilla Firefox\\firefox.exe
 geckodriver-binary=D:\\utils\\geckodriver\\geckodriver.exe
+
+; Firefox Driver log level
+; Possible values: TRACE, DEBUG, CONFIG, INFO, WARN, ERROR, FATAL
+;log-level=
 
 
 ; This section contains configuration properties of Apache HTTP Client. Apache
