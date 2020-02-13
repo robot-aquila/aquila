@@ -13,7 +13,7 @@ pipeline {
         stage('IT') {
             steps {
                 sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
-                sh 'xvfb-run -s \"-screen 0 1920x1080x16\" mvn -B -f web-utils -DskipITs=false -Dtest=FidexpIT#testTestFormIntegrity test'
+                sh 'xvfb-run -s \"-screen 0 1920x1080x16\" mvn -B -f web-utils -DskipITs=false -Dtest=FidexpIT verify'
             }
             post {
                 always {

@@ -1,5 +1,5 @@
 [firefox-driver]
-headless=false
+headless=true
 log-level=TRACE
 
 [apache-http-client]
