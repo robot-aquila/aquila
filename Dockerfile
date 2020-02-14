@@ -6,7 +6,7 @@ RUN apt-get update \
         openjdk-8-jdk openjdk-8-jre \
         ca-certificates curl firefox \
     && apt-get install -y --no-install-recommends maven \
-		net-tools iputils-ping
+		net-tools iputils-ping \
     && curl -L https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz | tar xz -C /usr/local/bin \
     && rm -fr /var/lib/apt/lists/*
 
