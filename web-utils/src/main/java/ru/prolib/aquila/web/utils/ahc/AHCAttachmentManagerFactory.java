@@ -29,6 +29,13 @@ public class AHCAttachmentManagerFactory implements HTTPAttachmentManagerFactory
 		return this;
 	}
 	
+	public AHCAttachmentManagerFactory loadIni(File file, boolean required) throws IOException {
+		if ( required || file.exists() ) {
+			loadIni(file);
+		}
+		return this;
+	}
+	
 	public AHCClientFactoryImpl getClientFactory() {
 		return clientFactory;
 	}

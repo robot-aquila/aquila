@@ -1,4 +1,4 @@
-package ru.prolib.aquila.web.utils.swd.ff;
+package ru.prolib.aquila.web.utils.wdfactory;
 
 import static org.junit.Assert.*;
 
@@ -23,8 +23,9 @@ import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
-import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory.DriverInstantiator;
-import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory.DriverInstantiatorImpl;
+import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory;
+import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory.DriverInstantiator;
+import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory.DriverInstantiatorImpl;
 
 public class FFWebDriverFactoryTest {
 	

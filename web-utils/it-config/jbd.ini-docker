@@ -1,6 +1,5 @@
-[firefox-driver]
-headless=false
-log-level=TRACE
+[remote-webdriver]
+driver=chrome
 
 [apache-http-client]
 socketTimeout=

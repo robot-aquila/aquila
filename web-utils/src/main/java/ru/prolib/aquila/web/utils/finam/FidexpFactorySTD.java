@@ -2,15 +2,14 @@ package ru.prolib.aquila.web.utils.finam;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-
 import ru.prolib.aquila.web.utils.HTTPAttachmentManagerFactory;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.ahc.AHCAttachmentManagerFactory;
 import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
-import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory;
+import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory;
+import ru.prolib.aquila.web.utils.wdfactory.RWDFactory;
 
 public class FidexpFactorySTD implements FidexpFactory {
 	private final WebDriverFactory driverFactory;
@@ -68,6 +67,13 @@ public class FidexpFactorySTD implements FidexpFactory {
 	
 	public static FidexpFactory newFactoryFF(File config, boolean config_required) throws IOException {
 		return newFactoryFF(config, config_required, new FirefoxOptions());
+	}
+	
+	public static FidexpFactory newFactoryRemote(File config, boolean config_required) throws IOException {
+		return new FidexpFactorySTD(
+				new RWDFactory().loadIni(config, config_required),
+				new AHCAttachmentManagerFactory().loadIni(config, config_required)
+			);
 	}
 
 }

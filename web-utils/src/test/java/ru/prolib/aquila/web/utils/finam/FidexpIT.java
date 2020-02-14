@@ -81,9 +81,10 @@ public class FidexpIT {
 		//ffo.addPreference("dom.webnotifications.enabled", false);
 		//ffo.setAcceptInsecureCerts(true);
 		//ffo.setUnhandledPromptBehaviour(UnexpectedAlertBehaviour.IGNORE);
-		facadeFactory = firefox ?
-				FidexpFactorySTD.newFactoryFF(JBROWSER_CONF_FILE, false/*, ffo*/) :
-				FidexpFactorySTD.newFactoryJBD(JBROWSER_CONF_FILE, false);
+//		facadeFactory = firefox ?
+//				FidexpFactorySTD.newFactoryFF(JBROWSER_CONF_FILE, false/*, ffo*/) :
+//				FidexpFactorySTD.newFactoryJBD(JBROWSER_CONF_FILE, false);
+		facadeFactory = FidexpFactorySTD.newFactoryRemote(JBROWSER_CONF_FILE, false);
 	}
 
 	@Before

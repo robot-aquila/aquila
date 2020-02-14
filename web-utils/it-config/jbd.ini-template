@@ -1,10 +1,12 @@
-; rev0.5
+; rev0.6
 ;
 ; This file contains configuration of transport layer to use for integration
 ; tests. If this file has an extension equal to ini-template then this is
 ; a template file. Make a copy of it to a new file named jbd.ini and it will be
 ; affected during integration tests.
 ;
+; Remote web driver is only used. 
+
 
 ; This section contains configuration properties of JBrowserDriver
 ; Most keys just defines an argument for apropriate method of Settings.Builder
@@ -91,21 +93,46 @@ ajaxResourceTimeout=5000
 ;proxy.pass=
 
 
-; This section contains configuration properties of Firefox Selenium Web Driver.
+
+; This section contains configuration properties of Firefox Web Driver.
 [firefox-driver]
-headless=false
-firefox-binary=C:\\Program Files\\Mozilla Firefox\\firefox.exe
-geckodriver-binary=D:\\utils\\geckodriver\\geckodriver.exe
+
+; Run Firefox in headless mode
+; default: false
+;headless=false
+
+; Path to Firefox executable.
+; Required when running Firefox locally.
+; default: not specified
+;firefox-binary=C:\\Program Files\\Mozilla Firefox\\firefox.exe
+
+; Path to geckodriver executable.
+; Required when running Firefox locally.
+; default: not specified
+;geckodriver-binary=D:\\utils\\geckodriver\\geckodriver.exe
 
 ; Firefox Driver log level
 ; Possible values: TRACE, DEBUG, CONFIG, INFO, WARN, ERROR, FATAL
+; default: not specified
 ;log-level=
 
 
-; This section contains configuration properties of Apache HTTP Client. Apache
-; HTTP Client used for most critical areas to provide enough stability and
-; reliability. You may want to make fine-tune the program's behaviour when
-; working in critical areas. 
+
+; This section contains configuration properties of Chrome Web Driver.
+[chrome-driver]
+; There is no properties currently available for Chrome.
+; The section reserved for further usage.
+
+
+
+[remote-driver]
+driver = chrome
+hub.url = http://localhost:4444/wd/hub
+
+
+
+; This section contains configuration properties of Apache HTTP Client (AHC).
+; AHC used for most critical areas when WebDriver cannot be used. 
 [apache-http-client]
 socketTimeout=
 connectTimeout=
@@ -114,4 +141,3 @@ defaultHeaders=true
 proxy.type=
 proxy.host=
 proxy.port=
-

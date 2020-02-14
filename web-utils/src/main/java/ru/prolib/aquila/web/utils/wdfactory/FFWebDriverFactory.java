@@ -1,15 +1,11 @@
-package ru.prolib.aquila.web.utils.swd.ff;
+package ru.prolib.aquila.web.utils.wdfactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import org.ini4j.Ini;
-import org.ini4j.Profile.Section;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxBinary;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
 import ru.prolib.aquila.web.utils.WebDriverFactory;
@@ -39,6 +35,7 @@ public class FFWebDriverFactory implements WebDriverFactory {
 		
 	}
 	
+	private final FFOptionsLoader optionsLoader = new FFOptionsLoader();
 	private FirefoxOptions ffo;
 	private Long implicitlyWaitSec;
 	private final DriverInstantiator di;
@@ -83,47 +80,7 @@ public class FFWebDriverFactory implements WebDriverFactory {
 	}
 	
 	public FFWebDriverFactory loadIni(File file) throws IOException {
-		ffo = new FirefoxOptions();
-		FirefoxBinary ffb = new FirefoxBinary();
-		Ini ini = new Ini(file);
-		if ( ini.containsKey("firefox-driver") ) {
-			Section sec = ini.get("firefox-driver");
-			if ( sec.containsKey("firefox-binary") ) {
-				String x = sec.get("firefox-binary").trim();
-				if ( x.length() > 0 ) {
-					ffb = new FirefoxBinary(new File(x));
-				}
-			}
-			if ( sec.containsKey("headless") ) {
-				String ssl = sec.get("headless").trim().toLowerCase();
-				switch ( ssl ) {
-				case "true":
-				case "1":
-				case "y":
-					ffb.addCommandLineOptions("--headless");
-					break;
-				case "":
-				case "0":
-				default:
-					break;
-				}
-			}
-			if ( sec.containsKey("geckodriver-binary") ) {
-				String x = sec.get("geckodriver-binary").trim();
-				if ( x.length() > 0 ) {
-					System.setProperty("webdriver.gecko.driver", x);
-				}
-			}
-			if ( sec.containsKey("log-level") ) {
-				String log_level_str = sec.get("log-level");
-				FirefoxDriverLogLevel log_level = FirefoxDriverLogLevel.fromString(log_level_str);
-				if ( log_level == null ) {
-					throw new IllegalArgumentException("Unsupported Firefox log level: " + log_level_str);
-				}
-				ffo.setLogLevel(log_level);
-			}
-		}
-		ffo.setBinary(ffb);
+		optionsLoader.loadOptions(file, ffo = new FirefoxOptions());
 		return this;
 	}
 

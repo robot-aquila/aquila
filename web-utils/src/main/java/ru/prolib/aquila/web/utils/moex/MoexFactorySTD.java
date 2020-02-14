@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
-import ru.prolib.aquila.web.utils.swd.ff.FFWebDriverFactory;
+import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory;
 
 /**
  * Standard factory of MOEX service facade based on WebDriverFactory.
