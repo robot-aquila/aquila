@@ -1,7 +1,7 @@
 pipeline {
     agent {
         dockerfile {
-            args '-v /root/.m2:/root/.m2 -v /dev/shm:/dev/shm'
+            args '-v /root/.m2:/root/.m2 --shm-size=2g'
         }
     }
     environment {
