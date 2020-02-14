@@ -1,5 +1,6 @@
 [remote-webdriver]
 driver=chrome
+hub.url=http://192.168.99.100:4444/wd/hub
 
 [apache-http-client]
 socketTimeout=
