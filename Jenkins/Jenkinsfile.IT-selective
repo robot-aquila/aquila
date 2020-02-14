@@ -1,7 +1,7 @@
 pipeline {
     agent {
         dockerfile {
-            args '-v /root/.m2:/root/.m2 --shm-size=2g'
+            args '-v /root/.m2:/root/.m2 --shm-size=2g --network jenkins'
         }
     }
     environment {
