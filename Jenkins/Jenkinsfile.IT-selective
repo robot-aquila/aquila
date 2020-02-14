@@ -11,7 +11,8 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh 'printenv | sort'
-				sh 'ping -n 2 ya.ru'
+				sh 'sudo ifconfig'
+				sh 'ping -n 2 selenium-hub'
             }
         }
         stage('Build') { 
