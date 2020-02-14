@@ -5,14 +5,14 @@ pipeline {
         }
     }
     environment {
-		MAVEN_OPTS="-Xmx1024m -Xms256m -XX:MaxPermSize=256m"
+        MAVEN_OPTS='-Xmx1024m -Xms256m -XX:MaxPermSize=256m'
     }
-	stages {
-		stage('Prepare') {
-			steps {
-				sh 'printenv | sort'
-			}
-		}
+    stages {
+        stage('Prepare') {
+            steps {
+                sh 'printenv | sort'
+            }
+        }
         stage('Build') { 
             steps {
                 sh 'mvn -B -DskipTests clean install' 
