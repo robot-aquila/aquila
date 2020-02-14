@@ -3,24 +3,15 @@
 # Add the `-d` flag at the end for detached execution
 version: "3"
 services:
+
   selenium-hub:
     image: selenium/hub:3.141.59-zinc
     container_name: selenium-hub
     ports:
       - "4444:4444"
+
   chrome:
     image: selenium/node-chrome:3.141.59-zinc
-    container_name: selenium-node-chrome
-    volumes:
-      - /dev/shm:/dev/shm
-    depends_on:
-      - selenium-hub
-    environment:
-      - HUB_HOST=selenium-hub
-      - HUB_PORT=4444
-  firefox:
-    image: selenium/node-firefox:3.141.59-zinc
-    container_name: selenium-node-firefox
     volumes:
       - /dev/shm:/dev/shm
     depends_on:
@@ -29,7 +20,50 @@ services:
       - HUB_HOST=selenium-hub
       - HUB_PORT=4444
 
+  firefox:
+    image: selenium/node-firefox:3.141.59-zinc
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+
+  jenkins-docker:
+    image: docker:dind
+    container_name: docker
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+
+  jenkins:
+    image: jenkinsci/blueocean
+    privileged: true
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+      - TZ=Europe/Moscow
+      - JAVA_OPTS=-Xmx1024m -Xms256m -XX:MaxPermSize=256m
+    volumes:
+      - jenkins-docker-certs:/certs/client:ro
+      - jenkins-data:/var/jenkins_home
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    user: "0"
+
 networks:
   default:
     external:
       name: jenkins
+
+volumes:
+  jenkins-docker-certs:
+    external: true
+  jenkins-data:
+    external: true
