@@ -11,7 +11,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh 'printenv | sort'
-				sh 'ping -c 1 selenium-hub.jenkins'
+				sh 'ping -c 1 192.168.99.100'
             }
         }
         stage('Build') { 
