@@ -6,6 +6,7 @@ import java.io.IOException;
 import ru.prolib.aquila.web.utils.WebDriverFactory;
 import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
 import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory;
+import ru.prolib.aquila.web.utils.wdfactory.RWDFactory;
 
 /**
  * Standard factory of MOEX service facade based on WebDriverFactory.
@@ -64,6 +65,10 @@ public class MoexFactorySTD implements MoexFactory {
 			factory.loadIni(config);
 		}
 		return new MoexFactorySTD(factory);
+	}
+	
+	public static MoexFactory newFactoryRemote(File config, boolean config_required) throws IOException {
+		return new MoexFactorySTD(new RWDFactory().loadIni(config, config_required));
 	}
 
 }

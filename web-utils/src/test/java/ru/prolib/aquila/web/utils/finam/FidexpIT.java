@@ -63,7 +63,6 @@ public class FidexpIT {
 		logger = LoggerFactory.getLogger(FidexpIT.class);
 	}
 	
-	private static final boolean firefox = true;
 	private static FidexpFactory facadeFactory;
 	
 	private FidexpFormParams params;
@@ -74,16 +73,6 @@ public class FidexpIT {
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
-		//FirefoxProfile ffp = new FirefoxProfile();
-		//FirefoxOptions ffo = new FirefoxOptions();
-		//ffo.addPreference("security.insecure_field_warning.contextual.enabled", false);
-		//ffo.addPreference("dom.webnotifications.allowinsecure", true);
-		//ffo.addPreference("dom.webnotifications.enabled", false);
-		//ffo.setAcceptInsecureCerts(true);
-		//ffo.setUnhandledPromptBehaviour(UnexpectedAlertBehaviour.IGNORE);
-//		facadeFactory = firefox ?
-//				FidexpFactorySTD.newFactoryFF(JBROWSER_CONF_FILE, false/*, ffo*/) :
-//				FidexpFactorySTD.newFactoryJBD(JBROWSER_CONF_FILE, false);
 		facadeFactory = FidexpFactorySTD.newFactoryRemote(JBROWSER_CONF_FILE, false);
 	}
 

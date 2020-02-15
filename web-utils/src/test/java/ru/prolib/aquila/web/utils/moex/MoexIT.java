@@ -57,7 +57,6 @@ public class MoexIT {
 	private static final double EXPECTED_AVAILABILITY = 72;
 	private static final org.slf4j.Logger logger;
 	private static final Map<Integer, Object> TEST_CONTRACT_DATA = new LinkedHashMap<>();
-	private static final boolean firefox = true;
 	
 	static {
 		logger = LoggerFactory.getLogger(MoexIT.class);
@@ -74,13 +73,8 @@ public class MoexIT {
 		Logger.getLogger("org.apache.http").setLevel(Level.ERROR);
 		Logger.getLogger("ru.prolib.aquila.web.utils").setLevel(Level.DEBUG);
 		loadTestContractDetails();
-		if ( firefox ) {
-			factory = MoexFactorySTD.newFactoryFF(JBROWSER_CONF_FILE, false);
-			finamFactory = FidexpFactorySTD.newFactoryFF(JBROWSER_CONF_FILE, false);
-		} else {
-			factory = MoexFactorySTD.newFactoryJBD(JBROWSER_CONF_FILE, false);
-			finamFactory = FidexpFactorySTD.newFactoryJBD(JBROWSER_CONF_FILE, false);
-		}
+		factory = MoexFactorySTD.newFactoryRemote(JBROWSER_CONF_FILE, false);
+		finamFactory = FidexpFactorySTD.newFactoryRemote(JBROWSER_CONF_FILE, false);
 	}
 	
 	private static void loadTestContractDetails() throws Exception {
