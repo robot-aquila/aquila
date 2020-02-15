@@ -11,7 +11,7 @@ services:
       - "4444:4444"
 
   chrome:
-    image: selenium/node-chrome:3.141.59-zinc
+    image: selenium/node-chrome-debug:3.141.59-zinc
     volumes:
       - /dev/shm:/dev/shm
     depends_on:
@@ -19,9 +19,13 @@ services:
     environment:
       - HUB_HOST=selenium-hub
       - HUB_PORT=4444
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSIONS=5
+    ports:
+      - "5900:5900"
 
   firefox:
-    image: selenium/node-firefox:3.141.59-zinc
+    image: selenium/node-firefox-debug:3.141.59-zinc
     volumes:
       - /dev/shm:/dev/shm
     depends_on:
@@ -29,6 +33,10 @@ services:
     environment:
       - HUB_HOST=selenium-hub
       - HUB_PORT=4444
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSIONS=5
+    ports:
+      - "5901:5900"
 
   jenkins-docker:
     image: docker:dind

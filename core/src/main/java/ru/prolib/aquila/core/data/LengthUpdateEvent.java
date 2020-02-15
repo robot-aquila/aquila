@@ -44,5 +44,11 @@ public class LengthUpdateEvent extends EventImpl {
 				.append(currLength)
 				.build();
 	}
+	
+	@Override
+	public String toString() {
+		return new StringBuilder().append(getType().getId())
+				.append(".LengthUpdate[").append(prevLength).append("->").append(currLength).append("]").toString();
+	}
 
 }

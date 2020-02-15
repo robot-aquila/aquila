@@ -65,5 +65,13 @@ public class LengthUpdateEventTest {
 		
 		assertEquals(expected, service.hashCode());
 	}
+	
+	@Test
+	public void testToString() {
+		service = new LengthUpdateEvent(new EventTypeImpl("MY_EVENT_TYPE"), 3, 4);
+		
+		String expected = "MY_EVENT_TYPE.LengthUpdate[3->4]";
+		assertEquals(expected, service.toString());
+	}
 
 }

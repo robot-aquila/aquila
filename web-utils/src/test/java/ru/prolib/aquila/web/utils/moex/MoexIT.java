@@ -202,7 +202,9 @@ public class MoexIT {
 	
 	@After
 	public void tearDown() throws Exception {
-		service.close();
+		if ( service != null ) {
+			service.close();
+		}
 	}
 	
 	@Test
