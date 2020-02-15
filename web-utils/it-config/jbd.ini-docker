@@ -1,3 +1,12 @@
+; Use EnvInject to configure remote WebDriver while running under Jenkins
+; Setup the following environment variables:
+;
+; AQUILA_IT_HUB_URL=http://<HUB_HOST>:<HUB_PORT>/wd/hub
+; AQUILA_IT_DRIVER=chrome
+;
+; Those variables will replace configuration described in this file.
+;
+
 [remote-webdriver]
 driver=chrome
 hub.url=http://selenium-hub:4444/wd/hub

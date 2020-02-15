@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 import org.ini4j.Ini;
 import org.ini4j.Profile.Section;
@@ -20,6 +21,8 @@ public class RWDOptionsLoader {
 	private static final String INI_KEY_HUB_URL = "hub.url";
 	private static final String DEFAULT_HUB_URL = "http://localhost:4444/wd/hub";
 	private static final String DEFAULT_DRIVER = DRIVER_CHROME;
+	private static final String ENV_KEY_DRIVER = "AQUILA_IT_DRIVER";
+	private static final String ENV_KEY_HUB_URL = "AQUILA_IT_HUB_URL";
 	
 	public static class RWDOptions {
 		private final URL hubUrl;
@@ -63,15 +66,24 @@ public class RWDOptionsLoader {
 	}
 	
 	public RWDOptions loadOptions(File config_file) throws IOException {
-		Ini ini = new Ini(config_file);
-		RWDOptions default_options = defaultOptions();
-		if ( ! ini.containsKey(INI_SECTION_NAME) ) {
-			return default_options;
+		String driver = DEFAULT_DRIVER, hub_url = DEFAULT_HUB_URL;
+		
+		// Lowest priority is the configuration file
+		if ( config_file.exists() ) {
+			Ini ini = new Ini(config_file);
+			if ( ini.containsKey(INI_SECTION_NAME) ) {
+				Section config = ini.get(INI_SECTION_NAME);
+				hub_url = config.getOrDefault(INI_KEY_HUB_URL, hub_url);
+				driver = config.getOrDefault(INI_KEY_DRIVER, driver);
+			}
 		}
-		Section config = ini.get(INI_SECTION_NAME);
-		URL hub_url = toURL(config.getOrDefault(INI_KEY_HUB_URL, default_options.getHubUrl().toString()));
-		Capabilities capabilities = default_options.getCapabilities();
-		String driver = config.getOrDefault(INI_KEY_DRIVER, DEFAULT_DRIVER);
+		
+		// The next priority is environment variables
+		Map<String, String> env = System.getenv();
+		hub_url = env.getOrDefault(ENV_KEY_HUB_URL, hub_url);
+		driver = env.getOrDefault(ENV_KEY_DRIVER, driver);
+		
+		Capabilities capabilities = null;
 		switch ( driver ) {
 		case DRIVER_FIREFOX:
 			FirefoxOptions fo = firefoxOptionsLoader.loadOptions(config_file);
@@ -84,7 +96,7 @@ public class RWDOptionsLoader {
 		default:
 			throw new IllegalArgumentException("Unsupported driver: " + driver);
 		}
-		return new RWDOptions(hub_url, capabilities);
+		return new RWDOptions(toURL(hub_url), capabilities);
 	}
 
 }
