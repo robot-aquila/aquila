@@ -1,0 +1,44 @@
+# To execute this docker-compose yml file use `docker-compose -f <file_name> up`
+# Add the `-d` flag at the end for detached execution
+version: "3"
+services:
+
+  jenkins-docker:
+    image: docker:dind
+    container_name: docker
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+
+  jenkins:
+    image: jenkinsci/blueocean
+    privileged: true
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_CERT_PATH=/certs/client
+      - DOCKER_TLS_VERIFY=1
+      - TZ=Europe/Moscow
+      - JAVA_OPTS=-Xmx1024m -Xms256m
+    volumes:
+      - jenkins-docker-certs:/certs/client:ro
+      - jenkins-data:/var/jenkins_home
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    user: "0"
+    depends_on:
+      - jenkins-docker
+
+networks:
+  default:
+    external:
+      name: jenkins
+
+volumes:
+  jenkins-docker-certs:
+    external: true
+  jenkins-data:
+    external: true
