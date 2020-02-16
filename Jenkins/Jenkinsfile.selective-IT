@@ -5,7 +5,7 @@ pipeline {
         }
     }
     environment {
-        MAVEN_OPTS='-Xmx1024m -Xms256m -XX:MaxPermSize=256m'
+        MAVEN_OPTS='-Xmx1024m -Xms256m'
     }
     stages {
         stage('Prepare') {
@@ -21,7 +21,7 @@ pipeline {
         stage('IT') {
             steps {
                 sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
-                sh 'mvn -B -f ${AQUILA_SELECTED_PROJECT} -DskipITs=false -Dtest=${AQUILA_SELECTED_TEST} verify'
+                sh 'mvn -B -f ${AQUILA_SELECTED_PROJECT} -DskipTests -DskipITs=false -Dtest=${AQUILA_SELECTED_TEST} verify'
             }
             post {
                 always {
