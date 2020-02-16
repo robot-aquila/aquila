@@ -1,0 +1,5 @@
+AQUILA_SELECTED_PROJECT | AQUILA_SELECTED_TEST
+-----------------------------------------------
+ N/A                    | FidexpIT
+ N/A                    | MoexIT
+ N/A                    | !MoexIT,!FidexpIT,**IT
