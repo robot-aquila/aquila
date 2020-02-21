@@ -46,7 +46,7 @@ public class QFSymbolAutosubscr implements QFOrderTracker {
 				orderCount ++;
 				if ( handler == null ) {
 					handler = dataService.onSubscribe(symbol, MDLevel.L1);
-					logger.debug("Subscribed for L1 of symbol {} (order count is {})", symbol, orderCount);
+					//logger.debug("Subscribed for L1 of symbol {} (order count is {})", symbol, orderCount);
 				}
 			} finally {
 				nodeLock.unlock();
@@ -59,13 +59,13 @@ public class QFSymbolAutosubscr implements QFOrderTracker {
 				orderCount --;
 				if ( orderCount <= 0 && handler != null) {
 					CDecimal cur_pos = position.getCurrentVolume();
-					Object args[] = { symbol, orderCount, cur_pos };
+					//Object args[] = { symbol, orderCount, cur_pos };
 					if ( cur_pos == null || cur_pos.toAbstract().compareTo(CDecimalBD.ZERO) == 0 ) {
 						handler.close();
 						handler = null;
-						logger.debug("Subscription of symbol {} is closed (order count is {}, cur.pos is {})", args);
+						//logger.debug("Subscription of symbol {} is closed (order count is {}, cur.pos is {})", args);
 					} else {
-						logger.debug("Keep subscription of symbol {} (order count is {}, cur.pos is {})", args);
+						//logger.debug("Keep subscription of symbol {} (order count is {}, cur.pos is {})", args);
 					}
 				}
 			} finally {

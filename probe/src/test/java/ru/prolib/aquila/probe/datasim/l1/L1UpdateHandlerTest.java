@@ -7,6 +7,7 @@ import static ru.prolib.aquila.probe.datasim.l1.L1UpdateHandler.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -255,7 +256,7 @@ public class L1UpdateHandlerTest {
 	}
 	
 	@Test
-	public void testTickByTickBlockReader_ReadBlock_NoMoreEntries() throws Exception {
+	public void testTickByTickBlockReader_ReadBlock_NoMoreEntries_UnderlyinReturnEmptyList() throws Exception {
 		List<L1Update> updates_cache = new ArrayList<>();
 		IBlockReader service = new TickByTickBlockReader(brMock, updates_cache);
 		expect(brMock.readBlock()).andReturn(new ArrayList<>());
@@ -264,8 +265,19 @@ public class L1UpdateHandlerTest {
 		List<L1Update> actual = service.readBlock();
 		
 		control.verify();
-		assertEquals(new ArrayList<>(), actual);
-		assertEquals(new ArrayList<>(), updates_cache);
+		assertNull(actual);
+	}
+	
+	@Test
+	public void testTickByTickBlockReader_ReadBlock_NoMoreEntries_UnderlyingReturnNull() throws Exception {
+		IBlockReader service = new TickByTickBlockReader(brMock, Arrays.asList());
+		expect(brMock.readBlock()).andReturn(null); // This is valid behavior
+		control.replay();
+		
+		List<L1Update> actual = service.readBlock();
+		
+		control.verify();
+		assertNull(actual);
 	}
 	
 	@Test

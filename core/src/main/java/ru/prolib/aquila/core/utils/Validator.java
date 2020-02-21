@@ -6,7 +6,7 @@ package ru.prolib.aquila.core.utils;
  * 2012-09-23<br>
  * $Id: Validator.java 287 2012-10-15 03:30:51Z whirlwind $
  */
-public interface Validator {
+public interface Validator<ValueType> {
 	
 	/**
 	 * Выполнить валидацию условий.
@@ -15,6 +15,6 @@ public interface Validator {
 	 * @return true - удовлетворяет условиям, false - условия не выполнены 
 	 * @throws ValidatorException - If error occurred.
 	 */
-	public boolean validate(Object object) throws ValidatorException;
+	public boolean validate(ValueType object) throws ValidatorException;
 
 }

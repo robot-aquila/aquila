@@ -26,23 +26,23 @@ public class QFOrderTrackingAspect {
 	
 	@Around("ru.prolib.aquila.qforts.impl.QFBuildingContextConfig.inObjectRegistryRegisterOrder(order)")
 	public Object aroundRegisterOrder(ProceedingJoinPoint join_point, EditableOrder order) throws Throwable {
-		logger.debug("Before register order #{}", order.getID());
+		//logger.debug("Before register order #{}", order.getID());
 		boolean retval = (boolean) join_point.proceed();
 		if ( retval ) {
 			counter.startTrackingOrder(order);
 		}
-		logger.debug(" After register order #{} (retval={})", order.getID(), retval);
+		//logger.debug(" After register order #{} (retval={})", order.getID(), retval);
 		return retval;
 	}
 	
 	@Around("ru.prolib.aquila.qforts.impl.QFBuildingContextConfig.inObjectRegistryPurgeOrder(order)")
 	public Object aroundPurgeOrder(ProceedingJoinPoint join_point, Order order) throws Throwable {
-		logger.debug("Before purge order #{}", order.getID());
+		//logger.debug("Before purge order #{}", order.getID());
 		boolean retval = (boolean) join_point.proceed();
 		if ( retval ) {
 			counter.stopTrackingOrder(order);
 		}
-		logger.debug(" After purge order #{} (retval={})", order.getID(), retval);
+		//logger.debug(" After purge order #{} (retval={})", order.getID(), retval);
 		return retval;
 	}
 	

@@ -3,6 +3,7 @@ package ru.prolib.aquila.probe.datasim.l1;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,7 +29,21 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	}
 	
 	public interface IBlockReader {
+		
+		/**
+		 * Set underlying reader.
+		 * <p>
+		 * @param reader
+		 */
 		void setReader(CloseableIterator<L1Update> reader);
+		
+		/**
+		 * Read next block.
+		 * <p>
+		 * @return next data block or null if no more data
+		 * @throws NoSuchElementException 
+		 * @throws IOException
+		 */
 		List<L1Update> readBlock() throws NoSuchElementException, IOException;
 	}
 	
@@ -105,14 +120,13 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 
 		@Override
 		public List<L1Update> readBlock() throws NoSuchElementException, IOException {
-			List<L1Update> result = new ArrayList<>();
 			if ( lastBlock.size() == 0 ) {
-				lastBlock.addAll(reader.readBlock());
+				List<L1Update> list = reader.readBlock();
+				if ( list != null ) {
+					lastBlock.addAll(list);
+				}
 			}
-			if ( lastBlock.size() > 0 ) {
-				result.add(lastBlock.remove(0));
-			}
-			return result;
+			return lastBlock.size() > 0 ? Arrays.asList(lastBlock.remove(0)) : null;
 		}
 		
 	}

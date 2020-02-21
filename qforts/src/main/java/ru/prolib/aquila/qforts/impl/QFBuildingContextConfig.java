@@ -59,7 +59,7 @@ public class QFBuildingContextConfig {
 	@Bean("symbolDataService")
 	@Profile("default")
 	public QFSymbolDataService symbolDataServiceModern(DataSource dataSource, EventQueue eventQueue) {
-		QFSymbolDataService data_service = new QFSymbolDataServiceModern(eventQueue, true);
+		QFSymbolDataService data_service = new QFSymbolDataServiceModern(eventQueue, false);
 		data_service.setDataSource(dataSource);
 		return data_service;
 	}

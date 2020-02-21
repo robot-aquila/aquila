@@ -10,8 +10,8 @@ import org.junit.*;
  * $Id: ValidatorStubTest.java 327 2012-12-05 19:58:26Z whirlwind $
  */
 public class ValidatorStubTest {
-	private static Validator v1 = new ValidatorStub(true);
-	private static Validator v2 = new ValidatorStub(false);
+	private static ValidatorStub v1 = new ValidatorStub(true);
+	private static ValidatorStub v2 = new ValidatorStub(false);
 
 	@Test
 	public void testValidate() throws Exception {
