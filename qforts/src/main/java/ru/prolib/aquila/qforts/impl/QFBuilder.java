@@ -12,7 +12,7 @@ public class QFBuilder {
 	private DataSource dataSource;
 	private EventQueue eventQueue;
 	private int liquidityMode = QForts.LIQUIDITY_LIMITED;
-	private boolean sds_legacy = false;
+	private boolean legacySymbolDataService = false;
 	private ApplicationContext context;
 	
 	private EventQueue getEventQueue() {
@@ -33,6 +33,10 @@ public class QFBuilder {
 		return dataSource;
 	}
 	
+	private boolean isLegacySymbolDataService() {
+		return legacySymbolDataService;
+	}
+	
 	public void setBuildingContext(ApplicationContext context) {
 		this.context = context;
 	}
@@ -40,7 +44,7 @@ public class QFBuilder {
 	protected ApplicationContext getContext() {
 		if ( context == null ) {
 			AnnotationConfigApplicationContext c = new AnnotationConfigApplicationContext();
-			if ( sds_legacy ) {
+			if ( isLegacySymbolDataService() ) {
 				c.getEnvironment().setActiveProfiles("legacy");
 			}
 			c.registerBean("eventQueue", EventQueue.class, () -> getEventQueue());
@@ -74,6 +78,10 @@ public class QFBuilder {
 		return this;
 	}
 	
+	public QFBuilder withLegacySymbolDataService(boolean enable_legacy_service) {
+		this.legacySymbolDataService = enable_legacy_service;
+		return this;
+	}
 	
 	public QFortsEnv buildEnvironment(EditableTerminal terminal) {
 		return new QFortsEnv(terminal, getContext().getBean(QForts.class));
