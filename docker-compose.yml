@@ -47,6 +47,7 @@ services:
     volumes:
       - jenkins-docker-certs:/certs/client
       - jenkins-data:/var/jenkins_home
+      - /root/.m2:/root/.m2
 
   jenkins:
     image: jenkinsci/blueocean
@@ -60,6 +61,7 @@ services:
     volumes:
       - jenkins-docker-certs:/certs/client:ro
       - jenkins-data:/var/jenkins_home
+      - /root/.m2:/root/.m2
     ports:
       - "8080:8080"
       - "50000:50000"
