@@ -22,7 +22,7 @@ pipeline {
         }
 		stage('Install') {
 			steps {
-				sh 'mvn -B install'
+				sh 'mvn -B -DskipTests install'
 			}
 		}
     }
