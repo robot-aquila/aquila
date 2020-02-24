@@ -20,10 +20,10 @@ pipeline {
                 }
             }
         }
-		stage('Install') {
-			steps {
-				sh 'mvn -B -DskipTests install'
-			}
-		}
+        stage('Install') {
+            steps {
+                sh 'mvn -B -DskipTests install'
+            }
+        }
     }
 }
