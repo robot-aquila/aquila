@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
  * Segment writer will commit temporary file when closing.
  */
 public class CacheSegmentWriter extends Writer {
+	public static final int FILE_CREATE_TIMEOUT_SECONDS = 5;
 	private static final Logger logger;
 	
 	static {
@@ -65,6 +66,10 @@ public class CacheSegmentWriter extends Writer {
 		if ( ! closed ) {
 			writer.close();
 			committed.delete();
+			// In case of it's NFS or something possible slow like NFS
+			if ( FileUtils.waitFor(temporary, FILE_CREATE_TIMEOUT_SECONDS) == false ) {
+				throw new IOException("Timeout while flushing file to disk: " + temporary);
+			}
 			FileUtils.moveFile(temporary, committed);
 			closed = true;
 			logger.debug("Cache renewed: {}", committed);
