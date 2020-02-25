@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +63,7 @@ public class CacheSegmentWriter extends Writer {
 	@Override
 	public synchronized void close() throws IOException {
 		if ( ! closed ) {
-			IOUtils.closeQuietly(writer);
+			writer.close();
 			committed.delete();
 			FileUtils.moveFile(temporary, committed);
 			closed = true;
