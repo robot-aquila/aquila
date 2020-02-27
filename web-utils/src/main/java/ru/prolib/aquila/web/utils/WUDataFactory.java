@@ -35,6 +35,10 @@ public class WUDataFactory {
 		return data_source;
 	}
 	
+	public DataSource createForSymbolAndL1DataReplayFM(Scheduler scheduler, File data_root_dir) {
+		return createForSymbolAndL1DataReplayFM(scheduler, data_root_dir, new MoexData().createScaleDB(data_root_dir));
+	}
+	
 	/**
 	 * Create facade for accessing historical data of contracts of MOEX derivatives section.
 	 * <p>

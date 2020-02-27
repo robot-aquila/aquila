@@ -7,9 +7,9 @@ import java.time.Instant;
 import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -56,12 +56,19 @@ public class FinalL1UpdateSegmentStorageTest {
 	
 	@Test
 	public void testListSymbols() throws Exception {
-		Set<Symbol> expected = new HashSet<>();
-		expected.add(symbol1);
-		expected.add(symbol2);
+		List<Symbol> expected = Arrays.asList(
+			new Symbol("Eu-9.16"),
+			new Symbol("BR-3.17"),
+			new Symbol("UCAD-12.16"),
+			new Symbol("RVI-11.17"),
+			new Symbol("RTS-3.17"),
+			new Symbol("CU-6.18")
+		);
 		
-		Set<Symbol> actual = storage.listSymbols();
-		
+		List<Symbol> actual = new ArrayList<>(storage.listSymbols());
+
+		Collections.sort(actual);
+		Collections.sort(expected);
 		assertEquals(expected, actual);
 	}
 	

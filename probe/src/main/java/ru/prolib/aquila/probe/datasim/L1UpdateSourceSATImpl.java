@@ -33,6 +33,7 @@ import ru.prolib.aquila.data.L1UpdateSource;
  * securities. If the passed consumer does not implement such interface then
  * exception will be thrown.
  */
+@Deprecated // Reason: bad design
 public class L1UpdateSourceSATImpl implements L1UpdateSource, EventListener, Lockable {
 	private final Lock lock;
 	private final LID lid;
