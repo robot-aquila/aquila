@@ -57,7 +57,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	
 	// This is bad idea. Gain an access to this object thru builder -> app context -> get bean
 	@Deprecated
-	public SymbolSubscrRepository getSymbolSubscrRepository() {
+	synchronized public SymbolSubscrRepository getSymbolSubscrRepository() {
 		return symbolDataService.getSymbolSubscrRepository();
 	}
 	
@@ -66,7 +66,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	 * <p>
 	 * @param terminal instance
 	 */
-	void setTerminal(EditableTerminal terminal) {
+	synchronized void setTerminal(EditableTerminal terminal) {
 		this.terminal = terminal;
 	}
 	
@@ -75,7 +75,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	 * <p>
 	 * @return terminal instance
 	 */
-	EditableTerminal getTerminal() {
+	synchronized EditableTerminal getTerminal() {
 		return terminal;
 	}
 	
@@ -84,7 +84,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	 * <p>
 	 * @param handler instance
 	 */
-	void setTaskHandler(TaskHandler handler) {
+	synchronized void setTaskHandler(TaskHandler handler) {
 		this.taskHandler = handler;
 	}
 	
@@ -93,12 +93,12 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	 * <p>
 	 * @return handler instance
 	 */
-	TaskHandler getTaskHandler() {
+	synchronized TaskHandler getTaskHandler() {
 		return taskHandler;
 	}
 
 	@Override
-	public void run() {
+	synchronized public void run() {
 		EditableTerminal terminal = null;
 		synchronized ( this ) {
 			terminal = this.terminal;
@@ -128,22 +128,22 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public Instant getNextExecutionTime(Instant currentTime) {
+	synchronized public Instant getNextExecutionTime(Instant currentTime) {
 		return schedule.getNextRunTime(currentTime);
 	}
 
 	@Override
-	public boolean isLongTermTask() {
+	synchronized public boolean isLongTermTask() {
 		return false;
 	}
 
 	@Override
-	public long getNextOrderID() {
+	synchronized public long getNextOrderID() {
 		return seqOrderID.incrementAndGet();
 	}
 
 	@Override
-	public void subscribeRemoteObjects(EditableTerminal terminal) {
+	synchronized public void subscribeRemoteObjects(EditableTerminal terminal) {
 		synchronized ( this ) {
 			if ( this.terminal != null ) {
 				throw new IllegalStateException();
@@ -159,7 +159,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void unsubscribeRemoteObjects(EditableTerminal terminal) {
+	synchronized public void unsubscribeRemoteObjects(EditableTerminal terminal) {
 		TaskHandler th = null;
 		synchronized ( this ) {
 			if ( this.terminal != terminal ) {
@@ -177,7 +177,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void registerNewOrder(EditableOrder order) throws OrderException {
+	synchronized public void registerNewOrder(EditableOrder order) throws OrderException {
 		try {
 			facade.registerOrder(order);
 		} catch ( QFTransactionException e ) {
@@ -186,7 +186,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void cancelOrder(EditableOrder order) throws OrderException {
+	synchronized public void cancelOrder(EditableOrder order) throws OrderException {
 		try {
 			facade.cancelOrder(order);
 		} catch ( QFTransactionException e ) {
@@ -195,7 +195,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void onEvent(Event event) {
+	synchronized public void onEvent(Event event) {
 		if ( event instanceof SecurityEvent ) {
 			Security security = ((SecurityEvent) event).getSecurity();
 			Terminal terminal = security.getTerminal();
@@ -235,13 +235,13 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public SubscrHandler subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
+	synchronized public SubscrHandler subscribe(Symbol symbol, MDLevel level, EditableTerminal terminal) {
 		symbolDataService.setTerminal(terminal);
 		return symbolDataService.onSubscribe(symbol, level);
 	}
 
 	@Override
-	public SubscrHandler subscribe(Account account, EditableTerminal terminal) {
+	synchronized public SubscrHandler subscribe(Account account, EditableTerminal terminal) {
 		EditablePortfolio portfolio = null;
 		terminal.lock();
 		try {
@@ -262,7 +262,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 	}
 
 	@Override
-	public void close() {
+	synchronized public void close() {
 		
 	}
 
