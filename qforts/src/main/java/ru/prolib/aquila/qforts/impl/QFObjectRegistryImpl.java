@@ -31,7 +31,6 @@ public class QFObjectRegistryImpl implements QFObjectRegistry {
 		}
 	}
 	
-	private final Object monitor = new Object();
 	private final LinkedHashSet<EditablePortfolio> portfolios;
 	private final LinkedHashSet<EditableSecurity> securities;
 	private final LinkedHashMap<Symbol, LinkedHashSet<EditableOrder>> orders;
@@ -53,39 +52,29 @@ public class QFObjectRegistryImpl implements QFObjectRegistry {
 	
 	@Override
 	public boolean isRegistered(Portfolio portfolio) {
-		synchronized ( monitor ) {
-			return portfolios.contains(portfolio);
-		}
+		return portfolios.contains(portfolio);
 	}
 	
 	@Override
 	@Deprecated
 	public boolean isRegistered(Security security) {
-		synchronized ( monitor ) {
-			return securities.contains(security);
-		}
+		return securities.contains(security);
 	}
 	
 	@Override
 	public boolean isRegistered(Order order) {
-		synchronized ( monitor ) {
-			return cachedOrderInfo.containsKey(order);
-		}
+		return cachedOrderInfo.containsKey(order);
 	}
 	
 	@Override
 	public void register(EditablePortfolio portfolio) {
-		synchronized ( monitor ) {
-			portfolios.add(portfolio);
-		}
+		portfolios.add(portfolio);
 	}
 	
 	@Override
 	@Deprecated
 	public void register(EditableSecurity security) {
-		synchronized ( monitor ) {
-			securities.add(security);
-		}
+		securities.add(security);
 	}
 	
 	@Override
@@ -99,69 +88,59 @@ public class QFObjectRegistryImpl implements QFObjectRegistry {
 		} finally {
 			order.unlock();
 		}
-		synchronized ( monitor ) {
-			LinkedHashSet<EditableOrder> symbol_orders = orders.get(symbol);
-			if ( symbol_orders == null ) {
-				symbol_orders = new LinkedHashSet<>();
-				orders.put(symbol, symbol_orders);
-			}
-			cachedOrderInfo.put(order, order_info);
-			return symbol_orders.add(order);
+		LinkedHashSet<EditableOrder> symbol_orders = orders.get(symbol);
+		if ( symbol_orders == null ) {
+			symbol_orders = new LinkedHashSet<>();
+			orders.put(symbol, symbol_orders);
 		}
+		cachedOrderInfo.put(order, order_info);
+		return symbol_orders.add(order);
 	}
 	
 	@Override
 	public List<EditableSecurity> getSecurityList() {
-		synchronized ( monitor ) {
-			return new ArrayList<>(securities);
-		}
+		return new ArrayList<>(securities);
 	}
 	
 	@Override
 	public List<EditablePortfolio> getPortfolioList() {
-		synchronized ( monitor ) {
-			return new ArrayList<>(portfolios);
-		}
+		return new ArrayList<>(portfolios);
 	}
 	
 	@Override
 	public List<EditableOrder> getOrderList(Symbol symbol, CDecimal price) {
-		synchronized ( monitor ) {
-			List<EditableOrder> result = new ArrayList<>();
-			LinkedHashSet<EditableOrder> symbol_order = orders.get(symbol);
-			if ( symbol_order != null ) {
-				for ( EditableOrder order : symbol_order ) {
-					OrderInfo order_info = cachedOrderInfo.get(order);
-					if ( order_info.action == OrderAction.BUY ) {
-						if ( price.compareTo(order_info.price) <= 0 ) {
-							result.add(order);
-						}
-					} else if ( order_info.action == OrderAction.SELL ) {
-						if ( price.compareTo(order_info.price) >= 0 ) {
-							result.add(order);
-						}
-					} else {
-						throw new IllegalStateException("Unsupported order action: " + order_info.action);
+		List<EditableOrder> result = new ArrayList<>();
+		LinkedHashSet<EditableOrder> symbol_order = orders.get(symbol);
+		if ( symbol_order != null ) {
+			for ( EditableOrder order : symbol_order ) {
+				OrderInfo order_info = cachedOrderInfo.get(order);
+				if ( order_info.action == OrderAction.BUY ) {
+					if ( price.compareTo(order_info.price) <= 0 ) {
+						result.add(order);
 					}
+				} else if ( order_info.action == OrderAction.SELL ) {
+					if ( price.compareTo(order_info.price) >= 0 ) {
+						result.add(order);
+					}
+				} else {
+					throw new IllegalStateException("Unsupported order action: " + order_info.action);
 				}
 			}
-			return result;
 		}
+		return result;
 	}
 	
 	@Override
 	public boolean purgeOrder(Order order) {
-		synchronized ( monitor ) {
-			OrderInfo order_info = cachedOrderInfo.remove(order);
-			if ( order_info == null ) {
-				return false;
-			}
-			LinkedHashSet<EditableOrder> symbol_orders = orders.get(order_info.symbol);
-			if ( symbol_orders != null ) {
-				symbol_orders.remove(order);
-			}
-			return true;
+		OrderInfo order_info = cachedOrderInfo.remove(order);
+		if ( order_info == null ) {
+			return false;
 		}
+		LinkedHashSet<EditableOrder> symbol_orders = orders.get(order_info.symbol);
+		if ( symbol_orders != null ) {
+			symbol_orders.remove(order);
+		}
+		return true;
 	}
 
 }
