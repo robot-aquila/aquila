@@ -13,7 +13,6 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.Order;
 import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrCounterFactory;
 import ru.prolib.aquila.core.BusinessEntities.SymbolSubscrRepository;
-import ru.prolib.aquila.core.data.DataProvider;
 import ru.prolib.aquila.data.DataSource;
 import ru.prolib.aquila.qforts.impl.aspect.QFOrderTrackingAspect;
 
@@ -55,9 +54,9 @@ public class QFBuildingContextConfig {
 	public QFSessionSchedule sessionSchedule() {
 		return new QFSessionSchedule();
 	}
-	
+
 	@Bean("symbolDataService")
-	@Profile("default")
+	@Profile("modern-sds")
 	public QFSymbolDataService symbolDataServiceModern(DataSource dataSource, EventQueue eventQueue) {
 		QFSymbolDataService data_service = new QFSymbolDataServiceModern(eventQueue, false);
 		data_service.setDataSource(dataSource);
@@ -65,26 +64,41 @@ public class QFBuildingContextConfig {
 	}
 	
 	@Bean("symbolDataService")
-	@Profile("legacy")
-	public QFSymbolDataService symbolDataServiceLegacy(DataSource dataSource, QForts facade, SymbolSubscrRepository subscr) {
+	@Profile("legacy-sds")
+	public QFSymbolDataService symbolDataServiceLegacy(DataSource dataSource,
+			QForts facade,
+			SymbolSubscrRepository subscr)
+	{
 		QFSymbolDataService data_service = new QFSymbolDataServiceLegacy(facade, subscr);
 		data_service.setDataSource(dataSource);
 		return data_service;
 	}
 	
-	@Bean
-	public DataProvider dataProvider(QForts facade, AtomicLong orderIdSequence, QFSymbolDataService symbolDataService) {
-		return new QFReactor(facade, objectRegistry(), sessionSchedule(), orderIdSequence, symbolDataService);
+	@Bean("dataProvider")
+	public QFReactor dataProvider(QForts facade,
+			AtomicLong orderIdSequence,
+			QFSymbolDataService symbolDataService,
+			QFOrderExecutionTriggerMode orderExecutionTriggerMode)
+	{
+		return new QFReactor(facade, objectRegistry(), sessionSchedule(), orderIdSequence,
+				symbolDataService, orderExecutionTriggerMode);
+	}
+
+	@Bean("orderTracker")
+	@Profile("order-exec-trigger-mode-use-trade-events")
+	public QFOrderTracker orderTrackerUsingEvents(QFSymbolDataService symbolDataService) {
+		return new QFSymbolAutosubscr(new QFSymbolAutosubscrActionSDS(symbolDataService));
+	}
+
+	@Bean("orderTracker")
+	@Profile("order-exec-trigger-mode-l1-consumer")
+	public QFOrderTracker orderTrackerAsConsumer(DataSource dataSource, QFReactor dataProvider) {
+		return new QFSymbolAutosubscr(new QFSymbolAutosubscrActionDS(dataSource, dataProvider));
 	}
 	
 	@Bean
-	public QFOrderTracker orderTracker(QFSymbolDataService symbolDataService) {
-		return new QFSymbolAutosubscr(symbolDataService);
-	}
-	
-	@Bean
-	public QFOrderTrackingAspect orderTrackingAspect(QFOrderTracker tracker) {
-		return new QFOrderTrackingAspect(tracker);
+	public QFOrderTrackingAspect orderTrackingAspect(QFOrderTracker orderTracker) {
+		return new QFOrderTrackingAspect(orderTracker);
 	}
 	
 	@Pointcut("target(ru.prolib.aquila.qforts.impl.QFObjectRegistry)")

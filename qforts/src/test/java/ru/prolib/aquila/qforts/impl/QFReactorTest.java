@@ -2,6 +2,7 @@ package ru.prolib.aquila.qforts.impl;
 
 import static org.junit.Assert.*;
 import static  org.easymock.EasyMock.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -13,8 +14,9 @@ import org.easymock.Capture;
 import org.easymock.IMocksControl;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import ru.prolib.aquila.core.Event;
 import ru.prolib.aquila.core.BusinessEntities.Account;
@@ -24,10 +26,12 @@ import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableSecurity;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
@@ -38,6 +42,8 @@ import ru.prolib.aquila.core.data.DataProviderStub;
 
 public class QFReactorTest {
 	private static final Symbol symbol = new Symbol("MSFT");
+	
+	@Rule public ExpectedException eex = ExpectedException.none();
 	private IMocksControl control;
 	private QForts facadeMock;
 	private QFObjectRegistry registryMock;
@@ -58,6 +64,28 @@ public class QFReactorTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 	}
+	
+	QFReactor createWithEventBasedL1Source() {
+		return new QFReactor(
+				facadeMock,
+				registryMock,
+				scheduleMock,
+				seqOrderID,
+				sdsMock,
+				QFOrderExecutionTriggerMode.USE_LAST_TRADE_EVENT_OF_SECURITY
+			);
+	}
+	
+	QFReactor createAsL1UpdateConsumer() {
+		return new QFReactor(
+				facadeMock,
+				registryMock,
+				scheduleMock,
+				seqOrderID,
+				sdsMock,
+				QFOrderExecutionTriggerMode.USE_L1UPDATES_WHEN_ORDER_APPEARS
+			);
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -74,13 +102,20 @@ public class QFReactorTest {
 			.buildTerminal();
 		security = terminal.getEditableSecurity(symbol);
 		security.update(SecurityField.TICK_SIZE, CDecimalBD.of("0.01"));
-		reactor = new QFReactor(
-				facadeMock,
-				registryMock,
-				scheduleMock,
-				seqOrderID,
-				sdsMock
-			);
+		reactor = createWithEventBasedL1Source();
+	}
+	
+	@Test
+	public void testCtor5() {
+		reactor = new QFReactor(facadeMock, registryMock, scheduleMock, seqOrderID, sdsMock);
+		assertEquals(QFOrderExecutionTriggerMode.USE_LAST_TRADE_EVENT_OF_SECURITY, reactor.getOrderExecutionTriggerMode());
+	}
+	
+	@Test
+	public void testCtor6() {
+		reactor = new QFReactor(facadeMock, registryMock, scheduleMock, seqOrderID, sdsMock,
+				QFOrderExecutionTriggerMode.USE_L1UPDATES_WHEN_ORDER_APPEARS);
+		assertEquals(QFOrderExecutionTriggerMode.USE_L1UPDATES_WHEN_ORDER_APPEARS, reactor.getOrderExecutionTriggerMode());
 	}
 	
 	@Test
@@ -211,7 +246,8 @@ public class QFReactorTest {
 	}
 	
 	@Test
-	public void testSubscribeRemoteObjects() {
+	public void testSubscribeRemoteObjects_EventBasedL1SourceMode() {
+		reactor = createWithEventBasedL1Source();
 		Scheduler schedulerMock = control.createMock(Scheduler.class);
 		TaskHandler taskHandlerMock = control.createMock(TaskHandler.class);
 		terminal = new BasicTerminalBuilder()
@@ -232,6 +268,29 @@ public class QFReactorTest {
 		assertSame(taskHandlerMock, reactor.getTaskHandler());
 	}
 	
+	@Test
+	public void testSubscribeRemoteObjects_L1UpdateConsumerMode() {
+		reactor = createAsL1UpdateConsumer();
+		Scheduler schedulerMock = control.createMock(Scheduler.class);
+		TaskHandler taskHandlerMock = control.createMock(TaskHandler.class);
+		terminal = new BasicTerminalBuilder()
+			.withDataProvider(new DataProviderStub())
+			.withScheduler(schedulerMock)
+			.buildTerminal();
+		sdsMock.setTerminal(terminal);
+		sdsMock.onConnectionStatusChange(true);
+		expect(schedulerMock.schedule(reactor)).andReturn(taskHandlerMock);
+		control.replay();
+		
+		reactor.subscribeRemoteObjects(terminal);
+		
+		control.verify();
+		assertFalse(terminal.onSecurityLastTrade().isListener(reactor));
+		assertTrue(terminal.onSecurityUpdate().isListener(reactor));
+		assertSame(terminal, reactor.getTerminal());
+		assertSame(taskHandlerMock, reactor.getTaskHandler());
+	}
+	
 	@Test (expected=IllegalStateException.class)
 	public void testUnsubscribeRemoteObjects_ThrowsIfNotStarted() throws Exception {
 		control.replay();
@@ -239,8 +298,7 @@ public class QFReactorTest {
 		reactor.unsubscribeRemoteObjects(terminal);
 	}
 
-	@Test
-	public void testUnsubscribeRemoteObjects() {
+	private void testUnsubscribeRemoteObjects() {
 		TaskHandler taskHandlerMock = control.createMock(TaskHandler.class);
 		reactor.setTerminal(terminal);
 		reactor.setTaskHandler(taskHandlerMock);
@@ -257,6 +315,16 @@ public class QFReactorTest {
 		assertFalse(terminal.onSecurityUpdate().isListener(reactor));
 		assertNull(reactor.getTerminal());
 		assertNull(reactor.getTaskHandler());
+	}
+	
+	@Test
+	public void testUnsubscribeRemoteObjects_EventBasedL1SourceMode() {
+		testUnsubscribeRemoteObjects();
+	}
+	
+	@Test
+	public void testUnsubscribeRemoteObjects_L1UpdateConsumerMode() {
+		testUnsubscribeRemoteObjects();
 	}
 	
 	@Test
@@ -292,18 +360,6 @@ public class QFReactorTest {
 	}
 	
 	@Test
-	@Ignore // It does not use security registration/check anymore
-	public void testOnEvent_SkipIfNotRegistered() throws Exception {
-		expect(registryMock.isRegistered(security)).andStubReturn(false);
-		control.replay();
-		
-		reactor.onEvent(new SecurityEvent(terminal.onSecurityUpdate(), security, null));
-		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security, null, Tick.NULL_ASK));
-		
-		control.verify();
-	}
-	
-	@Test
 	public void testOnEvent_SecurityLastTrade() throws Exception {
 		facadeMock.handleOrders(security, CDecimalBD.of(2500L), CDecimalBD.of("54.02"));
 		control.replay();
@@ -312,6 +368,17 @@ public class QFReactorTest {
 				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), CDecimalBD.of("54.02"), CDecimalBD.of(2500L))));
 		
 		control.verify();
+	}
+	
+	@Test
+	public void testOnEvent_SecurityLastTrade_ThrowsIfNotAnEventBasedL1UpdateSourceSelected() {
+		reactor = createAsL1UpdateConsumer();
+		control.replay();
+		eex.expect(IllegalStateException.class);
+		eex.expectMessage("Unexpected event in a not event-based L1 source mode");
+		
+		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security,
+				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), CDecimalBD.of("54.02"), CDecimalBD.of(2500L))));
 	}
 	
 	@Test
@@ -383,6 +450,110 @@ public class QFReactorTest {
 		
 		reactor.close();
 		
+		control.verify();
+	}
+
+	@Test
+	public void testConsume_L1Update_SkipIfTerminalNotDefined() {
+		reactor = createAsL1UpdateConsumer();
+		control.replay();
+		reactor.setTerminal(null);
+		
+		reactor.consume(new L1UpdateBuilder(symbol)
+				.withTrade()
+				.withTime("2020-03-02T18:00:00Z")
+				.withPrice(120950L)
+				.withSize(100L)
+				.buildL1Update());
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testConsume_L1Update_ThrowsIfSecurityNotExists() {
+		reactor = createAsL1UpdateConsumer();
+		control.replay();
+		reactor.setTerminal(terminal);
+		eex.expect(IllegalStateException.class);
+		eex.expectMessage("Expected security not exists: BAZOOKA-251-AT-MINE");
+		
+		reactor.consume(new L1UpdateBuilder(new Symbol("BAZOOKA-251-AT-MINE"))
+				.withTrade()
+				.withTime("2020-03-02T18:02:00Z")
+				.withPrice(130930L)
+				.withSize(95L)
+				.buildL1Update());
+	}
+	
+	@Test
+	public void testConsume_L1Update_SecurityExceptionThrownByTerminal() throws Exception {
+		reactor = createAsL1UpdateConsumer();
+		EditableTerminal terminalMock = control.createMock(EditableTerminal.class);
+		expect(terminalMock.isSecurityExists(symbol)).andReturn(true);
+		expect(terminalMock.getSecurity(symbol)).andThrow(new SecurityException("Test error"));
+		control.replay();
+		reactor.setTerminal(terminalMock);
+		eex.expect(IllegalStateException.class);
+		eex.expectMessage("Unexpected exception: ");
+		
+		reactor.consume(new L1UpdateBuilder(symbol)
+				.withTrade()
+				.withTime("2020-03-02T18:16:00Z")
+				.withPrice(296100L)
+				.withSize(25L)
+				.buildL1Update());
+	}
+	
+	@Test
+	public void testConsume_L1Update_TransactionExceptionThrownByFacade() throws Exception {
+		reactor = createAsL1UpdateConsumer();
+		facadeMock.handleOrders(security, of(20L), of(55302L));
+		expectLastCall().andThrow(new QFTransactionException("Test error"));
+		control.replay();
+		reactor.setTerminal(terminal);
+		
+		reactor.consume(new L1UpdateBuilder(symbol)
+				.withTrade()
+				.withTime("2020-03-02T18:39:00Z")
+				.withPrice(55302L)
+				.withSize(20L)
+				.buildL1Update());
+
+		control.verify();
+	}
+
+	@Test
+	public void testConsume_L1Update_OK() throws Exception {
+		reactor = createAsL1UpdateConsumer();
+		facadeMock.handleOrders(security, of(35L), of("504.12"));
+		control.replay();
+		reactor.setTerminal(terminal);
+		
+		reactor.consume(new L1UpdateBuilder(symbol)
+				.withTrade()
+				.withTime("2020-03-02T18:50:00Z")
+				.withPrice("504.12")
+				.withSize(35L)
+				.buildL1Update());
+
+		control.verify();
+	}
+	
+	@Test
+	public void testConsume_L1Update_ThrowsIfEventBasedL1SourceEnabled() {
+		reactor = createWithEventBasedL1Source();
+		control.replay();
+		reactor.setTerminal(terminal);
+		eex.expect(IllegalStateException.class);
+		eex.expectMessage("Unexpected update in a non-consumer L1 source mode");
+		
+		reactor.consume(new L1UpdateBuilder(symbol)
+				.withTrade()
+				.withTime("2020-03-02T18:50:00Z")
+				.withPrice("504.12")
+				.withSize(35L)
+				.buildL1Update());
+
 		control.verify();
 	}
 

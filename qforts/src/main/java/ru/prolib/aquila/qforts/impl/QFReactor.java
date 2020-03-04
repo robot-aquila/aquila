@@ -13,11 +13,14 @@ import ru.prolib.aquila.core.BusinessEntities.CDecimalBD;
 import ru.prolib.aquila.core.BusinessEntities.EditableOrder;
 import ru.prolib.aquila.core.BusinessEntities.EditablePortfolio;
 import ru.prolib.aquila.core.BusinessEntities.EditableTerminal;
+import ru.prolib.aquila.core.BusinessEntities.L1Update;
+import ru.prolib.aquila.core.BusinessEntities.L1UpdateConsumer;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.SPRunnable;
 import ru.prolib.aquila.core.BusinessEntities.Security;
 import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
+import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
@@ -29,19 +32,44 @@ import ru.prolib.aquila.core.BusinessEntities.Terminal;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
 import ru.prolib.aquila.core.data.DataProvider;
 
-public class QFReactor implements EventListener, DataProvider, SPRunnable {
+public class QFReactor implements EventListener, DataProvider, SPRunnable, L1UpdateConsumer {
 	private static final Logger logger;
 	
 	static {
 		logger = LoggerFactory.getLogger(QFReactor.class);
 	}
 	
+	private final QFOrderExecutionTriggerMode orderExecutionTriggerMode;
 	private final QForts facade;
 	private final AtomicLong seqOrderID;
 	private final QFSessionSchedule schedule;
 	private final QFSymbolDataService symbolDataService;
 	private EditableTerminal terminal;
 	private TaskHandler taskHandler;
+
+	/**
+	 * Constructor.
+	 * <p>
+	 * @param facade - QFORTS facade
+	 * @param registry - object registry
+	 * @param schedule - scheduler describes different phases intraday
+	 * @param seqOrderID - order IDs
+	 * @param symbol_data_service - symbol service instance
+	 * @param order_execution_trigger_mode - how order executions should be triggered
+	 */
+	public QFReactor(QForts facade,
+					 QFObjectRegistry registry,
+					 QFSessionSchedule schedule,
+					 AtomicLong seqOrderID,
+					 QFSymbolDataService symbol_data_service,
+					 QFOrderExecutionTriggerMode order_execution_trigger_mode)
+	{
+		this.facade = facade;
+		this.schedule = schedule;
+		this.seqOrderID = seqOrderID;
+		this.symbolDataService = symbol_data_service;
+		this.orderExecutionTriggerMode = order_execution_trigger_mode;
+	}
 	
 	public QFReactor(QForts facade,
 					 QFObjectRegistry registry,
@@ -49,10 +77,12 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 					 AtomicLong seqOrderID,
 					 QFSymbolDataService symbol_data_service)
 	{
-		this.facade = facade;
-		this.schedule = schedule;
-		this.seqOrderID = seqOrderID;
-		this.symbolDataService = symbol_data_service;
+		this(facade, registry, schedule, seqOrderID, symbol_data_service,
+				QFOrderExecutionTriggerMode.USE_LAST_TRADE_EVENT_OF_SECURITY);
+	}
+	
+	public QFOrderExecutionTriggerMode getOrderExecutionTriggerMode() {
+		return orderExecutionTriggerMode;
 	}
 	
 	// This is bad idea. Gain an access to this object thru builder -> app context -> get bean
@@ -144,14 +174,14 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 
 	@Override
 	synchronized public void subscribeRemoteObjects(EditableTerminal terminal) {
-		synchronized ( this ) {
-			if ( this.terminal != null ) {
-				throw new IllegalStateException();
-			}
-			this.terminal = terminal;
+		if ( this.terminal != null ) {
+			throw new IllegalStateException();
 		}
+		this.terminal = terminal;
 		terminal.onSecurityUpdate().addListener(this);
-		terminal.onSecurityLastTrade().addListener(this);
+		if ( orderExecutionTriggerMode == QFOrderExecutionTriggerMode.USE_LAST_TRADE_EVENT_OF_SECURITY ) {
+			terminal.onSecurityLastTrade().addListener(this);
+		}
 		symbolDataService.setTerminal(terminal);
 		symbolDataService.onConnectionStatusChange(true);
 		taskHandler = terminal.schedule(this);
@@ -160,15 +190,12 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 
 	@Override
 	synchronized public void unsubscribeRemoteObjects(EditableTerminal terminal) {
-		TaskHandler th = null;
-		synchronized ( this ) {
-			if ( this.terminal != terminal ) {
-				throw new IllegalStateException();
-			}
-			this.terminal = null;
-			th = taskHandler;
-			taskHandler = null;
+		if ( this.terminal != terminal ) {
+			throw new IllegalStateException();
 		}
+		this.terminal = null;
+		TaskHandler th = taskHandler;
+		taskHandler = null;
 		terminal.onSecurityUpdate().removeListener(this);
 		terminal.onSecurityLastTrade().removeListener(this);
 		symbolDataService.onConnectionStatusChange(false);
@@ -200,7 +227,10 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 			Security security = ((SecurityEvent) event).getSecurity();
 			Terminal terminal = security.getTerminal();
 			if ( event.isType(terminal.onSecurityLastTrade()) ) {
-				onSecurityTradeEvent((SecurityTickEvent) event);			
+				if ( orderExecutionTriggerMode != QFOrderExecutionTriggerMode.USE_LAST_TRADE_EVENT_OF_SECURITY ) {
+					throw new IllegalStateException("Unexpected event in a not event-based L1 source mode");
+				}
+				onSecurityTradeEvent((SecurityTickEvent) event);
 			} else if ( event.isType(terminal.onSecurityUpdate()) ) {
 				onSecurityUpdateEvent((SecurityEvent) event);
 			}
@@ -211,6 +241,32 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable {
 		Tick tick = event.getTick();
 		try {
 			facade.handleOrders(event.getSecurity(), tick.getSize(), tick.getPrice());
+		} catch ( QFTransactionException e ) {
+			logger.error("Unexpected exception: ", e);
+		}
+	}
+	
+	@Override
+	synchronized public void consume(L1Update update) {
+		if ( orderExecutionTriggerMode != QFOrderExecutionTriggerMode.USE_L1UPDATES_WHEN_ORDER_APPEARS ) {
+			throw new IllegalStateException("Unexpected update in a non-consumer L1 source mode");
+		}
+		Symbol symbol = update.getSymbol();
+		Tick tick = update.getTick();
+		if ( terminal == null ) {
+			// This is possible if terminal not started.
+			// If Isn't started then no L1 data processing expected.
+			return; 
+		}
+		if ( ! terminal.isSecurityExists(symbol) ) {
+			// This is weird because this consumer appears on new order creation.
+			// Order must not be created if there was no security.
+			throw new IllegalStateException("Expected security not exists: " + symbol);
+		}
+		try {
+			facade.handleOrders(terminal.getSecurity(symbol), tick.getSize(), tick.getPrice());
+		} catch ( SecurityException e ) {
+			throw new IllegalStateException("Unexpected exception: ", e);
 		} catch ( QFTransactionException e ) {
 			logger.error("Unexpected exception: ", e);
 		}
