@@ -115,6 +115,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 
 		@Override
 		public void setReader(CloseableIterator<L1Update> reader) {
+			lastBlock.clear();
 			this.reader.setReader(reader);
 		}
 
@@ -138,6 +139,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	private final L1UpdateReaderFactory readerFactory;
 	private final IBlockReader blockReader;
 	private int sequenceID = 1;
+	private boolean sequenceFirstUpdate;
 	private CloseableIterator<L1Update> reader;
 	private Instant startTime;
 	
@@ -220,7 +222,8 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 			finishSequence();
 			if ( consumers.size() > 0 ) {
 				Instant _start_time = getStartTime();
-				logger.debug("Starting new sequence for {} at {}", symbol, _start_time);
+				logger.debug("Starting new sequence {} for {} at {}", new Object[] { sequenceID, symbol, _start_time });
+				sequenceFirstUpdate = true;
 				reader = readerFactory.createReader(symbol, _start_time);
 				blockReader.setReader(reader);
 				scheduleUpdate();
@@ -243,16 +246,24 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 	@Override
 	public void consume(List<L1Update> updates, int sequenceID) {
 		List<L1UpdateConsumer> list = null;
+		boolean dump_first_update = false;
 		lock.lock();
 		try {
 			if ( this.sequenceID != sequenceID ) {
+				logger.debug("Skip obsolete updates for sequence {}. Current sequence is: ", sequenceID, this.sequenceID);
 				return; // skip obsolete task
 			}
 			list = new ArrayList<>(consumers);
+			dump_first_update = sequenceFirstUpdate;
+			sequenceFirstUpdate = false;
 		} finally {
 			lock.unlock();
 		}
 		for ( L1Update update : updates ) {
+			if ( dump_first_update ) {
+				dump_first_update = false;
+				logger.debug("First update of sequence {}: {}", sequenceID, update);
+			}
 			for ( L1UpdateConsumer consumer : list ) {
 				consumer.consume(update);
 			}
@@ -278,7 +289,8 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		lock.lock();
 		try {
 			if ( reader != null ) {
-				logger.debug("Sequence finished for {} at {}", symbol, scheduler.getCurrentTime());
+				logger.debug("Sequence {} finished for {} at {}",
+						new Object[] { sequenceID, symbol, scheduler.getCurrentTime() });
 				IOUtils.closeQuietly(reader);
 				reader = null;
 				sequenceID ++;
@@ -295,8 +307,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 			if ( consumers.size() > 0
 			  && (updates = blockReader.readBlock()) != null )
 			{
-				scheduler.schedule(new L1UpdateTask(updates, sequenceID, this),
-						updates.get(0).getTime());
+				scheduler.schedule(new L1UpdateTask(updates, sequenceID, this), updates.get(0).getTime());
 				return;
 			}
 		} catch ( IOException e ) {

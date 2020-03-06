@@ -281,6 +281,64 @@ public class L1UpdateHandlerTest {
 	}
 	
 	@Test
+	public void testTickByTickBlockReader_SetReaderMustResetCache() throws Exception {
+		L1UpdateBuilder
+			builder1 = new L1UpdateBuilder(symbol).withTrade().withTime("2020-03-06T16:33:00Z"),
+			builder2 = new L1UpdateBuilder(symbol).withTrade().withTime("2020-03-06T16:40:00Z");
+		CloseableIterator<L1Update> it1 = new CloseableIteratorStub<>(Arrays.asList(
+				builder1.withPrice("22.17").withSize(10L).buildL1Update(),
+				builder1.withPrice("22.18").withSize(20L).buildL1Update(),
+				builder1.withPrice("22.15").withSize(50L).buildL1Update()
+			));
+		CloseableIterator<L1Update> it2 = new CloseableIteratorStub<>(Arrays.asList(
+				builder2.withPrice("17.33").withSize(15L).buildL1Update(),
+				builder2.withPrice("17.26").withSize(95L).buildL1Update(),
+				builder2.withPrice("17.38").withSize(25L).buildL1Update()
+			));
+		IBlockReader service = new TickByTickBlockReader();
+		service.setReader(it1);
+		
+		List<L1Update> actual = new ArrayList<>();
+		List<L1Update> chunk = service.readBlock();
+		actual.addAll(chunk);
+		service.setReader(it2);
+		for ( ; chunk != null && chunk.size() > 0 ; ) {
+			chunk = service.readBlock();
+			if ( chunk != null ) {
+				actual.addAll(chunk);
+			}
+		}
+		
+		List<L1Update> expected = Arrays.asList(
+				new L1UpdateBuilder(symbol)
+					.withTrade()
+					.withTime("2020-03-06T16:33:00Z")
+					.withPrice("22.17")
+					.withSize(10L)
+					.buildL1Update(),
+				new L1UpdateBuilder(symbol)
+					.withTrade()
+					.withTime("2020-03-06T16:40:00Z")
+					.withPrice("17.33")
+					.withSize(15L)
+					.buildL1Update(),
+				new L1UpdateBuilder(symbol)
+					.withTrade()
+					.withTime("2020-03-06T16:40:00Z")
+					.withPrice("17.26")
+					.withSize(95L)
+					.buildL1Update(),
+				new L1UpdateBuilder(symbol)
+					.withTrade()
+					.withTime("2020-03-06T16:40:00Z")
+					.withPrice("17.38")
+					.withSize(25L)
+					.buildL1Update()
+			);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
 	public void testCtor3() {
 		L1UpdateHandler service = new L1UpdateHandler(symbol, schedulerStub, readerFactoryStub);
 		
