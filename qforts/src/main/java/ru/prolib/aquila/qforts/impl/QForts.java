@@ -62,23 +62,32 @@ public class QForts {
 		transactions.changeBalance(portfolio, value);
 	}
 	
-	public void handleOrders(Security security, CDecimal availableVolume, CDecimal price)
+	public void handleOrders(Security security, CDecimal availableVolume, CDecimal price, String tick_info)
 			throws QFTransactionException
 	{
+		if ( tick_info == null ) {
+			tick_info = "";
+		}
 		if ( liquidityMode == LIQUIDITY_UNLIMITED ) {
 			availableVolume = MAX_LIQUIDITY;
 		}
+		CDecimal start_trade_index = CDecimalBD.ZERO;
 		for ( EditableOrder order : registry.getOrderList(security.getSymbol(), price) ) {
 			CDecimal volume = availableVolume.min(order.getCurrentVolume());
 			if ( volume.compareTo(ZERO) > 0 ) {
+				String order_tick_info = tick_info;
+				if ( liquidityMode == LIQUIDITY_LIMITED ) {
+					order_tick_info = String.format("%s/s%s_c%s", tick_info, start_trade_index, volume);
+				}
 				try {
-					transactions.executeOrder(order, volume, price);
+					transactions.executeOrder(order, volume, price, order_tick_info);
 				} catch ( QFValidationException e ) {
 					transactions.rejectOrder(order, e.getMessage());
 				}
 			}
-			if ( liquidityMode == 0 ) {
+			if ( liquidityMode == LIQUIDITY_LIMITED ) {
 				availableVolume = availableVolume.subtract(volume);
+				start_trade_index = start_trade_index.add(volume);
 				if ( availableVolume.compareTo(ZERO) <= 0 ) {
 					break;
 				}

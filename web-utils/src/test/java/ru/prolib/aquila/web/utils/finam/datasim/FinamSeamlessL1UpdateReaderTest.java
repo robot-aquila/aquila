@@ -46,50 +46,62 @@ public class FinamSeamlessL1UpdateReaderTest {
 		expected.add(builder.withTime("2016-09-22T07:45:11Z")
 			.withPrice("49.76")
 			.withSize(1)
+			.withComment("20160922104511#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-09-22T07:45:11Z")
 			.withPrice("49.78")
 			.withSize(3)
+			.withComment("20160922104511#0000000002")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-09-22T07:45:11Z")
 			.withPrice("50.00")
 			.withSize(1)
+			.withComment("20160922104511#0000000003")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-09-22T07:45:11Z")
 			.withPrice("50.00")
 			.withSize(42)
+			.withComment("20160922104511#0000000004")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-09-22T08:31:38Z")
 			.withPrice("49.18")
 			.withSize(1)
+			.withComment("20160922113138#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-09-22T09:29:39Z")
 			.withPrice("49.16")
 			.withSize(2)
+			.withComment("20160922122939#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-09-22T12:16:24Z")
 			.withPrice("49.69")
 			.withSize(2)
+			.withComment("20160922151624#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-04T07:43:10Z")
 			.withPrice("52.16")
 			.withSize(1)
+			.withComment("20161004104310#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-04T13:13:05Z")
 			.withPrice("52.82")
 			.withSize(1)
+			.withComment("20161004161305#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-04T13:25:12Z")
 			.withPrice("52.97")
 			.withSize(5)
+			.withComment("20161004162512#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-12T07:42:13Z")
 			.withPrice("54.58")
 			.withSize(2)
+			.withComment("20161012104213#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-12T13:15:29Z")
 			.withPrice("54.00")
 			.withSize(1)
+			.withComment("20161012161529#0000000001")
 			.buildL1Update());
 		assertEquals(expected, actual);
 	}
@@ -108,18 +120,22 @@ public class FinamSeamlessL1UpdateReaderTest {
 		expected.add(builder.withTime("2016-10-04T13:13:05Z")
 			.withPrice("52.82")
 			.withSize(1)
+			.withComment("20161004161305#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-04T13:25:12Z")
 			.withPrice("52.97")
 			.withSize(5)
+			.withComment("20161004162512#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-12T07:42:13Z")
 			.withPrice("54.58")
 			.withSize(2)
+			.withComment("20161012104213#0000000001")
 			.buildL1Update());
 		expected.add(builder.withTime("2016-10-12T13:15:29Z")
 			.withPrice("54.00")
 			.withSize(1)
+			.withComment("20161012161529#0000000001")
 			.buildL1Update());
 		assertEquals(expected, actual);
 	}

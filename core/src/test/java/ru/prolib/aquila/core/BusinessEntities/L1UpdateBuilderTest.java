@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 
@@ -194,14 +195,20 @@ public class L1UpdateBuilderTest {
 
 	@Test
 	public void testFromTick() {
-		actual = builder.fromTick(Tick.ofBid(T("2048-01-19T14:15:25Z"),
-				CDecimalBD.of("56.28"),
-				CDecimalBD.of(100L)))
+		actual = builder.fromTick(new Tick(TickType.BID, T("2048-01-19T14:15:25Z"), of("56.28"), of(100L), ZERO, "hello"))
 			.buildL1Update();
 		
-		expected = new L1UpdateImpl(symbol1, Tick.ofBid(T("2048-01-19T14:15:25Z"),
-				CDecimalBD.of("56.28"),
-				CDecimalBD.of(100L)));
+		expected = new L1UpdateImpl(symbol1,
+				new Tick(TickType.BID, T("2048-01-19T14:15:25Z"), of("56.28"), of(100L), ZERO, "hello"));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testWithComment() {
+		assertSame(builder, builder.withComment("zimbabwe"));
+		actual = builder.buildL1Update();
+		
+		expected = new L1UpdateImpl(symbol1, new Tick(TickType.TRADE, Instant.EPOCH, ZERO, ZERO, ZERO, "zimbabwe"));
 		assertEquals(expected, actual);
 	}
 

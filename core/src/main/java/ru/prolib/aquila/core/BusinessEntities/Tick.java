@@ -8,9 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
  * Tick data entity.
  */
 public class Tick implements TStamped {
-	@Deprecated
 	public static final Tick NULL_ASK = Tick.of(TickType.ASK, CDecimalBD.ZERO, CDecimalBD.ZERO);
-	@Deprecated
 	public static final Tick NULL_BID = Tick.of(TickType.BID, CDecimalBD.ZERO, CDecimalBD.ZERO);
 	
 	private final TickType type;
@@ -18,6 +16,7 @@ public class Tick implements TStamped {
 	private final CDecimal price;
 	private final CDecimal size;
 	private final CDecimal value;
+	private final String comment;
 	
 	/**
 	 * Constructor.
@@ -27,14 +26,20 @@ public class Tick implements TStamped {
 	 * @param price - price
 	 * @param size - size of tick
 	 * @param value - tick value (for example in account currency)
+	 * @param comment - comment
 	 */
-	public Tick(TickType type, Instant time, CDecimal price, CDecimal size, CDecimal value) {
+	public Tick(TickType type, Instant time, CDecimal price, CDecimal size, CDecimal value, String comment) {
 		super();
 		this.type = type;
 		this.time = time;
 		this.price = price;
 		this.size = size;
 		this.value = value;
+		this.comment = comment;
+	}
+	
+	public Tick(TickType type, Instant time, CDecimal price, CDecimal size, CDecimal value) {
+		this(type, time, price, size, value, null);
 	}
 
 	@Deprecated
@@ -154,6 +159,10 @@ public class Tick implements TStamped {
 		return value;
 	}
 	
+	public String getComment() {
+		return comment;
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		if ( other == this ) {
@@ -167,6 +176,7 @@ public class Tick implements TStamped {
 				.append(size, o.size)
 				.append(value, o.value)
 				.append(type, o.type)
+				.append(comment, o.comment)
 				.isEquals();
 		} else {
 			return false;
@@ -177,15 +187,17 @@ public class Tick implements TStamped {
 	public String toString() {
 		return type + "[" + getTime() + " " + price
 			+ (size == null ? "" : "x" + size)
-			+ (value == null ? "" : " " + value) + "]";
+			+ (value == null ? "" : " " + value)
+			+ (comment == null ? "" : " note=" + comment)
+			+ "]";
 	}
 	
 	public Tick withPrice(CDecimal newPrice) {
-		return Tick.of(type, time, newPrice, size, value);
+		return new Tick(type, time, newPrice, size, value, comment);
 	}
 	
 	public Tick withTime(Instant newTime) {
-		return Tick.of(type, newTime, price, size, value);
+		return new Tick(type, newTime, price, size, value, comment);
 	}
 
 }

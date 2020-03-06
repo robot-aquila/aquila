@@ -136,12 +136,35 @@ public class QFortsTest {
 		expectedOrders.add(order3);
 		expectedOrders.add(order4);
 		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(expectedOrders);
-		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"));
-		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"));
-		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"));
+		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"), "ICH/s0_c10");
+		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"), "ICH/s10_c5");
+		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"), "ICH/s15_c3");
 		control.replay();
 		
-		service.handleOrders(terminal.getEditableSecurity(symbol1), CDecimalBD.of(18L), CDecimalBD.of("54.26"));
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(18L), of("54.26"), "ICH");
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testHandleOrders_TickInfoIsNull() throws Exception {
+		EditableOrder
+			order1 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(10L)),
+			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, CDecimalBD.of(5L)),
+			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L)),
+			order4 = (EditableOrder) terminal.createOrder(account1, symbol1, OrderAction.BUY, CDecimalBD.of(25L));
+		List<EditableOrder> expectedOrders = new ArrayList<>();
+		expectedOrders.add(order1);
+		expectedOrders.add(order2);
+		expectedOrders.add(order3);
+		expectedOrders.add(order4);
+		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(expectedOrders);
+		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"), "/s0_c10");
+		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"), "/s10_c5");
+		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"), "/s15_c3");
+		control.replay();
+		
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(18L), of("54.26"), null);
 		
 		control.verify();
 	}
@@ -159,14 +182,14 @@ public class QFortsTest {
 		expectedOrders.add(order3);
 		expectedOrders.add(order4);
 		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(expectedOrders);
-		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"));
-		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"));
+		transactionsMock.executeOrder(order1, CDecimalBD.of(10L), CDecimalBD.of("54.26"), "TEX25/s0_c10");
+		transactionsMock.executeOrder(order2,  CDecimalBD.of(5L), CDecimalBD.of("54.26"), "TEX25/s10_c5");
 		expectLastCall().andThrow(new QFValidationException("Test error", QFResult.INSUFFICIENT_FUNDS));
 		transactionsMock.rejectOrder(order2, "Test error");
-		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"));
+		transactionsMock.executeOrder(order3,  CDecimalBD.of(3L), CDecimalBD.of("54.26"), "TEX25/s15_c3");
 		control.replay();
 		
-		service.handleOrders(terminal.getEditableSecurity(symbol1), CDecimalBD.of(18L), CDecimalBD.of("54.26"));
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(18L), of("54.26"), "TEX25");
 		
 		control.verify();
 	}
@@ -179,12 +202,12 @@ public class QFortsTest {
 			order2 = (EditableOrder) terminal.createOrder(account2, symbol1, OrderAction.SELL, CDecimalBD.of(5L)),
 			order3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L));
 		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(toList(order1, order2, order3));
-		transactionsMock.executeOrder(order1, of(10L), of("54.26"));
-		transactionsMock.executeOrder(order2,  of(5L), of("54.26"));
-		transactionsMock.executeOrder(order3, of(10L), of("54.26"));
+		transactionsMock.executeOrder(order1, of(10L), of("54.26"), "KAPPA-24");
+		transactionsMock.executeOrder(order2,  of(5L), of("54.26"), "KAPPA-24");
+		transactionsMock.executeOrder(order3, of(10L), of("54.26"), "KAPPA-24");
 		control.replay();
 		
-		service.handleOrders(terminal.getEditableSecurity(symbol1), of(10L), of("54.26"));
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(10L), of("54.26"), "KAPPA-24");
 
 		control.verify();
 	}
@@ -198,13 +221,13 @@ public class QFortsTest {
 			o3 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(20L)),
 			o4 = (EditableOrder) terminal.createOrder(account3, symbol1, OrderAction.BUY, CDecimalBD.of(49088812L));
 		expect(registryMock.getOrderList(symbol1, CDecimalBD.of("54.26"))).andReturn(toList(o1, o2, o3, o4));
-		transactionsMock.executeOrder(o1, of(10L), of("54.26"));
-		transactionsMock.executeOrder(o2,  of(5L), of("54.26"));
-		transactionsMock.executeOrder(o3, of(20L), of("54.26"));
-		transactionsMock.executeOrder(o4, of(49088812L), of("54.26"));
+		transactionsMock.executeOrder(o1, of(10L), of("54.26"), "KZ280");
+		transactionsMock.executeOrder(o2,  of(5L), of("54.26"), "KZ280");
+		transactionsMock.executeOrder(o3, of(20L), of("54.26"), "KZ280");
+		transactionsMock.executeOrder(o4, of(49088812L), of("54.26"), "KZ280");
 		control.replay();
 		
-		service.handleOrders(terminal.getEditableSecurity(symbol1), of(1L), of("54.26"));
+		service.handleOrders(terminal.getEditableSecurity(symbol1), of(1L), of("54.26"), "KZ280");
 
 		control.verify();
 	}

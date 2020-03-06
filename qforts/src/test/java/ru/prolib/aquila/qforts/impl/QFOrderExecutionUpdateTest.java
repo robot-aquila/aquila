@@ -115,6 +115,13 @@ public class QFOrderExecutionUpdateTest {
 	}
 	
 	@Test
+	public void testGetExecutionExternalID() {
+		assertSame(update, update.setExecutionExternalID("tutumbr@gambarino"));
+		
+		assertEquals("tutumbr@gambarino", update.getExecutionExternalID());
+	}
+	
+	@Test
 	public void testGetFinalCurrentVolume_ByInitialAndChangeValues() {
 		assertSame(update, update.setInitialCurrentVolume(CDecimalBD.of(150L)));
 		assertSame(update, update.setChangeCurrentVolume(CDecimalBD.of(-15L)));
@@ -204,6 +211,7 @@ public class QFOrderExecutionUpdateTest {
 			.setExecutionTime(T("2014-01-26T00:00:00Z"))
 			.setExecutionValue(CDecimalBD.of("48.26", RUB))
 			.setExecutionVolume(CDecimalBD.of(10L))
+			.setExecutionExternalID("foo@bar")
 			.setFinalCurrentVolume(CDecimalBD.of(20L))
 			.setFinalExecutedValue(CDecimalBD.of("11.02", RUB))
 			.setFinalizationTime(T("1927-10-03T00:00:00Z"))
@@ -220,6 +228,7 @@ public class QFOrderExecutionUpdateTest {
 			+ "exPr=100.24 "
 			+ "exVol=10 "
 			+ "exVal=48.26 RUB "
+			+ "exEID=foo@bar "
 			+ "currentVolume[i=5 c=null f=20] "
 			+ "executedValue[i=426.00000 RUB c=null f=11.02000 RUB] "
 			+ "finTime=1927-10-03T00:00:00Z "
@@ -243,6 +252,7 @@ public class QFOrderExecutionUpdateTest {
 			.setExecutionTime(T("2014-01-26T00:00:00Z"))
 			.setExecutionValue(CDecimalBD.of("48.26", RUB))
 			.setExecutionVolume(CDecimalBD.of(10L))
+			.setExecutionExternalID("zulu24")
 			.setChangeCurrentVolume(CDecimalBD.of(20L))
 			.setChangeExecutedValue(CDecimalBD.of("11.02", RUB))
 			.setFinalizationTime(T("1927-10-03T00:00:00Z"))
@@ -256,7 +266,8 @@ public class QFOrderExecutionUpdateTest {
 		Variant<Instant> vExTm = new Variant<>(vExSym, T("2014-01-26T00:00:00Z"), T("1997-05-05T00:00:00Z"));
 		Variant<CDecimal> vExVal = new Variant<>(vExTm, CDecimalBD.of("48.26", RUB), CDecimalBD.of("1.50", RUB));
 		Variant<CDecimal> vExVol = new Variant<>(vExVal, CDecimalBD.of(20L), CDecimalBD.of(10L));
-		Variant<CDecimal> vcCurVol = new Variant<>(vExVol, CDecimalBD.of(20L), CDecimalBD.of(15L));
+		Variant<String> vExEID = new Variant<>(vExVol, "zulu24", "foobar");
+		Variant<CDecimal> vcCurVol = new Variant<>(vExEID, CDecimalBD.of(20L), CDecimalBD.of(15L));
 		Variant<CDecimal> vcExVal = new Variant<>(vcCurVol, CDecimalBD.of("11.02", RUB), CDecimalBD.of("11.03", RUB));
 		Variant<Instant> vFinTm = new Variant<>(vcExVal, T("1927-10-03T00:00:00Z"), T("2006-01-01T00:00:00Z"));
 		Variant<OrderStatus> vfSt = new Variant<>(vFinTm, OrderStatus.FILLED, OrderStatus.SENT);
@@ -273,6 +284,7 @@ public class QFOrderExecutionUpdateTest {
 					.setExecutionTime(vExTm.get())
 					.setExecutionValue(vExVal.get())
 					.setExecutionVolume(vExVol.get())
+					.setExecutionExternalID(vExEID.get())
 					.setChangeCurrentVolume(vcCurVol.get())
 					.setChangeExecutedValue(vcExVal.get())
 					.setFinalizationTime(vFinTm.get())
@@ -291,6 +303,7 @@ public class QFOrderExecutionUpdateTest {
 		assertEquals(T("2014-01-26T00:00:00Z"), found.getExecutionTime());
 		assertEquals(CDecimalBD.of("48.26", RUB), found.getExecutionValue());
 		assertEquals(CDecimalBD.of(10L), found.getExecutionVolume());
+		assertEquals("zulu24", found.getExecutionExternalID());
 		assertEquals(CDecimalBD.of(20L), found.getChangeCurrentVolume());
 		assertEquals(CDecimalBD.ofRUB5("11.02"), found.getChangeExecutedValue());
 		assertEquals(T("1927-10-03T00:00:00Z"), found.getFinalizationTime());

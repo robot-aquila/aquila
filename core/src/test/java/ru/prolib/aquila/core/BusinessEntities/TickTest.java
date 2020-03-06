@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 
@@ -39,6 +40,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.ZERO, dummy.getPrice());
 		assertEquals(CDecimalBD.ZERO, dummy.getSize());
 		assertEquals(CDecimalBD.ZERO, dummy.getValue());
+		assertNull(dummy.getComment());
 		
 		dummy = Tick.NULL_BID;
 		assertNotNull(dummy);
@@ -47,6 +49,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.ZERO, dummy.getPrice());
 		assertEquals(CDecimalBD.ZERO, dummy.getSize());
 		assertEquals(CDecimalBD.ZERO, dummy.getValue());
+		assertNull(dummy.getComment());
 	}
 	
 	@Test
@@ -57,6 +60,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("1828.14"), tick.getPrice());
 		assertEquals(CDecimalBD.of(1000L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -67,6 +71,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("26.92"), tick.getPrice());
 		assertEquals(CDecimalBD.of(1205L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -77,6 +82,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("1828.14"), tick.getPrice());
 		assertEquals(CDecimalBD.ZERO, tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -87,6 +93,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("65.17"), tick.getPrice());
 		assertEquals(CDecimalBD.of(150L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -98,6 +105,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("713.45"), tick.getPrice());
 		assertEquals(CDecimalBD.of(820L), tick.getSize());
 		assertEquals(CDecimalBD.ofRUB2("634.02"), tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -108,6 +116,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("814.00"), tick.getPrice());
 		assertEquals(CDecimalBD.of(1000L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -118,6 +127,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("18.34"), tick.getPrice());
 		assertEquals(CDecimalBD.of(450L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -128,6 +138,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("18.29"), tick.getPrice());
 		assertEquals(CDecimalBD.of(580L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -138,6 +149,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("26.954"), tick.getPrice());
 		assertEquals(CDecimalBD.of(280L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 
 	@Test
@@ -148,6 +160,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("13.50"), tick.getPrice());
 		assertEquals(CDecimalBD.of(1450L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -158,6 +171,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("115.02"), tick.getPrice());
 		assertEquals(CDecimalBD.of(120L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -167,6 +181,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("95.19"), tick.getPrice());
 		assertEquals(CDecimalBD.of(400L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 	
 	@Test
@@ -177,6 +192,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("2.12"), tick.getPrice());
 		assertEquals(CDecimalBD.of(40L), tick.getSize());
 		assertEquals(CDecimalBD.ZERO, tick.getValue());
+		assertNull(tick.getComment());
 	}
 
 	@Test
@@ -188,9 +204,10 @@ public class TickTest {
 	
 	@Test
 	public void testEquals() throws Exception {
-		Tick expected = Tick.of(TickType.ASK, time3, CDecimalBD.of("80.34"),
+		Tick expected = new Tick(TickType.ASK, time3, CDecimalBD.of("80.34"),
 				CDecimalBD.of(100L),
-				CDecimalBD.ofUSD2("803400.00"));
+				CDecimalBD.ofUSD2("803400.00"),
+				"Hello, Dolly!");
 		Variant<TickType> vType = new Variant<TickType>()
 				.add(TickType.ASK)
 				.add(TickType.BID)
@@ -210,11 +227,12 @@ public class TickTest {
 		Variant<CDecimal> vValue = new Variant<CDecimal>(vSize)
 				.add(CDecimalBD.ofUSD2("803400.00"))
 				.add(CDecimalBD.ofRUB5("215.4567"));
-		Variant<?> iterator = vValue;
+		Variant<String> vCom = new Variant<>(vValue, "Hello, Dolly!", "foobar");
+		Variant<?> iterator = vCom;
 		int foundCnt = 0;
 		Tick found = null, x = null;
 		do {
-			x = Tick.of(vType.get(), vTime.get(), vPrice.get(), vSize.get(), vValue.get());
+			x = new Tick(vType.get(), vTime.get(), vPrice.get(), vSize.get(), vValue.get(), vCom.get());
 			if ( expected.equals(x) ) {
 				foundCnt ++;
 				found = x;
@@ -226,6 +244,7 @@ public class TickTest {
 		assertEquals(CDecimalBD.of("80.34"), found.getPrice());
 		assertEquals(CDecimalBD.of(100L), found.getSize());
 		assertEquals(CDecimalBD.ofUSD2("803400.00"), found.getValue());
+		assertEquals("Hello, Dolly!", found.getComment());
 	}
 	
 	@Test
@@ -234,7 +253,8 @@ public class TickTest {
 				"TRADE[2013-10-06T15:44:51.123Z 1828.14x1000 0]",
 				"ASK[2015-08-12T08:15:35.526Z 34.15x100 0]",
 				"BID[2015-08-12T08:15:35.526Z 34.15x100 425.95 RUB]",
-				"TRADE[2015-08-12T08:15:35.526Z 34.15x100 425.95 USD]"
+				"TRADE[2015-08-12T08:15:35.526Z 34.15x100 425.95 USD]",
+				"TRADE[2020-03-05T16:07:45.023Z 10.35x200 600.02 RUB note=Test]"
 		};
 		Tick toTest[] = {
 				tick,
@@ -244,7 +264,8 @@ public class TickTest {
 						CDecimalBD.ofRUB2("425.95")),
 				Tick.of(TickType.TRADE,	time3, CDecimalBD.of("34.15"),
 						CDecimalBD.of(100L),
-						CDecimalBD.ofUSD2("425.95"))
+						CDecimalBD.ofUSD2("425.95")),
+				new Tick(TickType.TRADE, T("2020-03-05T16:07:45.023Z"), of("10.35"), of(200L), ofRUB2("600.02"), "Test")
 		};
 		for ( int i = 0; i < expected.length; i ++ ) {
 			assertEquals("At #" + i, expected[i], toTest[i].toString());			
@@ -253,27 +274,28 @@ public class TickTest {
 	
 	@Test
 	public void testWithPrice() {
-		Tick tick = Tick.of(TickType.ASK, time1, CDecimalBD.of("800.24"),
-				CDecimalBD.of(400L),
-				CDecimalBD.ofRUB2("12.48"));
+		Tick tick = new Tick(TickType.ASK, time1, of("800.24"), of(400L), ofRUB2("12.48"), "zoom");
 		Tick newTick = tick.withPrice(CDecimalBD.of("32.48"));
 		assertEquals(TickType.ASK, newTick.getType());
 		assertEquals(time1, newTick.getTime());
 		assertEquals(CDecimalBD.of("32.48"), newTick.getPrice());
 		assertEquals(CDecimalBD.of(400L), newTick.getSize());
 		assertEquals(CDecimalBD.ofRUB2("12.48"), newTick.getValue());
+		assertEquals("zoom", newTick.getComment());
 	}
 	
 	@Test
 	public void testWithTime() {
-		Tick tick = Tick.of(TickType.TRADE, T("1980-05-01T00:10:00Z"),
+		Tick tick = new Tick(TickType.TRADE, T("1980-05-01T00:10:00Z"),
 				CDecimalBD.of("12.34"),
 				CDecimalBD.of(10L),
-				CDecimalBD.ofUSD2("1.00")),
-			expected = Tick.of(TickType.TRADE, T("2006-07-12T13:48:29Z"),
+				CDecimalBD.ofUSD2("1.00"),
+				"zulu24"),
+			expected = new Tick(TickType.TRADE, T("2006-07-12T13:48:29Z"),
 				CDecimalBD.of("12.34"),
 				CDecimalBD.of(10L),
-				CDecimalBD.ofUSD2("1.00"));
+				CDecimalBD.ofUSD2("1.00"),
+				"zulu24");
 		
 		assertEquals(expected, tick.withTime(T("2006-07-12T13:48:29Z")));
 	}

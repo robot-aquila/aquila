@@ -84,9 +84,10 @@ public class QFAssemblerTest {
 			.setExecutionSymbol(symbol1)
 			.setExecutionTime(T("2017-04-18T08:33:00.001Z"))
 			.setExecutionValue(CDecimalBD.ofRUB5("30.70"))
-			.setExecutionVolume(CDecimalBD.of(10L));
+			.setExecutionVolume(CDecimalBD.of(10L))
+			.setExecutionExternalID("TX5268812-T2");
 		OrderExecution expectedExec = new OrderExecutionImpl(terminal, 240L,
-				null, symbol1, OrderAction.SELL, 4429L,
+				"TX5268812-T2", symbol1, OrderAction.SELL, 4429L,
 				T("2017-04-18T08:33:00.001Z"),
 				CDecimalBD.of("15.36"),
 				CDecimalBD.of(10L),

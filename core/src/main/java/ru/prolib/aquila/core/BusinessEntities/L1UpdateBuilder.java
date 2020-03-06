@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
+
 import java.time.Instant;
 
 public class L1UpdateBuilder {
@@ -8,6 +10,8 @@ public class L1UpdateBuilder {
 	private Symbol symbol;
 	private CDecimal price = CDecimalBD.ZERO;
 	private CDecimal size = CDecimalBD.ZERO;
+	private CDecimal value = ZERO;
+	private String comment;
 	
 	public L1UpdateBuilder(Symbol symbol) {
 		this.symbol = symbol;
@@ -74,11 +78,18 @@ public class L1UpdateBuilder {
 		return withSize(CDecimalBD.of(size));
 	}
 	
+	public L1UpdateBuilder withComment(String text) {
+		this.comment = text;
+		return this;
+	}
+	
 	public L1UpdateBuilder fromTick(Tick source) {
 		this.price = source.getPrice();
 		this.size = source.getSize();
 		this.time = source.getTime();
 		this.type = source.getType();
+		this.comment = source.getComment();
+		this.value = source.getValue();
 		return this;
 	}
 	
@@ -92,7 +103,7 @@ public class L1UpdateBuilder {
 		if ( symbol == null ) {
 			throw new IllegalStateException("Undefined symbol");
 		}
-		return new L1UpdateImpl(symbol, Tick.of(type, time, price, size));
+		return new L1UpdateImpl(symbol, new Tick(type, time, price, size, value, comment));
 	}
 
 }

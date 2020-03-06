@@ -95,7 +95,7 @@ public class QFTransactionService {
 		}
 	}
 	
-	public void executeOrder(EditableOrder order, CDecimal volume, CDecimal price)
+	public void executeOrder(EditableOrder order, CDecimal volume, CDecimal price, String tick_info)
 			throws QFTransactionException
 	{
 		EditablePortfolio portfolio = (EditablePortfolio) order.getPortfolio();
@@ -112,6 +112,7 @@ public class QFTransactionService {
 				throw new QFTransactionException("Order not registered: " + order.getID());
 			}
 			QFOrderExecutionUpdate oeu = calculator.executeOrder(order, volume, price);
+			oeu.setExecutionExternalID(tick_info);
 			QFPortfolioChangeUpdate pcu = calculator.changePosition(portfolio, security,
 					oeu.getPositionVolumeChange(), price);
 			int r = validator.canChangePositon(pcu);
@@ -130,6 +131,7 @@ public class QFTransactionService {
 				logger.debug("Execution parameters ----------------------------");
 				logger.debug("Exec. Price: {}", price);
 				logger.debug(" Exec. Vol.: {}", volume);
+				logger.debug("  Tick info: {}", tick_info);
 				
 				QFOrderStatusUpdate osu = calculator.updateOrderStatus(
 						order,

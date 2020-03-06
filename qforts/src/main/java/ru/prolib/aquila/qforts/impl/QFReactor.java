@@ -240,7 +240,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable, L1Upd
 	private void onSecurityTradeEvent(SecurityTickEvent event) {
 		Tick tick = event.getTick();
 		try {
-			facade.handleOrders(event.getSecurity(), tick.getSize(), tick.getPrice());
+			facade.handleOrders(event.getSecurity(), tick.getSize(), tick.getPrice(), tick.getComment());
 		} catch ( QFTransactionException e ) {
 			logger.error("Unexpected exception: ", e);
 		}
@@ -264,7 +264,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable, L1Upd
 			throw new IllegalStateException("Expected security not exists: " + symbol);
 		}
 		try {
-			facade.handleOrders(terminal.getSecurity(symbol), tick.getSize(), tick.getPrice());
+			facade.handleOrders(terminal.getSecurity(symbol), tick.getSize(), tick.getPrice(), tick.getComment());
 		} catch ( SecurityException e ) {
 			throw new IllegalStateException("Unexpected exception: ", e);
 		} catch ( QFTransactionException e ) {

@@ -26,7 +26,7 @@ import ru.prolib.aquila.data.storage.segstor.SegmentMetaData;
 import ru.prolib.aquila.data.storage.segstor.SymbolDaily;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentNotExistsException;
 
-public class FinalL1UpdateSegmentStorageTest {
+public class FinamL1UpdateSegmentStorageTest {
 	private static Symbol symbol1, symbol2, symbol3;
 	private static File root;
 	
@@ -221,14 +221,17 @@ public class FinalL1UpdateSegmentStorageTest {
 		expected.add(builder.withPrice("52.16")
 				.withTime("2016-10-04T07:43:10Z")
 				.withSize(1L)
+				.withComment("20161004104310#0000000001")
 				.buildL1Update());
 		expected.add(builder.withPrice("52.82")
 				.withTime("2016-10-04T13:13:05Z")
 				.withSize(1L)
+				.withComment("20161004161305#0000000001")
 				.buildL1Update());
 		expected.add(builder.withPrice("52.97")
 				.withTime("2016-10-04T13:25:12Z")
 				.withSize(5L)
+				.withComment("20161004162512#0000000001")
 				.buildL1Update());
 		
 		List<L1Update> actual = new ArrayList<>();

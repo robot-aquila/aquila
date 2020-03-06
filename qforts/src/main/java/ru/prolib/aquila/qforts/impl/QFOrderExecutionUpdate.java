@@ -20,6 +20,7 @@ public class QFOrderExecutionUpdate {
 	protected Instant executionTime;
 	protected Instant finalizationTime;
 	protected OrderStatus finalStatus, initialStatus;
+	protected String executionExternalID;
 	
 	public QFOrderExecutionUpdate() {
 		currentVolume = new CDValueTriplet(0);
@@ -106,6 +107,11 @@ public class QFOrderExecutionUpdate {
 		return this;
 	}
 	
+	public QFOrderExecutionUpdate setExecutionExternalID(String value) {
+		executionExternalID = value;
+		return this;
+	}
+	
 	public CDecimal getChangeCurrentVolume() {
 		return currentVolume.getChangeValue();
 	}
@@ -170,6 +176,10 @@ public class QFOrderExecutionUpdate {
 		return executionValue;
 	}
 	
+	public String getExecutionExternalID() {
+		return executionExternalID;
+	}
+	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + "["
@@ -180,6 +190,7 @@ public class QFOrderExecutionUpdate {
 			+ "exPr=" + executionPrice + " "
 			+ "exVol=" + executionVolume + " "
 			+ "exVal=" + executionValue + " "
+			+ "exEID=" + executionExternalID + " "
 			+ "currentVolume" + currentVolume + " "
 			+ "executedValue" + executedValue + " "
 			+ "finTime=" + finalizationTime + " "
@@ -205,6 +216,7 @@ public class QFOrderExecutionUpdate {
 			.append(o.executionSymbol,	executionSymbol)
 			.append(o.executionTime,	executionTime)
 			.append(o.executionValue,	executionValue)
+			.append(o.executionExternalID, executionExternalID)
 			.append(o.currentVolume,	currentVolume)
 			.append(o.executedValue,	executedValue)
 			.append(o.finalizationTime,	finalizationTime)

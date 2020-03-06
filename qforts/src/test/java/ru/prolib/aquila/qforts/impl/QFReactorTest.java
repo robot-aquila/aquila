@@ -38,6 +38,7 @@ import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.BusinessEntities.Tick;
+import ru.prolib.aquila.core.BusinessEntities.TickType;
 import ru.prolib.aquila.core.data.DataProviderStub;
 
 public class QFReactorTest {
@@ -361,11 +362,11 @@ public class QFReactorTest {
 	
 	@Test
 	public void testOnEvent_SecurityLastTrade() throws Exception {
-		facadeMock.handleOrders(security, CDecimalBD.of(2500L), CDecimalBD.of("54.02"));
+		facadeMock.handleOrders(security, of(2500L), of("54.02"), "CHAP01");
 		control.replay();
 		
 		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security,
-				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), CDecimalBD.of("54.02"), CDecimalBD.of(2500L))));
+				null, new Tick(TickType.TRADE, T("2017-04-25T11:25:00Z"), of("54.02"), of(2500L), ZERO, "CHAP01")));
 		
 		control.verify();
 	}
@@ -377,8 +378,7 @@ public class QFReactorTest {
 		eex.expect(IllegalStateException.class);
 		eex.expectMessage("Unexpected event in a not event-based L1 source mode");
 		
-		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security,
-				null, Tick.ofTrade(T("2017-04-25T11:25:00Z"), CDecimalBD.of("54.02"), CDecimalBD.of(2500L))));
+		reactor.onEvent(new SecurityTickEvent(terminal.onSecurityLastTrade(), security, null, null));
 	}
 	
 	@Test
@@ -507,7 +507,7 @@ public class QFReactorTest {
 	@Test
 	public void testConsume_L1Update_TransactionExceptionThrownByFacade() throws Exception {
 		reactor = createAsL1UpdateConsumer();
-		facadeMock.handleOrders(security, of(20L), of(55302L));
+		facadeMock.handleOrders(security, of(20L), of(55302L), "ZAZ15");
 		expectLastCall().andThrow(new QFTransactionException("Test error"));
 		control.replay();
 		reactor.setTerminal(terminal);
@@ -517,6 +517,7 @@ public class QFReactorTest {
 				.withTime("2020-03-02T18:39:00Z")
 				.withPrice(55302L)
 				.withSize(20L)
+				.withComment("ZAZ15")
 				.buildL1Update());
 
 		control.verify();
@@ -525,7 +526,7 @@ public class QFReactorTest {
 	@Test
 	public void testConsume_L1Update_OK() throws Exception {
 		reactor = createAsL1UpdateConsumer();
-		facadeMock.handleOrders(security, of(35L), of("504.12"));
+		facadeMock.handleOrders(security, of(35L), of("504.12"), "BOOZ5");
 		control.replay();
 		reactor.setTerminal(terminal);
 		
@@ -534,6 +535,7 @@ public class QFReactorTest {
 				.withTime("2020-03-02T18:50:00Z")
 				.withPrice("504.12")
 				.withSize(35L)
+				.withComment("BOOZ5")
 				.buildL1Update());
 
 		control.verify();

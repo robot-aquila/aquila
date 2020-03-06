@@ -206,22 +206,25 @@ public class QFTransactionServiceTest {
 				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
-		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
-				.setExecutionAction(OrderAction.BUY)
-				.setExecutionVolume(CDecimalBD.of(10L))
-				.setFinalStatus(OrderStatus.ACTIVE);
 		expect(calculatorMock.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05")))
-			.andReturn(oeuStub);
+			.andReturn(new QFOrderExecutionUpdate()
+					.setExecutionAction(OrderAction.BUY)
+					.setExecutionVolume(CDecimalBD.of(10L))
+					.setFinalStatus(OrderStatus.ACTIVE));
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
 		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(10L), CDecimalBD.of("100.05")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
-		assemblerMock.update(order, oeuStub, 1001L);
+		assemblerMock.update(same(order), eq(new QFOrderExecutionUpdate()
+				.setExecutionAction(OrderAction.BUY)
+				.setExecutionVolume(of(10L))
+				.setExecutionExternalID("TK1245-26")
+				.setFinalStatus(OrderStatus.ACTIVE)), eq(1001L));
 		assemblerMock.update(portfolio, pcuMock);
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05"));
+		service.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05"), "TK1245-26");
 		
 		control.verify();
 	}
@@ -239,22 +242,25 @@ public class QFTransactionServiceTest {
 				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
-		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
-				.setExecutionAction(OrderAction.SELL)
-				.setExecutionVolume(CDecimalBD.of(20L))
-				.setFinalStatus(OrderStatus.ACTIVE);
 		expect(calculatorMock.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14")))
-			.andReturn(oeuStub);
+			.andReturn(new QFOrderExecutionUpdate()
+					.setExecutionAction(OrderAction.SELL)
+					.setExecutionVolume(CDecimalBD.of(20L))
+					.setFinalStatus(OrderStatus.ACTIVE));
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
 		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(-20L), CDecimalBD.of("92.14")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
-		assemblerMock.update(order, oeuStub, 1051L);
+		assemblerMock.update(same(order), eq(new QFOrderExecutionUpdate()
+				.setExecutionAction(OrderAction.SELL)
+				.setExecutionVolume(CDecimalBD.of(20L))
+				.setExecutionExternalID("GI-209")
+				.setFinalStatus(OrderStatus.ACTIVE)), eq(1051L));
 		assemblerMock.update(portfolio, pcuMock);
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14"));
+		service.executeOrder(order, CDecimalBD.of(20L), CDecimalBD.of("92.14"), "GI-209");
 		
 		control.verify();
 	}
@@ -272,7 +278,7 @@ public class QFTransactionServiceTest {
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05"));
+		service.executeOrder(order, CDecimalBD.of(10L), CDecimalBD.of("100.05"), "BARMA-12");
 		
 		control.verify();
 	}
@@ -296,7 +302,7 @@ public class QFTransactionServiceTest {
 			);
 		obj_reg.register(order);
 		
-		service.executeOrder(order, of(20L), of(105000L));
+		service.executeOrder(order, of(20L), of(105000L), "KIB-10092");
 
 		assertEquals(ZERO_RUB2, portfolio.getUsedMargin());
 		assertEquals(ZERO_RUB2, portfolio.getProfitAndLoss());
@@ -327,7 +333,7 @@ public class QFTransactionServiceTest {
 				account, symbol1, OrderAction.BUY, of(20L), of(120000L)
 			);
 		obj_reg.register(order);
-		service.executeOrder(order, of(5L), of(105000L));
+		service.executeOrder(order, of(5L), of(105000L), "ZOB-13-47");
 		
 		assertEquals(ofRUB2( "74687.55"), portfolio.getUsedMargin());
 		assertEquals(ofRUB2( "34137.80"), portfolio.getProfitAndLoss());
@@ -339,7 +345,7 @@ public class QFTransactionServiceTest {
 		assertNull(order.getSystemMessage());
 		assertTrue(obj_reg.isRegistered(order));
 		
-		service.executeOrder(order, of(5L), of(112000L));
+		service.executeOrder(order, of(5L), of(112000L), "ZOB-13-48");
 		
 		// All properties unchanged, except order status and sys. message 
 		assertEquals(ofRUB2( "74687.55"), portfolio.getUsedMargin());
@@ -366,23 +372,26 @@ public class QFTransactionServiceTest {
 				.add(order.getSecurity()))).andReturn(multilockMock);
 		multilockMock.lock();
 		expect(registryMock.isRegistered(order)).andReturn(true);
-		QFOrderExecutionUpdate oeuStub = new QFOrderExecutionUpdate()
-				.setExecutionAction(OrderAction.SELL)
-				.setExecutionVolume(CDecimalBD.of(5L))
-				.setFinalStatus(OrderStatus.FILLED);
 		expect(calculatorMock.executeOrder(order, CDecimalBD.of(5L), CDecimalBD.of("100.05")))
-			.andReturn(oeuStub);
+			.andReturn(new QFOrderExecutionUpdate()
+					.setExecutionAction(OrderAction.SELL)
+					.setExecutionVolume(CDecimalBD.of(5L))
+					.setFinalStatus(OrderStatus.FILLED));
 		QFPortfolioChangeUpdate pcuMock = control.createMock(QFPortfolioChangeUpdate.class);
 		expect(calculatorMock.changePosition(portfolio, security, CDecimalBD.of(-5L), CDecimalBD.of("100.05")))
 			.andReturn(pcuMock);
 		expect(validatorMock.canChangePositon(pcuMock)).andReturn(QFResult.OK);
-		assemblerMock.update(order, oeuStub, 1006L);
+		assemblerMock.update(same(order), eq(new QFOrderExecutionUpdate()
+				.setExecutionAction(OrderAction.SELL)
+				.setExecutionVolume(CDecimalBD.of(5L))
+				.setExecutionExternalID("KIZA12-449")
+				.setFinalStatus(OrderStatus.FILLED)), eq(1006L));
 		assemblerMock.update(portfolio, pcuMock);
 		expect(registryMock.purgeOrder(order)).andReturn(true);
 		multilockMock.unlock();
 		control.replay();
 		
-		service.executeOrder(order, CDecimalBD.of(5L), CDecimalBD.of("100.05"));
+		service.executeOrder(order, CDecimalBD.of(5L), CDecimalBD.of("100.05"), "KIZA12-449");
 		
 		control.verify();
 	}

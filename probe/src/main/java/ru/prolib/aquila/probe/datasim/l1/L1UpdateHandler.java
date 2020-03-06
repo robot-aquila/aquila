@@ -219,7 +219,9 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		try {
 			finishSequence();
 			if ( consumers.size() > 0 ) {
-				reader = readerFactory.createReader(symbol, getStartTime());
+				Instant _start_time = getStartTime();
+				logger.debug("Starting new sequence for {} at {}", symbol, _start_time);
+				reader = readerFactory.createReader(symbol, _start_time);
 				blockReader.setReader(reader);
 				scheduleUpdate();
 			}
@@ -276,6 +278,7 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		lock.lock();
 		try {
 			if ( reader != null ) {
+				logger.debug("Sequence finished for {} at {}", symbol, scheduler.getCurrentTime());
 				IOUtils.closeQuietly(reader);
 				reader = null;
 				sequenceID ++;

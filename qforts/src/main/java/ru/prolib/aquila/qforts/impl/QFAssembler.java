@@ -21,7 +21,7 @@ public class QFAssembler {
 	
 	public void update(EditableOrder order, QFOrderExecutionUpdate update, long executionID) {
 		OrderExecution execution = new OrderExecutionImpl(order.getTerminal(),
-				executionID, null, update.getExecutionSymbol(),
+				executionID, update.getExecutionExternalID(), update.getExecutionSymbol(),
 				update.getExecutionAction(), update.getExecutionOrderID(),
 				update.getExecutionTime(), update.getExecutionPrice(),
 				update.getExecutionVolume(), update.getExecutionValue());
