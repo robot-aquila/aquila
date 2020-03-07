@@ -13,6 +13,7 @@ import ru.prolib.aquila.data.storage.MDStorage;
 import ru.prolib.aquila.data.storage.ohlcv.OHLCVStorageBuilder;
 import ru.prolib.aquila.data.storage.segstor.SymbolDailySegmentStorage;
 import ru.prolib.aquila.probe.datasim.L1UpdateSourceImpl;
+import ru.prolib.aquila.probe.datasim.l1.L1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.finam.datasim.FinamL1UpdateReaderFactory;
 import ru.prolib.aquila.web.utils.finam.segstor.FinamL1UpdateSegmentStorage;
 import ru.prolib.aquila.web.utils.moex.data.MoexData;
@@ -60,6 +61,10 @@ public class FinamData {
 	
 	public MDStorage<TFSymbol, Candle> createCachingOHLCV(File data_dir, File cache_dir) throws DataStorageException {
 		return createCachingOHLCV(data_dir, cache_dir, createMoexPriceScaleDB(data_dir));
+	}
+	
+	public L1UpdateReaderFactory createUpdateReaderFactory(File data_root_dir) {
+		return new FinamL1UpdateReaderFactory(data_root_dir, createMoexPriceScaleDB(data_root_dir));
 	}
 	
 	/**
