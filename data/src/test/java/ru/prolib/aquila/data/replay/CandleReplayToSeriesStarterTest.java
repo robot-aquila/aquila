@@ -15,6 +15,8 @@ import org.junit.Test;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleListener;
+import ru.prolib.aquila.core.data.CandleProvider;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.data.ZTFrame;
@@ -22,7 +24,7 @@ import ru.prolib.aquila.core.data.ZTFrame;
 public class CandleReplayToSeriesStarterTest {
 	private static Symbol symbol = new Symbol("GAZP");
 	private IMocksControl control;
-	private CandleReplayService crsMock;
+	private CandleProvider crsMock;
 	private EditableTSeries<Candle> targetMock;
 	private SubscrHandler shMock;
 	private CandleReplayToSeriesStarter service;
@@ -31,7 +33,7 @@ public class CandleReplayToSeriesStarterTest {
 	@Before
 	public void setUp() throws Exception {
 		control = createStrictControl();
-		crsMock = control.createMock(CandleReplayService.class);
+		crsMock = control.createMock(CandleProvider.class);
 		targetMock = control.createMock(EditableTSeries.class);
 		shMock = control.createMock(SubscrHandler.class);
 		service = new CandleReplayToSeriesStarter(crsMock, symbol, targetMock);

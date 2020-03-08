@@ -29,6 +29,7 @@ import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleBuilder;
+import ru.prolib.aquila.core.data.CandleListener;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.replay.CandleReplayServiceImpl.*;

@@ -7,17 +7,18 @@ import ru.prolib.aquila.core.StarterException;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleProvider;
 import ru.prolib.aquila.core.data.EditableTSeries;
 import ru.prolib.aquila.core.data.TFSymbol;
 
 public class CandleReplayToSeriesStarter implements Starter {
-	private final CandleReplayService service;
+	private final CandleProvider service;
 	private final Symbol symbol;
 	private final EditableTSeries<Candle> target;
 	private final AtomicBoolean started;
 	private SubscrHandler handler;
 	
-	public CandleReplayToSeriesStarter(CandleReplayService service, Symbol symbol, EditableTSeries<Candle> target) {
+	public CandleReplayToSeriesStarter(CandleProvider service, Symbol symbol, EditableTSeries<Candle> target) {
 		this.service = service;
 		this.symbol = symbol;
 		this.target = target;

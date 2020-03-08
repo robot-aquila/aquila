@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleListener;
 import ru.prolib.aquila.core.data.EditableTSeries;
 
 public class CandleReplayToSeries implements CandleListener {

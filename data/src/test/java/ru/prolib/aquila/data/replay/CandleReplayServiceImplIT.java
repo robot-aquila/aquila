@@ -32,6 +32,8 @@ import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
 import ru.prolib.aquila.core.data.Candle;
 import ru.prolib.aquila.core.data.CandleBuilder;
+import ru.prolib.aquila.core.data.CandleListener;
+import ru.prolib.aquila.core.data.CandleProvider;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.core.data.ZTFrame;
 import ru.prolib.aquila.data.storage.DataStorageException;
@@ -227,7 +229,7 @@ public class CandleReplayServiceImplIT {
 	 * Number of iterations is configurable.
 	 */
 	static class TestThread1 extends TestThreadAbstract {
-		protected final CandleReplayService service;
+		protected final CandleProvider service;
 		protected final TFSymbol key;
 		protected final int candle_count;
 		
@@ -235,7 +237,7 @@ public class CandleReplayServiceImplIT {
 				int iteration_count,
 				CountDownLatch start,
 				CountDownLatch finished,
-				CandleReplayService service,
+				CandleProvider service,
 				TFSymbol key,
 				int candle_count)
 		{
@@ -259,14 +261,14 @@ public class CandleReplayServiceImplIT {
 	 * Subscribe and unsubscribe immediately after subscription.
 	 */
 	static class TestThread2 extends TestThreadAbstract {
-		protected final CandleReplayService service;
+		protected final CandleProvider service;
 		protected final TFSymbol key;
 		
 		TestThread2(String name, 
 				int iteration_count,
 				CountDownLatch start,
 				CountDownLatch finished,
-				CandleReplayService service,
+				CandleProvider service,
 				TFSymbol key)
 		{
 			super(name, iteration_count, start, finished);
@@ -288,14 +290,14 @@ public class CandleReplayServiceImplIT {
 	 * The key result is that both listeners receive update because running node operates of copy of listeners.
 	 */
 	static class TestThread3 extends TestThreadAbstract {
-		protected final CandleReplayService service;
+		protected final CandleProvider service;
 		protected final TFSymbol key;
 		
 		TestThread3(String name,
 				int iteration_count,
 				CountDownLatch start,
 				CountDownLatch finished,
-				CandleReplayService service,
+				CandleProvider service,
 				TFSymbol key)
 		{
 			super(name, iteration_count, start, finished);

@@ -23,11 +23,13 @@ import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.data.Candle;
+import ru.prolib.aquila.core.data.CandleListener;
+import ru.prolib.aquila.core.data.CandleProvider;
 import ru.prolib.aquila.core.data.TFSymbol;
 import ru.prolib.aquila.data.storage.DataStorageException;
 import ru.prolib.aquila.data.storage.MDStorage;
 
-public class CandleReplayServiceImpl implements CandleReplayService {
+public class CandleReplayServiceImpl implements CandleProvider {
 	private static final Logger logger;
 	
 	static {

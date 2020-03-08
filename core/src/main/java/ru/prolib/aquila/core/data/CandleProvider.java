@@ -1,8 +1,7 @@
-package ru.prolib.aquila.data.replay;
+package ru.prolib.aquila.core.data;
 
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
-import ru.prolib.aquila.core.data.TFSymbol;
 
-public interface CandleReplayService {
+public interface CandleProvider {
 	SubscrHandler subscribe(TFSymbol key, CandleListener listener);
 }
