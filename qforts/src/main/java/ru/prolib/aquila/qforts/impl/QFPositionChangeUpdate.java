@@ -14,18 +14,19 @@ public class QFPositionChangeUpdate {
 	protected final CDValueTriplet currentPrice, openPrice, profitAndLoss,
 		usedMargin, varMargin, varMarginClose, varMarginInter, accountBalance,
 		volume;
+	protected CDecimal initialTickValue, finalTickValue;
 	
 	public QFPositionChangeUpdate(Account account, Symbol symbol) {
 		this.account = account;
 		this.symbol = symbol;
 		currentPrice = new CDValueTriplet();
 		openPrice = new CDValueTriplet();
-		profitAndLoss = new CDValueTriplet(2, RUB);
-		usedMargin = new CDValueTriplet(2, RUB);
+		profitAndLoss = new CDValueTriplet(5, RUB);
+		usedMargin = new CDValueTriplet(5, RUB);
 		varMargin = new CDValueTriplet(5, RUB);
 		varMarginClose = new CDValueTriplet(5, RUB);
 		varMarginInter = new CDValueTriplet(5, RUB);
-		accountBalance = new CDValueTriplet(2, RUB);
+		accountBalance = new CDValueTriplet(5, RUB);
 		volume = new CDValueTriplet(0);
 	}
 	
@@ -127,6 +128,11 @@ public class QFPositionChangeUpdate {
 		return this;
 	}
 	
+	public QFPositionChangeUpdate setInitialTickValue(CDecimal value) {
+		this.initialTickValue = value;
+		return this;
+	}
+	
 	public QFPositionChangeUpdate setFinalBalance(CDecimal value) {
 		accountBalance.setFinalValue(value);
 		return this;
@@ -169,6 +175,11 @@ public class QFPositionChangeUpdate {
 	
 	public QFPositionChangeUpdate setFinalVolume(CDecimal value) {
 		volume.setFinalValue(value);
+		return this;
+	}
+	
+	public QFPositionChangeUpdate setFinalTickValue(CDecimal value) {
+		finalTickValue = value;
 		return this;
 	}
 	
@@ -239,6 +250,10 @@ public class QFPositionChangeUpdate {
 	public CDecimal getInitialVolume() {
 		return volume.getInitialValue();
 	}
+	
+	public CDecimal getInitialTickValue() {
+		return initialTickValue;
+	}
 
 	public CDecimal getFinalCurrentPrice() {
 		return currentPrice.getFinalValue();
@@ -272,6 +287,10 @@ public class QFPositionChangeUpdate {
 		return volume.getFinalValue();
 	}
 	
+	public CDecimal getFinalTickValue() {
+		return finalTickValue;
+	}
+	
 	@Override
 	public String toString() {
 		return getClass().getSimpleName()
@@ -286,6 +305,9 @@ public class QFPositionChangeUpdate {
 				+ " vmc" + varMarginClose
 				+ " vmi" + varMarginInter
 				+ " vol" + volume
+				+ new StringBuilder()
+					.append(" tv[i=").append(initialTickValue).append(" f=").append(finalTickValue).append("]")
+					.toString()
 				+ "]";
 	}
 	
@@ -310,6 +332,8 @@ public class QFPositionChangeUpdate {
 			.append(o.varMarginClose, varMarginClose)
 			.append(o.varMarginInter, varMarginInter)
 			.append(o.volume, volume)
+			.append(o.initialTickValue, initialTickValue)
+			.append(o.finalTickValue, finalTickValue)
 			.isEquals();
 	}
 

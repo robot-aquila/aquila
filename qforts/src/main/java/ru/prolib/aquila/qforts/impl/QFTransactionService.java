@@ -115,6 +115,7 @@ public class QFTransactionService {
 			oeu.setExecutionExternalID(tick_info);
 			QFPortfolioChangeUpdate pcu = calculator.changePosition(portfolio, security,
 					oeu.getPositionVolumeChange(), price);
+			// TODO: Check that executed value from order update equal to position change value from position update 
 			int r = validator.canChangePositon(pcu);
 			if ( r == QFResult.OK ) {
 				assembler.update(order, oeu, seqExecutionID.incrementAndGet());

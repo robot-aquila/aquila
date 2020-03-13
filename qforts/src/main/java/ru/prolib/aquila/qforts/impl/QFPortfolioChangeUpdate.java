@@ -22,11 +22,11 @@ public class QFPortfolioChangeUpdate {
 	public QFPortfolioChangeUpdate(Account account) {
 		this.account = account;
 		positions = new LinkedHashMap<>();
-		balance = new CDValueTriplet(2, RUB);
-		equity = new CDValueTriplet(2, RUB);
-		freeMargin = new CDValueTriplet(2, RUB);
-		profitAndLoss = new CDValueTriplet(2, RUB);
-		usedMargin = new CDValueTriplet(2, RUB);
+		balance = new CDValueTriplet(5, RUB);
+		equity = new CDValueTriplet(5, RUB);
+		freeMargin = new CDValueTriplet(5, RUB);
+		profitAndLoss = new CDValueTriplet(5, RUB);
+		usedMargin = new CDValueTriplet(5, RUB);
 		varMargin = new CDValueTriplet(5, RUB);
 		varMarginClose = new CDValueTriplet(5, RUB);
 		varMarginInter = new CDValueTriplet(5, RUB);

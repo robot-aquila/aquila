@@ -1,6 +1,7 @@
 package ru.prolib.aquila.qforts.impl;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,32 +91,32 @@ public class QFPortfolioChangeUpdateTest {
 	
 	@Test
 	public void testGetChangeBalance_ByInitialAndFinalValues() {
-		assertSame(update, update.setInitialBalance(CDecimalBD.of("115.01", RUB)));
-		assertSame(update, update.setFinalBalance(CDecimalBD.of("205.34", RUB)));
+		assertSame(update, update.setInitialBalance(ofRUB2("115.01")));
+		assertSame(update, update.setFinalBalance(ofRUB2("205.34")));
 		
-		assertEquals(CDecimalBD.of("90.33", RUB), update.getChangeBalance());
+		assertEquals(ofRUB5("90.33"), update.getChangeBalance());
 	}
 
 	@Test
 	public void testGetChangeBalance_ByChangeValue() {
-		assertSame(update, update.setChangeBalance(CDecimalBD.of("982.00", RUB)));
+		assertSame(update, update.setChangeBalance(ofRUB2("982.00")));
 		
-		assertEquals(CDecimalBD.of("982.00", RUB), update.getChangeBalance());
+		assertEquals(ofRUB5("982.00"), update.getChangeBalance());
 	}
 
 	@Test
 	public void testGetChangeEquity_ByInitialAndFinalValues() {
-		assertSame(update, update.setInitialEquity(CDecimalBD.of("115.01", RUB)));
-		assertSame(update, update.setFinalEquity(CDecimalBD.of("205.34", RUB)));
+		assertSame(update, update.setInitialEquity(CDecimalBD.ofRUB2("115.01")));
+		assertSame(update, update.setFinalEquity(CDecimalBD.ofRUB2("205.34")));
 		
-		assertEquals(CDecimalBD.of("90.33", RUB), update.getChangeEquity());
+		assertEquals(CDecimalBD.ofRUB5("90.33"), update.getChangeEquity());
 	}
 
 	@Test
 	public void testGetChangeEquity_ByChangeValue() {
 		assertSame(update, update.setChangeEquity(CDecimalBD.of("982.00", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00", RUB), update.getChangeEquity());
+		assertEquals(CDecimalBD.ofRUB5("982.00"), update.getChangeEquity());
 	}
 
 	@Test
@@ -123,14 +124,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialFreeMargin(CDecimalBD.of("115.01", RUB)));
 		assertSame(update, update.setFinalFreeMargin(CDecimalBD.of("205.34", RUB)));
 		
-		assertEquals(CDecimalBD.of("90.33", RUB), update.getChangeFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("90.33"), update.getChangeFreeMargin());
 	}
 
 	@Test
 	public void testGetChangeFreeMargin_ByChangeValue() {
 		assertSame(update, update.setChangeFreeMargin(CDecimalBD.of("982.00", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00", RUB), update.getChangeFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("982.00"), update.getChangeFreeMargin());
 	}
 
 	@Test
@@ -138,14 +139,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialProfitAndLoss(CDecimalBD.of("115.01", RUB)));
 		assertSame(update, update.setFinalProfitAndLoss(CDecimalBD.of("205.34", RUB)));
 		
-		assertEquals(CDecimalBD.of("90.33", RUB), update.getChangeProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("90.33"), update.getChangeProfitAndLoss());
 	}
 
 	@Test
 	public void testGetChangeProfitAndLoss_ByChangeValue() {
 		assertSame(update, update.setChangeProfitAndLoss(CDecimalBD.of("982.00", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00", RUB), update.getChangeProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("982.00"), update.getChangeProfitAndLoss());
 	}
 
 	@Test
@@ -153,14 +154,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialUsedMargin(CDecimalBD.of("115.01", RUB)));
 		assertSame(update, update.setFinalUsedMargin(CDecimalBD.of("205.34", RUB)));
 		
-		assertEquals(CDecimalBD.of("90.33", RUB), update.getChangeUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("90.33"), update.getChangeUsedMargin());
 	}
 
 	@Test
 	public void testGetChangeUsedMargin_ByChangeValue() {
 		assertSame(update, update.setChangeUsedMargin(CDecimalBD.of("982.00", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00", RUB), update.getChangeUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("982.00"), update.getChangeUsedMargin());
 	}
 
 	@Test
@@ -168,14 +169,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialVarMargin(CDecimalBD.of("115.01", RUB)));
 		assertSame(update, update.setFinalVarMargin(CDecimalBD.of("205.34", RUB)));
 		
-		assertEquals(CDecimalBD.of("90.33000", RUB), update.getChangeVarMargin());
+		assertEquals(CDecimalBD.ofRUB5("90.33000"), update.getChangeVarMargin());
 	}
 
 	@Test
 	public void testGetChangeVarMargin_ByChangeValue() {
 		assertSame(update, update.setChangeVarMargin(CDecimalBD.of("982.00", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00000", RUB), update.getChangeVarMargin());
+		assertEquals(CDecimalBD.ofRUB5("982.00000"), update.getChangeVarMargin());
 	}
 
 	@Test
@@ -183,14 +184,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialVarMarginClose(CDecimalBD.of("115.01", RUB)));
 		assertSame(update, update.setFinalVarMarginClose(CDecimalBD.of("205.34", RUB)));
 		
-		assertEquals(CDecimalBD.of("90.33000", RUB), update.getChangeVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5("90.33000"), update.getChangeVarMarginClose());
 	}
 
 	@Test
 	public void testGetChangeVarMarginClose_ByChangeValue() {
 		assertSame(update, update.setChangeVarMarginClose(CDecimalBD.of("982", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00000", RUB), update.getChangeVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5("982.00000"), update.getChangeVarMarginClose());
 	}
 
 	@Test
@@ -198,14 +199,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialVarMarginInter(CDecimalBD.of("115.01", RUB)));
 		assertSame(update, update.setFinalVarMarginInter(CDecimalBD.of("205.34", RUB)));
 		
-		assertEquals(CDecimalBD.of("90.33000", RUB), update.getChangeVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5("90.33000"), update.getChangeVarMarginInter());
 	}
 
 	@Test
 	public void testGetChangeVarMarginInter_ByChangeValue() {
 		assertSame(update, update.setChangeVarMarginInter(CDecimalBD.of("982", RUB)));
 		
-		assertEquals(CDecimalBD.of("982.00000", RUB), update.getChangeVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5("982.00000"), update.getChangeVarMarginInter());
 	}
 	
 	@Test
@@ -213,14 +214,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialBalance(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeBalance(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05", RUB), update.getFinalBalance());
+		assertEquals(CDecimalBD.ofRUB5("84.05"), update.getFinalBalance());
 	}
 	
 	@Test
 	public void testGetFinalBalance_ByFinalValue() {
 		assertSame(update, update.setFinalBalance(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98", RUB), update.getFinalBalance());
+		assertEquals(CDecimalBD.ofRUB5("76.98"), update.getFinalBalance());
 	}
 
 	@Test
@@ -228,14 +229,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialEquity(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeEquity(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05", RUB), update.getFinalEquity());
+		assertEquals(CDecimalBD.ofRUB5("84.05"), update.getFinalEquity());
 	}
 	
 	@Test
 	public void testGetFinalEquity_ByFinalValue() {
 		assertSame(update, update.setFinalEquity(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98", RUB), update.getFinalEquity());
+		assertEquals(CDecimalBD.ofRUB5("76.98"), update.getFinalEquity());
 	}
 
 	@Test
@@ -243,14 +244,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialFreeMargin(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeFreeMargin(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05", RUB), update.getFinalFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("84.05"), update.getFinalFreeMargin());
 	}
 	
 	@Test
 	public void testGetFinalFreeMargin_ByFinalValue() {
 		assertSame(update, update.setFinalFreeMargin(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98", RUB), update.getFinalFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("76.98"), update.getFinalFreeMargin());
 	}
 
 	@Test
@@ -258,14 +259,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialProfitAndLoss(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeProfitAndLoss(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05", RUB), update.getFinalProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("84.05"), update.getFinalProfitAndLoss());
 	}
 	
 	@Test
 	public void testGetFinalProfitAndLoss_ByFinalValue() {
 		assertSame(update, update.setFinalProfitAndLoss(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98", RUB), update.getFinalProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("76.98"), update.getFinalProfitAndLoss());
 	}
 
 	@Test
@@ -273,14 +274,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialUsedMargin(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeUsedMargin(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05", RUB), update.getFinalUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("84.05"), update.getFinalUsedMargin());
 	}
 	
 	@Test
 	public void testGetFinalUsedMargin_ByFinalValue() {
 		assertSame(update, update.setFinalUsedMargin(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98", RUB), update.getFinalUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("76.98"), update.getFinalUsedMargin());
 	}
 	
 	@Test
@@ -288,14 +289,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialVarMargin(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeVarMargin(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05000", RUB), update.getFinalVarMargin());
+		assertEquals(CDecimalBD.ofRUB5("84.05000"), update.getFinalVarMargin());
 	}
 	
 	@Test
 	public void testGetFinalVarMargin_ByFinalValue() {
 		assertSame(update, update.setFinalVarMargin(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98000", RUB), update.getFinalVarMargin());
+		assertEquals(CDecimalBD.ofRUB5("76.98000"), update.getFinalVarMargin());
 	}
 
 	@Test
@@ -303,14 +304,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialVarMarginClose(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeVarMarginClose(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05000", RUB), update.getFinalVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5("84.05000"), update.getFinalVarMarginClose());
 	}
 	
 	@Test
 	public void testGetFinalVarMarginClose_ByFinalValue() {
 		assertSame(update, update.setFinalVarMarginClose(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98000", RUB), update.getFinalVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5("76.98000"), update.getFinalVarMarginClose());
 	}
 
 	@Test
@@ -318,14 +319,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setInitialVarMarginInter(CDecimalBD.of("86.19", RUB)));
 		assertSame(update, update.setChangeVarMarginInter(CDecimalBD.of("-2.14", RUB)));
 		
-		assertEquals(CDecimalBD.of("84.05000", RUB), update.getFinalVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5("84.05000"), update.getFinalVarMarginInter());
 	}
 	
 	@Test
 	public void testGetFinalVarMarginInter_ByFinalValue() {
 		assertSame(update, update.setFinalVarMarginInter(CDecimalBD.of("76.98", RUB)));
 		
-		assertEquals(CDecimalBD.of("76.98000", RUB), update.getFinalVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5("76.98000"), update.getFinalVarMarginInter());
 	}
 	
 	@Test
@@ -333,14 +334,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeBalance(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalBalance(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98", RUB), update.getInitialBalance());
+		assertEquals(CDecimalBD.ofRUB5("10906.98"), update.getInitialBalance());
 	}
 	
 	@Test
 	public void testGetInitialBalance_ByInitialValue() {
 		assertSame(update, update.setInitialBalance(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15", RUB), update.getInitialBalance());
+		assertEquals(CDecimalBD.ofRUB5("48.15"), update.getInitialBalance());
 	}
 
 	@Test
@@ -348,14 +349,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeEquity(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalEquity(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98", RUB), update.getInitialEquity());
+		assertEquals(CDecimalBD.ofRUB5("10906.98"), update.getInitialEquity());
 	}
 	
 	@Test
 	public void testGetInitialEquity_ByInitialValue() {
 		assertSame(update, update.setInitialEquity(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15", RUB), update.getInitialEquity());
+		assertEquals(CDecimalBD.ofRUB5("48.15"), update.getInitialEquity());
 	}
 	
 	@Test
@@ -363,14 +364,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeFreeMargin(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalFreeMargin(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98", RUB), update.getInitialFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("10906.98"), update.getInitialFreeMargin());
 	}
 	
 	@Test
 	public void testGetInitialFreeMargin_ByInitialValue() {
 		assertSame(update, update.setInitialFreeMargin(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15", RUB), update.getInitialFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("48.15"), update.getInitialFreeMargin());
 	}
 	
 	@Test
@@ -378,14 +379,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeProfitAndLoss(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalProfitAndLoss(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98", RUB), update.getInitialProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("10906.98"), update.getInitialProfitAndLoss());
 	}
 	
 	@Test
 	public void testGetInitialProfitAndLoss_ByInitialValue() {
 		assertSame(update, update.setInitialProfitAndLoss(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15", RUB), update.getInitialProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("48.15"), update.getInitialProfitAndLoss());
 	}
 
 	@Test
@@ -393,14 +394,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeUsedMargin(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalUsedMargin(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98", RUB), update.getInitialUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("10906.98"), update.getInitialUsedMargin());
 	}
 	
 	@Test
 	public void testGetInitialUsedMargin_ByInitialValue() {
 		assertSame(update, update.setInitialUsedMargin(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15", RUB), update.getInitialUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("48.15"), update.getInitialUsedMargin());
 	}
 
 	@Test
@@ -408,14 +409,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeVarMargin(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalVarMargin(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98000", RUB), update.getInitialVarMargin());
+		assertEquals(CDecimalBD.ofRUB5("10906.98000"), update.getInitialVarMargin());
 	}
 	
 	@Test
 	public void testGetInitialVarMargin_ByInitialValue() {
 		assertSame(update, update.setInitialVarMargin(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15000", RUB), update.getInitialVarMargin());
+		assertEquals(CDecimalBD.ofRUB5("48.15000"), update.getInitialVarMargin());
 	}
 
 	@Test
@@ -423,14 +424,14 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeVarMarginClose(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalVarMarginClose(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98000", RUB), update.getInitialVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5("10906.98000"), update.getInitialVarMarginClose());
 	}
 	
 	@Test
 	public void testGetInitialVarMarginClose_ByInitialValue() {
 		assertSame(update, update.setInitialVarMarginClose(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15000", RUB), update.getInitialVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5("48.15000"), update.getInitialVarMarginClose());
 	}
 
 	@Test
@@ -438,43 +439,43 @@ public class QFPortfolioChangeUpdateTest {
 		assertSame(update, update.setChangeVarMarginInter(CDecimalBD.of("-872.98", RUB)));
 		assertSame(update, update.setFinalVarMarginInter(CDecimalBD.of("10034", RUB)));
 		
-		assertEquals(CDecimalBD.of("10906.98000", RUB), update.getInitialVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5("10906.98000"), update.getInitialVarMarginInter());
 	}
 	
 	@Test
 	public void testGetInitialVarMarginInter_ByInitialValue() {
 		assertSame(update, update.setInitialVarMarginInter(CDecimalBD.of("48.15", RUB)));
 		
-		assertEquals(CDecimalBD.of("48.15000", RUB), update.getInitialVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5("48.15000"), update.getInitialVarMarginInter());
 	}
 
 	@Test
 	public void testToString() {
-		update.setInitialBalance(CDecimalBD.of("10000", RUB))
-			.setFinalBalance(CDecimalBD.of("11000", RUB))
-			.setChangeEquity(CDecimalBD.of("500", RUB))
-			.setFinalEquity(CDecimalBD.of("800", RUB))
-			.setInitialFreeMargin(CDecimalBD.of("256", RUB))
-			.setFinalFreeMargin(CDecimalBD.of("300", RUB))
-			.setChangeProfitAndLoss(CDecimalBD.of("-582.72", RUB))
-			.setFinalProfitAndLoss(CDecimalBD.of("995.11", RUB))
-			.setInitialUsedMargin(CDecimalBD.of("504.08", RUB))
-			.setFinalUsedMargin(CDecimalBD.of("507.12", RUB))
-			.setInitialVarMargin(CDecimalBD.of("12.28601", RUB))
-			.setFinalVarMargin(CDecimalBD.of("9.15000", RUB))
-			.setInitialVarMarginClose(CDecimalBD.of("44.98002", RUB))
-			.setFinalVarMarginClose(CDecimalBD.of("9.46012", RUB))
-			.setInitialVarMarginInter(CDecimalBD.of("0.01012", RUB))
-			.setChangeVarMarginInter(CDecimalBD.of("1.00000", RUB))
+		update.setInitialBalance(CDecimalBD.ofRUB5("10000"))
+			.setFinalBalance(CDecimalBD.ofRUB5("11000"))
+			.setChangeEquity(CDecimalBD.ofRUB5("500"))
+			.setFinalEquity(CDecimalBD.ofRUB5("800"))
+			.setInitialFreeMargin(CDecimalBD.ofRUB5("256"))
+			.setFinalFreeMargin(CDecimalBD.ofRUB5("300"))
+			.setChangeProfitAndLoss(CDecimalBD.ofRUB5("-582.72"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB5("995.11"))
+			.setInitialUsedMargin(CDecimalBD.ofRUB5("504.08"))
+			.setFinalUsedMargin(CDecimalBD.ofRUB5("507.12"))
+			.setInitialVarMargin(CDecimalBD.ofRUB5("12.28601"))
+			.setFinalVarMargin(CDecimalBD.ofRUB5("9.15000"))
+			.setInitialVarMarginClose(CDecimalBD.ofRUB5("44.98002"))
+			.setFinalVarMarginClose(CDecimalBD.ofRUB5("9.46012"))
+			.setInitialVarMarginInter(CDecimalBD.ofRUB5("0.01012"))
+			.setChangeVarMarginInter(CDecimalBD.ofRUB5("1.00000"))
 			.getOrCreatePositionUpdate(symbol1)
 				.setChangeCurrentPrice(CDecimalBD.of("14.01"));
 		
 		String expected = "QFPortfolioChangeUpdate[a=TEST1"
-				+ " bal[i=10000.00 RUB c=null f=11000.00 RUB]"
-				+ " eq[i=null c=500.00 RUB f=800.00 RUB]"
-				+ " fm[i=256.00 RUB c=null f=300.00 RUB]"
-				+ " pl[i=null c=-582.72 RUB f=995.11 RUB]"
-				+ " um[i=504.08 RUB c=null f=507.12 RUB]"
+				+ " bal[i=10000.00000 RUB c=null f=11000.00000 RUB]"
+				+ " eq[i=null c=500.00000 RUB f=800.00000 RUB]"
+				+ " fm[i=256.00000 RUB c=null f=300.00000 RUB]"
+				+ " pl[i=null c=-582.72000 RUB f=995.11000 RUB]"
+				+ " um[i=504.08000 RUB c=null f=507.12000 RUB]"
 				+ " vm[i=12.28601 RUB c=null f=9.15000 RUB]"
 				+ " vmc[i=44.98002 RUB c=null f=9.46012 RUB]"
 				+ " vmi[i=0.01012 RUB c=1.00000 RUB f=null]"
@@ -491,45 +492,27 @@ public class QFPortfolioChangeUpdateTest {
 	
 	@Test
 	public void testEquals() {
-		update.setChangeBalance(CDecimalBD.of("12", RUB))
-			.setChangeEquity(CDecimalBD.of("1", RUB))
-			.setChangeFreeMargin(CDecimalBD.of("15.02", RUB))
-			.setChangeProfitAndLoss(CDecimalBD.of("408", RUB))
-			.setChangeUsedMargin(CDecimalBD.of("206", RUB))
-			.setChangeVarMargin(CDecimalBD.of("404", RUB))
-			.setChangeVarMarginClose(CDecimalBD.of("48", RUB))
-			.setChangeVarMarginInter(CDecimalBD.of("2.6", RUB))
+		update.setChangeBalance(ofRUB5("12"))
+			.setChangeEquity(ofRUB5("1"))
+			.setChangeFreeMargin(ofRUB5("15.02"))
+			.setChangeProfitAndLoss(ofRUB5("408"))
+			.setChangeUsedMargin(ofRUB5("206"))
+			.setChangeVarMargin(ofRUB5("404"))
+			.setChangeVarMarginClose(ofRUB5("48"))
+			.setChangeVarMarginInter(ofRUB5("2.6"))
 			.getOrCreatePositionUpdate(symbol3)
-				.setChangeBalance(CDecimalBD.of("81", RUB));
+				.setChangeBalance(ofRUB5("81"));
 		
 		Variant<Account> vAcc = new Variant<>(account1, account2);
-		Variant<CDecimal> vcBal = new Variant<CDecimal>(vAcc)
-				.add(CDecimalBD.of("12.00", RUB))
-				.add(CDecimalBD.of("5.16", RUB)),
-			vcEq = new Variant<CDecimal>(vcBal)
-				.add(CDecimalBD.of("1.00", RUB))
-				.add(CDecimalBD.of("0.50", RUB)),
-			vcFrMgn = new Variant<CDecimal>(vcEq)
-				.add(CDecimalBD.of("15.02", RUB))
-				.add(CDecimalBD.of("7.15", RUB)),
-			vcPL = new Variant<CDecimal>(vcFrMgn)
-				.add(CDecimalBD.of("408.00", RUB))
-				.add(CDecimalBD.of("-9.65", RUB)),
-			vcUsMgn = new Variant<CDecimal>(vcPL)
-				.add(CDecimalBD.of("206.00", RUB))
-				.add(CDecimalBD.of("108.32", RUB)),
-			vcVMgn = new Variant<CDecimal>(vcUsMgn)
-				.add(CDecimalBD.of("404.00", RUB))
-				.add(CDecimalBD.of("7.12", RUB)),
-			vcVMgnC = new Variant<CDecimal>(vcVMgn)
-				.add(CDecimalBD.of("48.00", RUB))
-				.add(CDecimalBD.of("84.01", RUB)),
-			vcVMgnI = new Variant<CDecimal>(vcVMgnC)
-				.add(CDecimalBD.of("2.60", RUB))
-				.add(CDecimalBD.of("2.40", RUB)),
-			vpcBal = new Variant<CDecimal>(vcVMgnI)
-				.add(CDecimalBD.of("81.00", RUB))
-				.add(CDecimalBD.of("42.69", RUB));
+		Variant<CDecimal> vcBal = new Variant<>(vAcc, ofRUB5("12.00"), ofRUB5("5.16")),
+			vcEq = new Variant<>(vcBal, ofRUB5("1.00"), ofRUB5("0.50")),
+			vcFrMgn = new Variant<>(vcEq, ofRUB5("15.02"), ofRUB5("7.15")),
+			vcPL = new Variant<>(vcFrMgn, ofRUB5("408.00"), ofRUB5("-9.65")),
+			vcUsMgn = new Variant<>(vcPL, ofRUB5("206.00"), ofRUB5("108.32")),
+			vcVMgn = new Variant<>(vcUsMgn, ofRUB5("404.00"), ofRUB5("7.12")),
+			vcVMgnC = new Variant<>(vcVMgn, ofRUB5("48.00"), ofRUB5("84.01")),
+			vcVMgnI = new Variant<>(vcVMgnC, ofRUB5("2.60"), ofRUB5("2.40")),
+			vpcBal = new Variant<>(vcVMgnI, ofRUB5("81.00"), ofRUB5("42.69"));
 		Variant<Symbol> vpSym = new Variant<>(vpcBal, symbol3, symbol1);
 		Variant<?> iterator = vpSym;
 		int foundCnt = 0;
@@ -552,15 +535,15 @@ public class QFPortfolioChangeUpdateTest {
 			}
 		} while ( iterator.next() );
 		assertEquals(1, foundCnt);
-		assertEquals(CDecimalBD.of( "12.00", RUB), found.getChangeBalance());
-		assertEquals(CDecimalBD.of(  "1.00", RUB), found.getChangeEquity());
-		assertEquals(CDecimalBD.of( "15.02", RUB), found.getChangeFreeMargin());
-		assertEquals(CDecimalBD.of("408.00", RUB), found.getChangeProfitAndLoss());
-		assertEquals(CDecimalBD.of("206.00", RUB), found.getChangeUsedMargin());
-		assertEquals(CDecimalBD.of("404.00000", RUB), found.getChangeVarMargin());
-		assertEquals(CDecimalBD.of( "48.00000", RUB), found.getChangeVarMarginClose());
-		assertEquals(CDecimalBD.of(  "2.60000", RUB), found.getChangeVarMarginInter());
-		assertEquals(CDecimalBD.of( "81.00", RUB), found.getPositionUpdate(symbol3)
+		assertEquals(CDecimalBD.ofRUB5( "12.00"), found.getChangeBalance());
+		assertEquals(CDecimalBD.ofRUB5(  "1.00"), found.getChangeEquity());
+		assertEquals(CDecimalBD.ofRUB5( "15.02"), found.getChangeFreeMargin());
+		assertEquals(CDecimalBD.ofRUB5("408.00"), found.getChangeProfitAndLoss());
+		assertEquals(CDecimalBD.ofRUB5("206.00"), found.getChangeUsedMargin());
+		assertEquals(CDecimalBD.ofRUB5("404.00000"), found.getChangeVarMargin());
+		assertEquals(CDecimalBD.ofRUB5( "48.00000"), found.getChangeVarMarginClose());
+		assertEquals(CDecimalBD.ofRUB5(  "2.60000"), found.getChangeVarMarginInter());
+		assertEquals(CDecimalBD.ofRUB5( "81.00"), found.getPositionUpdate(symbol3)
 				.getChangeBalance());
 	}
 

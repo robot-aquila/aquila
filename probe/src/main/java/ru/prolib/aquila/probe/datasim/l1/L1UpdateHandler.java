@@ -250,7 +250,8 @@ public class L1UpdateHandler implements L1UpdateConsumerEx {
 		lock.lock();
 		try {
 			if ( this.sequenceID != sequenceID ) {
-				logger.debug("Skip obsolete updates for sequence {}. Current sequence is: ", sequenceID, this.sequenceID);
+				logger.debug("Skip obsolete updates for sequence {}. Current sequence is: {}",
+						sequenceID, this.sequenceID);
 				return; // skip obsolete task
 			}
 			list = new ArrayList<>(consumers);

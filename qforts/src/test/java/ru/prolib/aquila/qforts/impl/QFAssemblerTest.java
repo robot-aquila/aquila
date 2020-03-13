@@ -1,6 +1,7 @@
 package ru.prolib.aquila.qforts.impl;
 
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
@@ -158,31 +159,33 @@ public class QFAssemblerTest {
 		update.getOrCreatePositionUpdate(symbol1)
 			.setFinalCurrentPrice(CDecimalBD.of("100.15"))
 			.setFinalOpenPrice(CDecimalBD.of("94.12"))
-			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("156.12"))
-			.setFinalUsedMargin(CDecimalBD.ofRUB2("65.02"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB5("156.12"))
+			.setFinalUsedMargin(CDecimalBD.ofRUB5("65.02"))
 			.setFinalVarMargin(CDecimalBD.ofRUB5("-632"))
 			.setFinalVarMarginClose(CDecimalBD.ofRUB5("-20"))
 			.setFinalVarMarginInter(CDecimalBD.ofRUB5("118.1"))
-			.setFinalVolume(CDecimalBD.of(1L));
+			.setFinalVolume(CDecimalBD.of(1L))
+			.setFinalTickValue(ofRUB5("12.17601"));
 		update.getOrCreatePositionUpdate(symbol2)
 			.setFinalCurrentPrice(CDecimalBD.of("12.82"))
 			.setFinalOpenPrice(CDecimalBD.of("532.81"))
-			.setFinalProfitAndLoss(CDecimalBD.ofRUB2("11.02"))
-			.setFinalUsedMargin(CDecimalBD.ofRUB2("4.1"))
+			.setFinalProfitAndLoss(CDecimalBD.ofRUB5("11.02"))
+			.setFinalUsedMargin(CDecimalBD.ofRUB5("4.1"))
 			.setFinalVarMargin(CDecimalBD.ofRUB5("-9"))
 			.setFinalVarMarginClose(CDecimalBD.ofRUB5("1002"))
 			.setFinalVarMarginInter(CDecimalBD.ofRUB5("18.9"))
-			.setFinalVolume(CDecimalBD.of(10L));
+			.setFinalVolume(CDecimalBD.of(10L))
+			.setFinalTickValue(ofUSD2("14.26"));
 		
 		service.update(portfolio, update);
 		
 		assertEquals(new DeltaUpdateBuilder()
 			.withToken(PortfolioField.CURRENCY, "RUB")
-			.withToken(PortfolioField.BALANCE, CDecimalBD.ofRUB2("10000"))
-			.withToken(PortfolioField.EQUITY, CDecimalBD.ofRUB2("8000"))
-			.withToken(PortfolioField.FREE_MARGIN, CDecimalBD.ofRUB2("2000"))
-			.withToken(PortfolioField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("-200"))
-			.withToken(PortfolioField.USED_MARGIN, CDecimalBD.ofRUB2("150"))
+			.withToken(PortfolioField.BALANCE, CDecimalBD.ofRUB5("10000"))
+			.withToken(PortfolioField.EQUITY, CDecimalBD.ofRUB5("8000"))
+			.withToken(PortfolioField.FREE_MARGIN, CDecimalBD.ofRUB5("2000"))
+			.withToken(PortfolioField.PROFIT_AND_LOSS, CDecimalBD.ofRUB5("-200"))
+			.withToken(PortfolioField.USED_MARGIN, CDecimalBD.ofRUB5("150"))
 			.withToken(QFPortfolioField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("98.25412"))
 			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("1.09882"))
 			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("5.88721"))
@@ -191,21 +194,23 @@ public class QFAssemblerTest {
 			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("100.15"))
 			.withToken(PositionField.CURRENT_VOLUME, CDecimalBD.of(1L))
 			.withToken(PositionField.OPEN_PRICE, CDecimalBD.of("94.12"))
-			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("156.12"))
-			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB2("65.02"))
+			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB5("156.12"))
+			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB5("65.02"))
 			.withToken(QFPositionField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("-632"))
 			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("-20"))
 			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("118.1"))
+			.withToken(QFPositionField.QF_TICK_VALUE, ofRUB5("12.17601"))
 			.buildUpdate().getContents(), portfolio.getPosition(symbol1).getContents());
 		assertEquals(new DeltaUpdateBuilder()
 			.withToken(PositionField.CURRENT_PRICE, CDecimalBD.of("12.82"))
 			.withToken(PositionField.CURRENT_VOLUME, CDecimalBD.of(10L))
 			.withToken(PositionField.OPEN_PRICE, CDecimalBD.of("532.81"))
-			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB2("11.02"))
-			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB2("4.1"))
+			.withToken(PositionField.PROFIT_AND_LOSS, CDecimalBD.ofRUB5("11.02"))
+			.withToken(PositionField.USED_MARGIN, CDecimalBD.ofRUB5("4.1"))
 			.withToken(QFPositionField.QF_VAR_MARGIN, CDecimalBD.ofRUB5("-9"))
 			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, CDecimalBD.ofRUB5("1002"))
 			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, CDecimalBD.ofRUB5("18.9"))
+			.withToken(QFPositionField.QF_TICK_VALUE, ofUSD2("14.26"))
 			.buildUpdate().getContents(), portfolio.getPosition(symbol2).getContents());
 	}
 	

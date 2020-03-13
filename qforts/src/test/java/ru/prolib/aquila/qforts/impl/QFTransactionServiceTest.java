@@ -304,10 +304,10 @@ public class QFTransactionServiceTest {
 		
 		service.executeOrder(order, of(20L), of(105000L), "KIB-10092");
 
-		assertEquals(ZERO_RUB2, portfolio.getUsedMargin());
-		assertEquals(ZERO_RUB2, portfolio.getProfitAndLoss());
-		assertEquals(ofRUB2("100000"), portfolio.getEquity());
-		assertEquals(ofRUB2("100000"), portfolio.getFreeMargin());
+		assertEquals(ZERO_RUB5, portfolio.getUsedMargin());
+		assertEquals(ZERO_RUB5, portfolio.getProfitAndLoss());
+		assertEquals(ofRUB5("100000"), portfolio.getEquity());
+		assertEquals(ofRUB5("100000"), portfolio.getFreeMargin());
 		assertEquals(of(20L), order.getCurrentVolume());
 		assertNull(order.getExecutedValue());
 		assertEquals(OrderStatus.CANCELLED, order.getStatus());
@@ -335,10 +335,10 @@ public class QFTransactionServiceTest {
 		obj_reg.register(order);
 		service.executeOrder(order, of(5L), of(105000L), "ZOB-13-47");
 		
-		assertEquals(ofRUB2( "74687.55"), portfolio.getUsedMargin());
-		assertEquals(ofRUB2( "34137.80"), portfolio.getProfitAndLoss());
-		assertEquals(ofRUB2("134137.80"), portfolio.getEquity());
-		assertEquals(ofRUB2( "59450.25"), portfolio.getFreeMargin());
+		assertEquals(ofRUB5( "74687.55"), portfolio.getUsedMargin());
+		assertEquals(ofRUB5( "34137.80"), portfolio.getProfitAndLoss());
+		assertEquals(ofRUB5("134137.80"), portfolio.getEquity());
+		assertEquals(ofRUB5( "59450.25"), portfolio.getFreeMargin());
 		assertEquals(of(15L), order.getCurrentVolume());
 		assertEquals(ofRUB5("716893.80"), order.getExecutedValue());
 		assertEquals(OrderStatus.PENDING, order.getStatus());
@@ -348,10 +348,10 @@ public class QFTransactionServiceTest {
 		service.executeOrder(order, of(5L), of(112000L), "ZOB-13-48");
 		
 		// All properties unchanged, except order status and sys. message 
-		assertEquals(ofRUB2( "74687.55"), portfolio.getUsedMargin());
-		assertEquals(ofRUB2( "34137.80"), portfolio.getProfitAndLoss());
-		assertEquals(ofRUB2("134137.80"), portfolio.getEquity());
-		assertEquals(ofRUB2( "59450.25"), portfolio.getFreeMargin());
+		assertEquals(ofRUB5( "74687.55"), portfolio.getUsedMargin());
+		assertEquals(ofRUB5( "34137.80"), portfolio.getProfitAndLoss());
+		assertEquals(ofRUB5("134137.80"), portfolio.getEquity());
+		assertEquals(ofRUB5( "59450.25"), portfolio.getFreeMargin());
 		assertEquals(of(15L), order.getCurrentVolume());
 		assertEquals(ofRUB5("716893.80"), order.getExecutedValue());
 		assertEquals(OrderStatus.CANCELLED, order.getStatus());

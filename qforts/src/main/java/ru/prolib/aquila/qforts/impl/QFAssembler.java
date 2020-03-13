@@ -57,6 +57,7 @@ public class QFAssembler {
 			.withToken(QFPositionField.QF_VAR_MARGIN, update.getFinalVarMargin())
 			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE, update.getFinalVarMarginClose())
 			.withToken(QFPositionField.QF_VAR_MARGIN_INTER, update.getFinalVarMarginInter())
+			.withToken(QFPositionField.QF_TICK_VALUE, update.getFinalTickValue())
 			.buildUpdate());
 	}
 	
