@@ -243,12 +243,21 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(true);
 		expect(stateMock.removeNextSlot()).andReturn(slot);
+		//stateMock.beforeExecution(time);
 		stateMock.beforeExecution(time);
 		runnable1Mock.run();
+		stateMock.afterExecution(time);
+		stateMock.waitForThread(time);
+		stateMock.beforeExecution(time);
 		runnable2Mock.run();
+		stateMock.afterExecution(time);
+		stateMock.waitForThread(time);
+		stateMock.beforeExecution(time);
 		runnable3Mock.run();
 		stateMock.afterExecution(time);
 		stateMock.waitForThread(time);
+		//stateMock.afterExecution(time);
+		//stateMock.waitForThread(time);
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		control.replay();
 		
@@ -269,9 +278,11 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.removeNextSlot()).andReturn(slot);
 		stateMock.beforeExecution(time);
 		runnable1Mock.run();
-		stateMock.addTask(task);
 		stateMock.afterExecution(time);
 		stateMock.waitForThread(time);
+		stateMock.addTask(task);
+		//stateMock.afterExecution(time);
+		//stateMock.waitForThread(time);
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		control.replay();
 		
@@ -291,9 +302,9 @@ public class SchedulerWorkingPassTest {
 		expect(stateMock.getCurrentTime()).andReturn(time);
 		expect(stateMock.hasSlotForExecution()).andReturn(true);
 		expect(stateMock.removeNextSlot()).andReturn(slot);
-		stateMock.beforeExecution(time);
-		stateMock.afterExecution(time);
-		stateMock.waitForThread(time);
+		//stateMock.beforeExecution(time);
+		//stateMock.afterExecution(time);
+		//stateMock.waitForThread(time);
 		expect(stateMock.getMode()).andReturn(SchedulerMode.RUN);
 		control.replay();
 		

@@ -91,11 +91,14 @@ public class SchedulerWorkingPass {
 				return false;
 			}
 			SchedulerSlot slot = state.removeNextSlot();
-			state.beforeExecution(curr_time);
+			//state.beforeExecution(curr_time);
 			for ( SchedulerTaskImpl task : slot.getTasks() ) {
 				// DO NOT LOCK THE TASK! WILL CAUSE DEADLOCKS!
 				if ( task.isScheduled() ) {
+					state.beforeExecution(curr_time);
 					task.execute();
+					state.afterExecution(curr_time);
+					state.waitForThread(curr_time);
 					if ( task.isScheduled() ) {
 						// It may be only a periodic and not cancelled task.
 						task.scheduleForNextExecution(curr_time);
@@ -103,9 +106,9 @@ public class SchedulerWorkingPass {
 					}
 				}
 			}
+			//state.afterExecution(curr_time);
+			//state.waitForThread(curr_time);
 			slot.clearTasks();
-			state.afterExecution(curr_time);
-			state.waitForThread(curr_time);
 			if ( state.getMode() == SchedulerMode.RUN_STEP ) {
 				state.switchToWait();
 			}
