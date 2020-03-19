@@ -105,7 +105,10 @@ public class MoexContractUpdateHandler implements UpdateHandler {
 				snapshot = false;
 			}
 		} catch ( IOException e ) {
-			throw new DataStorageException("Error reading local data: ", e);
+			throw new DataStorageException(new StringBuilder()
+					.append("Error reading local data of symbol ")
+					.append(symbol)
+					.append(": ").toString(), e);
 		}
 	}
 	
