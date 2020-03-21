@@ -207,8 +207,11 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		controller.processUpdate(position, time);
 		
 		assertEquals(1, listener.getEventCount());
-		assertContainerEvent(listener.getEvent(0), position.onPositionChange(),
-				position, time, PositionField.CURRENT_VOLUME);
+		assertContainerEventWUT(listener.getEvent(0),
+				PositionEvent.class,
+				position.onPositionChange(),
+				position,
+				time);
 	}
 	
 	@Test
@@ -223,8 +226,11 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		controller.processUpdate(position, time);
 		
 		assertEquals(1, listener.getEventCount());
-		assertContainerEvent(listener.getEvent(0), position.onCurrentPriceChange(),
-				position, time, PositionField.CURRENT_PRICE);
+		assertContainerEventWUT(listener.getEvent(0),
+				PositionEvent.class,
+				position.onCurrentPriceChange(),
+				position,
+				time);
 	}
 
 	@Test
@@ -284,7 +290,11 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		assertFalse(position.onUpdate().hasListeners());
 		assertFalse(position.onUpdate().hasAlternates());
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEventWUT(listenerStub.getEvent(0), position.onClose(), position, T("2017-08-04T18:18:00Z"));
+		assertContainerEventWUT(listenerStub.getEvent(0),
+				PositionEvent.class,
+				position.onClose(),
+				position,
+				T("2017-08-04T18:18:00Z"));
 	}
 	
 	@Test
@@ -302,7 +312,11 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), position.onAvailable(), position, time, 12345);
+		assertContainerEventWUT(listenerStub.getEvent(0),
+				PositionEvent.class,
+				position.onAvailable(),
+				position,
+				time);
 	}
 	
 	@Test
@@ -323,8 +337,20 @@ public class PositionImplTest extends ObservableStateContainerImplTest {
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), position.onUpdate(), position, time1, 12345);
-		assertContainerEvent(listenerStub.getEvent(1), position.onUpdate(), position, time2, 12345);
+		assertContainerEvent(listenerStub.getEvent(0),
+				PositionUpdateEvent.class,
+				position.onUpdate(),
+				position,
+				time1,
+				m(p(12345, null)),
+				m(p(12345, 415)));
+		assertContainerEvent(listenerStub.getEvent(1),
+				PositionUpdateEvent.class,
+				position.onUpdate(),
+				position,
+				time2,
+				m(p(12345, 415)),
+				m(p(12345, 450)));
 	}
 		
 	@Test

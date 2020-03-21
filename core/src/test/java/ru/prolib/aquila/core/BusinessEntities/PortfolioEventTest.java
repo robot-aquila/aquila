@@ -38,14 +38,12 @@ public class PortfolioEventTest {
 		tokens2 = new HashSet<>();
 		tokens2.add(PortfolioField.ASSETS);
 		event = new PortfolioEvent(eventType1, port1, time1);
-		event.setUpdatedTokens(tokens1);
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertSame(eventType1, event.getType());
 		assertSame(port1, event.getPortfolio());
-		assertEquals(tokens1, event.getUpdatedTokens());
 		assertEquals(time1, event.getTime());
 	}
 	
@@ -70,16 +68,12 @@ public class PortfolioEventTest {
 		PortfolioEvent event3 = new PortfolioEvent(eventType1, port2, time1);
 		PortfolioEvent event4 = new PortfolioEvent(eventType2, port2, time1);
 		PortfolioEvent event5 = new PortfolioEvent(eventType1, port1, time1);
-		event5.setUpdatedTokens(tokens1);
 		
 		assertFalse(event.equals(new PortfolioEvent(eventType1, port1, time2)));
 		assertFalse(event.equals(event2));
 		assertFalse(event.equals(event3));
 		assertFalse(event.equals(event4));
 		assertTrue(event.equals(event5));
-		
-		event5.setUpdatedTokens(tokens2);
-		assertFalse(event.equals(event5));
 	}
 
 }

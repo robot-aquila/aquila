@@ -5,10 +5,11 @@ import static  org.easymock.EasyMock.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.Capture;
 import org.easymock.IMocksControl;
@@ -30,10 +31,10 @@ import ru.prolib.aquila.core.BusinessEntities.L1UpdateBuilder;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.Scheduler;
 import ru.prolib.aquila.core.BusinessEntities.SchedulerStub;
-import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
+import ru.prolib.aquila.core.BusinessEntities.SecurityUpdateEvent;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.BusinessEntities.TaskHandler;
@@ -56,14 +57,27 @@ public class QFReactorTest {
 	private SchedulerStub schedulerStub;
 	private QFReactor reactor;
 	
-	static Instant T(String timeString) {
-		return Instant.parse(timeString);
-	}
-	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
+	}
+	
+	static Instant T(String time_string) {
+		return Instant.parse(time_string);
+	}
+	
+	static Pair<Integer, Object> p(int token, Object value) {
+		return Pair.of(token, value);
+	}
+	
+	@SafeVarargs
+	static Map<Integer, Object> m(Pair<Integer, Object> ...pairs) {
+		Map<Integer, Object> r = new HashMap<>();
+		for ( Pair<Integer, Object> pair : pairs ) {
+			r.put(pair.getKey(), pair.getValue());
+		}
+		return r;
 	}
 	
 	QFReactor createWithEventBasedL1Source() {
@@ -383,9 +397,12 @@ public class QFReactorTest {
 	
 	@Test
 	public void testOnEvent_InitialMarginUpdate_SkipIfNotUpdated() throws Exception {
-		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
-		Set<Integer> updatedTokens = new HashSet<>();
-		updatedTokens.add(SecurityField.SETTLEMENT_PRICE);
+		SecurityUpdateEvent e = new SecurityUpdateEvent(terminal.onSecurityUpdate(),
+				security,
+				T("2020-03-21T19:49:00Z"),
+				m(p(SecurityField.SETTLEMENT_PRICE, of("145.12"))),
+				m(p(SecurityField.SETTLEMENT_PRICE, of("146.18")))
+			);
 		control.replay();
 		
 		reactor.onEvent(e);
@@ -402,11 +419,13 @@ public class QFReactorTest {
 	
 	private void testOnEvent_InitialMarginUpdate_AllowedPeriod(int periodID) throws Exception {
 		setUp();
-		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
-		Set<Integer> updatedTokens = new HashSet<>();
-		updatedTokens.add(SecurityField.INITIAL_MARGIN);
-		e.setUpdatedTokens(updatedTokens);
-		expect(scheduleMock.getCurrentPeriod(anyObject())).andReturn(periodID);
+		SecurityUpdateEvent e = new SecurityUpdateEvent(terminal.onSecurityUpdate(),
+				security,
+				T("1998-12-01T20:10:00Z"),
+				m(p(SecurityField.INITIAL_MARGIN, ofRUB2("12.04"))),
+				m(p(SecurityField.INITIAL_MARGIN, ofRUB2("13.98")))
+			);
+		expect(scheduleMock.getCurrentPeriod(T("1998-12-01T20:10:00Z"))).andReturn(periodID);
 		facadeMock.updateMargin(security);
 		control.replay();
 		
@@ -432,10 +451,12 @@ public class QFReactorTest {
 	
 	private void testOnEvent_InitialMarginUpdate_DisallowedPeriod(int periodID) throws Exception {
 		setUp();
-		SecurityEvent e = new SecurityEvent(terminal.onSecurityUpdate(), security, null);
-		Set<Integer> updatedTokens = new HashSet<>();
-		updatedTokens.add(SecurityField.INITIAL_MARGIN);
-		e.setUpdatedTokens(updatedTokens);
+		SecurityUpdateEvent e = new SecurityUpdateEvent(terminal.onSecurityUpdate(),
+				security,
+				null,
+				m(p(SecurityField.INITIAL_MARGIN, ofRUB2("1.02"))),
+				m(p(SecurityField.INITIAL_MARGIN, ofRUB2("1.05")))
+			);
 		expect(scheduleMock.getCurrentPeriod(anyObject())).andReturn(periodID);
 		control.replay();
 		

@@ -2,10 +2,11 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import java.math.RoundingMode;
 import java.time.Instant;
-import java.util.Set;
+import java.util.Map;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCUpdateEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.SecurityParams;
 
 /**
@@ -199,20 +200,33 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	static class SecurityEventFactory implements EventFactory {
 		private final Security object;
 		private final Instant time;
-		private final Set<Integer> updatedTokens;
 		
 		SecurityEventFactory(Security object, Instant time) {
 			this.object = object;
 			this.time = time;
-			this.updatedTokens = object.getUpdatedTokens();
 		}
 		
 		@Override
 		public Event produceEvent(EventType type) {
-			SecurityEvent e = new SecurityEvent(type, object, time);
-			e.setUpdatedTokens(updatedTokens);
-			return e;
+			return new SecurityEvent(type, object, time);
 		}
+	}
+	
+	static class SecurityUpdateEventFactory extends OSCUpdateEventFactory {
+		private final Security security;
+
+		public SecurityUpdateEventFactory(Security security, Instant time,
+				Map<Integer, Object> old_values, Map<Integer, Object> new_values)
+		{
+			super(security, time, old_values, new_values);
+			this.security = security;
+		}
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new SecurityUpdateEvent(type, security, time, oldValues, newValues);
+		}
+		
 	}
 	
 	static class SecurityTickEventFactory implements EventFactory {
@@ -368,6 +382,14 @@ public class SecurityImpl extends ObservableStateContainerImpl implements Editab
 	@Override
 	protected EventFactory createEventFactory(Instant time) {
 		return new SecurityEventFactory(this, time);
+	}
+	
+	@Override
+	protected EventFactory createEventFactory(Instant time,
+			Map<Integer, Object> old_vals,
+			Map<Integer, Object> new_vals)
+	{
+		return new SecurityUpdateEventFactory(this, time, old_vals, new_vals);	
 	}
 	
 	/**

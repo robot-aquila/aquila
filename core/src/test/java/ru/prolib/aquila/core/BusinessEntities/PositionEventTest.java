@@ -37,14 +37,12 @@ public class PositionEventTest {
 		tokens2 = new HashSet<>();
 		tokens2.add(PositionField.PROFIT_AND_LOSS);
 		event = new PositionEvent(eventType1, position1, time1);
-		event.setUpdatedTokens(tokens1);
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertSame(eventType1, event.getType());
 		assertSame(position1, event.getPosition());
-		assertEquals(tokens1, event.getUpdatedTokens());
 	}
 	
 	@Test
@@ -68,16 +66,12 @@ public class PositionEventTest {
 		PositionEvent event3 = new PositionEvent(eventType1, position2, time1);
 		PositionEvent event4 = new PositionEvent(eventType2, position2, time1);
 		PositionEvent event5 = new PositionEvent(eventType1, position1, time1);
-		event5.setUpdatedTokens(tokens1);
 		
 		assertFalse(event.equals(new PositionEvent(eventType1, position1, time2)));
 		assertFalse(event.equals(event2));
 		assertFalse(event.equals(event3));
 		assertFalse(event.equals(event4));
 		assertTrue(event.equals(event5));
-		
-		event5.setUpdatedTokens(tokens2);
-		assertFalse(event.equals(event5));
 	}
 
 }

@@ -1,6 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 import ru.prolib.aquila.core.EventDispatcher;
@@ -11,6 +12,7 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCParams;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCUpdateEventFactory;
 
 /**
  * Observable state container implementation.
@@ -94,15 +96,20 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 		dispatcher.suppressEvents();
 		lock.lock();
 		try {
+			Map<Integer, Object> original_values = getContents();
 			super.update(tokens); // inside the lock is OK in this case
 			if ( hasChanged() ) {
+				Map<Integer, Object> new_values = getUpdatedContents(), old_values = new HashMap<>();
+				for ( Integer key : new_values.keySet() ) {
+					old_values.put(key, original_values.get(key));
+				}
+				
 				Instant time = controller.getCurrentTime(this);
-				EventFactory factory = createEventFactory(time);
-				dispatcher.dispatch(onUpdate, factory);
+				dispatcher.dispatch(onUpdate, createEventFactory(time, old_values, new_values));
 				controller.processUpdate(this, time);
 				if ( ! available && controller.hasMinimalData(this, time) ) {
 					available = true;
-					dispatcher.dispatch(onAvailable, factory);
+					dispatcher.dispatch(onAvailable, createEventFactory(time));
 					controller.processAvailable(this, time);
 				}
 			}
@@ -138,6 +145,21 @@ public class ObservableStateContainerImpl extends UpdatableStateContainerImpl im
 	 */
 	protected EventFactory createEventFactory(Instant time) {
 		return new OSCEventFactory(this, time);
+	}
+	
+	/**
+	 * Create event factory to produce update events.
+	 * <p>
+	 * @param time - time of event
+	 * @param old_values - updated tokens before update
+	 * @param new_values - updated tokens
+	 * @return event factory
+	 */
+	protected EventFactory createEventFactory(Instant time,
+			Map<Integer, Object> old_values,
+			Map<Integer, Object> new_values)
+	{
+		return new OSCUpdateEventFactory(this, time, old_values, new_values);
 	}
 
 }

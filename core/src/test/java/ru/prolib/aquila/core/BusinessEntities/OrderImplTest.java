@@ -352,7 +352,11 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		assertFalse(order.onArchived().hasAlternates());
 		assertNull(order.getTerminal());
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEventWUT(listenerStub.getEvent(0), order.onClose(), order, T("2017-08-04T18:16:00Z"));
+		assertContainerEventWUT(listenerStub.getEvent(0),
+				OrderEvent.class,
+				order.onClose(),
+				order,
+				T("2017-08-04T18:16:00Z"));
 	}
 	
 	@Test
@@ -385,7 +389,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		
 		type.removeListener(listenerStub);
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), type, order, time, OrderField.STATUS);
+		assertContainerEventWUT(listenerStub.getEvent(0), OrderEvent.class, type, order, time);
 	}
 	
 	private void testOrderController_ProcessAvailable_SkipIfStatusEventsDisabled(OrderStatus newStatus,
@@ -430,7 +434,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		
 		type.removeListener(listenerStub);
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEventWUT(listenerStub.getEvent(0), type, order, time);
+		assertContainerEventWUT(listenerStub.getEvent(0), OrderEvent.class, type, order, time);
 	}
 	
 	private void testOrderController_ProcessUpdate_SkipIfNotAvailable(OrderStatus newStatus,
@@ -743,7 +747,7 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), order.onAvailable(), order, time, 12345);
+		assertContainerEventWUT(listenerStub.getEvent(0), OrderEvent.class, order.onAvailable(), order, time);
 	}
 
 	@Test
@@ -766,8 +770,20 @@ public class OrderImplTest extends ObservableStateContainerImplTest {
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), order.onUpdate(), order, time1, 12345);
-		assertContainerEvent(listenerStub.getEvent(1), order.onUpdate(), order, time2, 12345);
+		assertContainerEvent(listenerStub.getEvent(0),
+				OrderUpdateEvent.class,
+				order.onUpdate(),
+				order,
+				time1,
+				m(p(12345, null)),
+				m(p(12345, 415)));
+		assertContainerEvent(listenerStub.getEvent(1),
+				OrderUpdateEvent.class,
+				order.onUpdate(),
+				order,
+				time2,
+				m(p(12345, 415)),
+				m(p(12345, 450)));
 	}
 	
 	/**

@@ -19,10 +19,10 @@ import ru.prolib.aquila.core.BusinessEntities.MDLevel;
 import ru.prolib.aquila.core.BusinessEntities.OrderException;
 import ru.prolib.aquila.core.BusinessEntities.SPRunnable;
 import ru.prolib.aquila.core.BusinessEntities.Security;
-import ru.prolib.aquila.core.BusinessEntities.SecurityEvent;
 import ru.prolib.aquila.core.BusinessEntities.SecurityException;
 import ru.prolib.aquila.core.BusinessEntities.SecurityField;
 import ru.prolib.aquila.core.BusinessEntities.SecurityTickEvent;
+import ru.prolib.aquila.core.BusinessEntities.SecurityUpdateEvent;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandler;
 import ru.prolib.aquila.core.BusinessEntities.SubscrHandlerStub;
 import ru.prolib.aquila.core.BusinessEntities.Symbol;
@@ -223,16 +223,23 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable, L1Upd
 
 	@Override
 	synchronized public void onEvent(Event event) {
-		if ( event instanceof SecurityEvent ) {
-			Security security = ((SecurityEvent) event).getSecurity();
+		if ( event instanceof SecurityUpdateEvent ) {
+			SecurityUpdateEvent e = (SecurityUpdateEvent) event;
+			Security security = e.getSecurity();
+			Terminal terminal = security.getTerminal();
+			if ( event.isType(terminal.onSecurityUpdate()) ) {
+				onSecurityUpdateEvent(e);
+			}
+		} else
+		if ( event instanceof SecurityTickEvent ) {
+			SecurityTickEvent e = (SecurityTickEvent) event;
+			Security security = e.getSecurity();
 			Terminal terminal = security.getTerminal();
 			if ( event.isType(terminal.onSecurityLastTrade()) ) {
 				if ( orderExecutionTriggerMode != QFOrderExecutionTriggerMode.USE_LAST_TRADE_EVENT_OF_SECURITY ) {
 					throw new IllegalStateException("Unexpected event in a not event-based L1 source mode");
 				}
-				onSecurityTradeEvent((SecurityTickEvent) event);
-			} else if ( event.isType(terminal.onSecurityUpdate()) ) {
-				onSecurityUpdateEvent((SecurityEvent) event);
+				onSecurityTradeEvent(e);				
 			}
 		}
 	}
@@ -272,17 +279,16 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable, L1Upd
 		}
 	}
 	
-	private void onSecurityUpdateEvent(SecurityEvent event) {
+	private void onSecurityUpdateEvent(SecurityUpdateEvent event) {
 		if ( ! event.hasChanged(SecurityField.INITIAL_MARGIN) ) {
 			return;
 		}
-		Security security = event.getSecurity();
-		switch ( schedule.getCurrentPeriod(security.getTerminal().getCurrentTime()) ) {
+		switch ( schedule.getCurrentPeriod(event.getTime()) ) {
 		case QFSessionSchedule.PCVM1_1:
 		case QFSessionSchedule.PCVM1_2:
 		case QFSessionSchedule.PCVM2:
 			try {
-				facade.updateMargin(security);
+				facade.updateMargin(event.getSecurity());
 			} catch ( QFTransactionException e ) {
 				logger.error("Unexpected exception: ", e);
 			}

@@ -336,15 +336,11 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		controller.processUpdate(security, time);
 		
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEvent((SecurityEvent) listenerStub.getEvent(0), security.onSessionUpdate(), security, time,
-				SecurityField.LOT_SIZE,
-				SecurityField.TICK_SIZE,
-				SecurityField.TICK_VALUE,
-				SecurityField.INITIAL_MARGIN,
-				SecurityField.OPEN_PRICE,
-				SecurityField.HIGH_PRICE,
-				SecurityField.LOW_PRICE,
-				SecurityField.CLOSE_PRICE);
+		assertContainerEventWUT((SecurityEvent) listenerStub.getEvent(0),
+				SecurityEvent.class,
+				security.onSessionUpdate(),
+				security,
+				time);
 	}
 	
 	@Test
@@ -395,7 +391,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertEquals(expected, security.getBestAsk());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertContainerEventWUT(e, security.onBestAsk(), security, T("2017-08-04T21:05:00Z"));
+		assertContainerEventWUT(e, SecurityEvent.class, security.onBestAsk(), security, T("2017-08-04T21:05:00Z"));
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getTick());
 	}
@@ -414,7 +410,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertNull(security.getBestAsk());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertContainerEventWUT(e, security.onBestAsk(), security, T("2017-08-04T20:03:00Z"));
+		assertContainerEventWUT(e, SecurityEvent.class, security.onBestAsk(), security, T("2017-08-04T20:03:00Z"));
 		assertSame(security, e.getSecurity());
 		assertNull(e.getTick());
 	}
@@ -435,7 +431,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 				CDecimalBD.of(500L));
 		assertEquals(expected, security.getBestBid());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertContainerEventWUT(e, security.onBestBid(), security, T("2017-08-04T21:10:00Z"));
+		assertContainerEventWUT(e, SecurityEvent.class, security.onBestBid(), security, T("2017-08-04T21:10:00Z"));
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getTick());
 	}
@@ -454,7 +450,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		assertNull(security.getBestBid());
 		assertEquals(1, listenerStub.getEventCount());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertContainerEventWUT(e, security.onBestBid(), security, T("2017-08-04T20:03:00Z"));
+		assertContainerEventWUT(e, SecurityEvent.class, security.onBestBid(), security, T("2017-08-04T20:03:00Z"));
 		assertSame(security, e.getSecurity());
 		assertNull(e.getTick());
 	}
@@ -475,7 +471,7 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 				CDecimalBD.of(805L));
 		assertEquals(expected, security.getLastTrade());
 		SecurityTickEvent e = (SecurityTickEvent) listenerStub.getEvent(0);
-		assertContainerEventWUT(e, security.onLastTrade(), security, T("2017-08-04T21:10:00Z"));
+		assertContainerEventWUT(e, SecurityEvent.class, security.onLastTrade(), security, T("2017-08-04T21:10:00Z"));
 		assertSame(security, e.getSecurity());
 		assertEquals(expected, e.getTick());
 	}
@@ -771,7 +767,10 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
 		assertContainerEventWUT((SecurityEvent) listenerStub.getEvent(0),
-				security.onAvailable(), security, time);
+				SecurityEvent.class,
+				security.onAvailable(),
+				security,
+				time);
 	}
 	
 	@Test
@@ -792,8 +791,20 @@ public class SecurityImplTest extends ObservableStateContainerImplTest {
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), security.onUpdate(), security, time1, 12345);
-		assertContainerEvent(listenerStub.getEvent(1), security.onUpdate(), security, time2, 12345);
+		assertContainerEvent(listenerStub.getEvent(0),
+				SecurityUpdateEvent.class,
+				security.onUpdate(),
+				security,
+				time1,
+				m(p(12345, null)),
+				m(p(12345, 415)));
+		assertContainerEvent(listenerStub.getEvent(1),
+				SecurityUpdateEvent.class,
+				security.onUpdate(),
+				security,
+				time2,
+				m(p(12345, 415)),
+				m(p(12345, 450)));
 	}
 	
 	@Test

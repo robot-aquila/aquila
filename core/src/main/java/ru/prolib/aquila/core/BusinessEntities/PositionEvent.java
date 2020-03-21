@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
  * $Id: PositionEvent.java 529 2013-02-19 08:49:04Z whirlwind $
  */
 public class PositionEvent extends OSCEventImpl {
-	private final Position position;
+	protected final Position position;
 
 	public PositionEvent(EventType type, Position position, Instant time) {
 		super(type, position, time);
@@ -42,8 +42,7 @@ public class PositionEvent extends OSCEventImpl {
 		return o.getType() == getType()
 			&& o.position == position
 			&& new EqualsBuilder()
-				.append(o.getTime(), getTime())
-				.append(o.getUpdatedTokens(), getUpdatedTokens())
+				.append(o.time, time)
 				.isEquals();
 	}
 

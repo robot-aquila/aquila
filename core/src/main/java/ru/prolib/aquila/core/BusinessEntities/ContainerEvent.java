@@ -1,7 +1,6 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.util.Set;
 
 import ru.prolib.aquila.core.Event;
 
@@ -16,10 +15,6 @@ public interface ContainerEvent extends Event {
 	 * @return container
 	 */
 	public ObservableStateContainer getContainer();
-	
-	public boolean hasChanged(int token);
-	
-	public Set<Integer> getUpdatedTokens();
 	
 	/**
 	 * Get time of event.

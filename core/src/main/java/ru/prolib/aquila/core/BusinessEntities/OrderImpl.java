@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCUpdateEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParams;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.OrderParamsBuilder;
 
@@ -249,6 +249,14 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 		return new OrderEventFactory(this, time);
 	}
 	
+	@Override
+	protected EventFactory createEventFactory(Instant time,
+			Map<Integer, Object> old_vals,
+			Map<Integer, Object> new_vals)
+	{
+		return new OrderUpdateEventFactory(this, time, old_vals, new_vals);
+	}
+	
 	protected EventFactory createExecutionEventFactory(Instant time, OrderExecution execution) {
 		return new OrderExecutionEventFactory(this, time, execution);
 	}
@@ -325,20 +333,32 @@ public class OrderImpl extends ObservableStateContainerImpl implements EditableO
 	static class OrderEventFactory implements EventFactory {
 		protected final Order order;
 		protected final Instant time;
-		protected final Set<Integer> updatedTokens;
 		
 		OrderEventFactory(Order order, Instant time) {
 			super();
 			this.order = order;
 			this.time = time;
-			this.updatedTokens = order.getUpdatedTokens();
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			OrderEvent e = new OrderEvent(type, order, time);
-			e.setUpdatedTokens(updatedTokens);
-			return e;
+			return new OrderEvent(type, order, time);
+		}
+		
+	}
+	
+	static class OrderUpdateEventFactory extends OSCUpdateEventFactory {
+		protected final Order order;
+
+		public OrderUpdateEventFactory(Order order, Instant time,
+				Map<Integer, Object> old_values, Map<Integer, Object> new_values) {
+			super(order, time, old_values, new_values);
+			this.order = order;
+		}
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new OrderUpdateEvent(type, order, time, oldValues, newValues);
 		}
 		
 	}

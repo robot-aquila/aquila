@@ -1,10 +1,11 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
 import java.time.Instant;
-import java.util.Set;
+import java.util.Map;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCUpdateEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PositionParams;
 
 /**
@@ -111,6 +112,11 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 		return new PositionEventFactory(this, time);
 	}
 	
+	@Override
+	protected EventFactory createEventFactory(Instant time, Map<Integer, Object> oldVals, Map<Integer, Object> newVals) {
+		return new PositionUpdateEventFactory(this, time, oldVals, newVals);
+	}
+	
 	public static class PositionController implements OSCController {
 		
 		@Override
@@ -146,20 +152,35 @@ public class PositionImpl extends ObservableStateContainerImpl implements Editab
 	static class PositionEventFactory implements EventFactory {
 		private final Position position;
 		private final Instant time;
-		private final Set<Integer> updatedTokens;
 		
 		PositionEventFactory(Position position, Instant time) {
 			super();
 			this.position = position;
 			this.time = time;
-			this.updatedTokens = position.getUpdatedTokens();
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			PositionEvent e = new PositionEvent(type, position, time);
-			e.setUpdatedTokens(updatedTokens);
-			return e;
+			return new PositionEvent(type, position, time);
+		}
+		
+	}
+	
+	static class PositionUpdateEventFactory extends OSCUpdateEventFactory {
+		private final Position position;
+
+		public PositionUpdateEventFactory(Position position,
+				Instant time,
+				Map<Integer, Object> old_values,
+				Map<Integer, Object> new_values)
+		{
+			super(position, time, old_values, new_values);
+			this.position = position;
+		}
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new PositionUpdateEvent(type, position, time, oldValues, newValues);
 		}
 		
 	}

@@ -174,7 +174,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		assertTrue(portfolio.onClose().isAlternateType(type));
 		assertTrue(portfolio.onClose().isListener(listenerStub));
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEventWUT(listenerStub.getEvent(0), portfolio.onClose(), portfolio, T("2017-08-04T18:15:00Z"));
+		assertContainerEventWUT(listenerStub.getEvent(0),
+				PortfolioEvent.class,
+				portfolio.onClose(),
+				portfolio,
+				T("2017-08-04T18:15:00Z"));
 	}
 	
 	@Test
@@ -433,7 +437,11 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 		
 		getMocksControl().verify();
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), portfolio.onAvailable(), portfolio, time, 12345);
+		assertContainerEventWUT(listenerStub.getEvent(0),
+				PortfolioEvent.class,
+				portfolio.onAvailable(),
+				portfolio,
+				time);
 	}
 	
 	@Test
@@ -454,8 +462,20 @@ public class PortfolioImplTest extends ObservableStateContainerImplTest {
 
 		getMocksControl().verify();
 		assertEquals(2, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), portfolio.onUpdate(), portfolio, time1, 12345);
-		assertContainerEvent(listenerStub.getEvent(1), portfolio.onUpdate(), portfolio, time2, 12345);
+		assertContainerEvent(listenerStub.getEvent(0),
+				PortfolioUpdateEvent.class,
+				portfolio.onUpdate(),
+				portfolio,
+				time1,
+				m(p(12345, null)),
+				m(p(12345, 415)));
+		assertContainerEvent(listenerStub.getEvent(1),
+				PortfolioUpdateEvent.class,
+				portfolio.onUpdate(),
+				portfolio,
+				time2,
+				m(p(12345, 415)),
+				m(p(12345, 450)));
 	}
 	
 	@Test

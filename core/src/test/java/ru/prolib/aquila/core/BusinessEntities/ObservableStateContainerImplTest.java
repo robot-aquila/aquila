@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.junit.Assert.*;
 import static org.easymock.EasyMock.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.BasicConfigurator;
 import org.easymock.IMocksControl;
 import org.junit.After;
@@ -55,6 +58,23 @@ public class ObservableStateContainerImplTest {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure();
 	}
+	
+	static Instant T(String time_string) {
+		return Instant.parse(time_string);
+	}
+	
+	static Pair<Integer, Object> p(int token, Object value) {
+		return Pair.of(token, value);
+	}
+	
+	@SafeVarargs
+	static Map<Integer, Object> m(Pair<Integer, Object> ...pairs) {
+		Map<Integer, Object> r = new HashMap<>();
+		for ( Pair<Integer, Object> pair : pairs ) {
+			r.put(pair.getKey(), pair.getValue());
+		}
+		return r;
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -76,37 +96,41 @@ public class ObservableStateContainerImplTest {
 		listenerStub.clear();
 	}
 	
-	protected static Instant T(String timeString) {
-		return Instant.parse(timeString);
-	}
-	
 	protected IMocksControl getMocksControl() {
 		return control;
 	}
-	
-	protected void assertContainerEvent(Event actualEvent, EventType expectedType,
-			ObservableStateContainer expectedContainer,
-			Instant expectedTime, Integer... expectedUpdatedTokens)
+
+	public static void assertContainerEvent(Event actual_event,
+			Class<?> expected_class,
+			EventType expected_type,
+			ObservableStateContainer expected_container,
+			Instant expected_time,
+			Map<Integer, Object> oldVals,
+			Map<Integer, Object> newVals)
 	{
-		Set<Integer> expectedTokens = new HashSet<>();
-		for ( Integer x : expectedUpdatedTokens ) {
-			expectedTokens.add(x);
-		}
-		ContainerEvent e = (ContainerEvent) actualEvent;
-		assertTrue(e.isType(expectedType));
-		assertSame(expectedContainer, e.getContainer());
-		assertEquals(expectedTime, e.getTime());
-		assertEquals(expectedTokens, e.getUpdatedTokens());
+		assertThat(actual_event, is(instanceOf(ContainerUpdateEvent.class)));
+		assertThat(actual_event, is(instanceOf(expected_class)));
+		ContainerUpdateEvent e = (ContainerUpdateEvent) actual_event;
+		assertTrue(e.isType(expected_type));
+		assertSame(expected_container, e.getContainer());
+		assertEquals(expected_time, e.getTime());
+		assertEquals(oldVals, e.getOldValues());
+		assertEquals(newVals, e.getNewValues());
 	}
 	
-	protected void assertContainerEventWUT(Event actualEvent, EventType expectedType,
-			ObservableStateContainer expectedContainer, Instant expectedTime)
+	public static void assertContainerEventWUT(Event actual_event,
+			Class<?> expected_class,
+			EventType expected_type,
+			ObservableStateContainer expected_container,
+			Instant expected_time)
 	{
-		ContainerEvent e = (ContainerEvent) actualEvent;
-		assertTrue(e.isType(expectedType));
-		assertSame(expectedContainer, e.getContainer());
-		assertEquals(expectedTime, e.getTime());
-		//assertNull(e.getUpdatedTokens());
+		assertThat(actual_event, is(instanceOf(ContainerEvent.class)));
+		assertThat(actual_event, is(not(instanceOf(ContainerUpdateEvent.class))));
+		assertThat(actual_event, is(instanceOf(expected_class)));
+		ContainerEvent e = (ContainerEvent) actual_event;
+		assertTrue(e.isType(expected_type));
+		assertSame(expected_container, e.getContainer());
+		assertEquals(expected_time, e.getTime());
 	}
 	
 	/**
@@ -688,7 +712,14 @@ public class ObservableStateContainerImplTest {
 		
 		control.verify();
 		assertEquals(1, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), container.onUpdate(), container, time, BOOL_ACTIVE);
+		assertContainerEvent(listenerStub.getEvent(0),
+				ContainerUpdateEvent.class,
+				container.onUpdate(),
+				container,
+				time,
+				m(p(BOOL_ACTIVE, null)),
+				m(p(BOOL_ACTIVE, true))
+			);
 	}
 	
 	@Test
@@ -710,8 +741,15 @@ public class ObservableStateContainerImplTest {
 		control.verify();
 		assertTrue(container.isAvailable());
 		assertEquals(2, listenerStub.getEventCount());
-		assertContainerEvent(listenerStub.getEvent(0), container.onUpdate(), container, time, BOOL_ACTIVE);
-		assertContainerEvent(listenerStub.getEvent(1), container.onAvailable(), container, time, BOOL_ACTIVE);
+		assertContainerEvent(listenerStub.getEvent(0),
+				ContainerUpdateEvent.class,
+				container.onUpdate(),
+				container,
+				time,
+				m(p(BOOL_ACTIVE, null)),
+				m(p(BOOL_ACTIVE, true))
+			);
+		assertContainerEventWUT(listenerStub.getEvent(1), ContainerEvent.class, container.onAvailable(), container, time);
 	}
 	
 	@Test

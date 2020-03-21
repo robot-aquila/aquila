@@ -39,34 +39,25 @@ public class OrderEventTest {
 		time1 = Instant.parse("2017-08-04T02:10:00Z");
 		time2 = Instant.parse("2017-01-01T00:00:00Z");
 		event = new OrderEvent(type1, order1, time1);
-		event.setUpdatedTokens(tokens1);
 	}
 	
 	@Test
 	public void testAccessors() throws Exception {
 		assertSame(type1, event.getType());
 		assertSame(order1, event.getOrder());
-		assertEquals(tokens1, event.getUpdatedTokens());
 		assertEquals(time1, event.getTime());
 	}
 	
 	@Test
 	public void testEquals_MixedVars() throws Exception {
-		Variant<EventType> vType = new Variant<EventType>()
-			.add(type1)
-			.add(type2);
-		Variant<Order> vOrder = new Variant<Order>(vType)
-			.add(null)
-			.add(order1)
-			.add(order2);
-		Variant<Set<Integer>> vTokens = new Variant<Set<Integer>>(vOrder, tokens1, tokens2, null);
-		Variant<Instant> vTime = new Variant<>(vTokens, time1, time2);
+		Variant<EventType> vType = new Variant<EventType>(type1, type2);
+		Variant<Order> vOrder = new Variant<Order>(vType, null, order1, order2);
+		Variant<Instant> vTime = new Variant<>(vOrder, time1, time2);
 		Variant<?> iterator = vTime;
 		int foundCount = 0;
 		OrderEvent foundEvent = null;
 		do {
 			OrderEvent actual = new OrderEvent(vType.get(), vOrder.get(), vTime.get());
-			actual.setUpdatedTokens(vTokens.get());
 			if ( event.equals(actual) ) {
 				foundCount ++;
 				foundEvent = actual;
@@ -77,7 +68,6 @@ public class OrderEventTest {
 		assertSame(type1, foundEvent.getType());
 		assertSame(order1, foundEvent.getOrder());
 		assertEquals(time1, foundEvent.getTime());
-		assertEquals(tokens1, foundEvent.getUpdatedTokens());
 	}
 	
 	@Test

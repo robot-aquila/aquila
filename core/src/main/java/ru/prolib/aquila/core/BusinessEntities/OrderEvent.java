@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
  * $Id: OrderEvent.java 283 2012-09-26 17:01:17Z whirlwind $
  */
 public class OrderEvent extends OSCEventImpl {
-	private final Order order;
+	protected final Order order;
 
 	/**
 	 * Constructor.
@@ -50,8 +50,7 @@ public class OrderEvent extends OSCEventImpl {
 			return o.getType() == getType()
 				&& o.getOrder() == getOrder()
 				&& new EqualsBuilder()
-					.append(o.getUpdatedTokens(), getUpdatedTokens())
-					.append(o.getTime(), getTime())
+					.append(o.time, time)
 					.isEquals();
 		}
 		return false;

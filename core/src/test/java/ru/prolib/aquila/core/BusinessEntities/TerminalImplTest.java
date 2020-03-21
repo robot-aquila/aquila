@@ -2,6 +2,8 @@ package ru.prolib.aquila.core.BusinessEntities;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+import static ru.prolib.aquila.core.BusinessEntities.ObservableStateContainerImplTest.*;
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -58,10 +60,11 @@ public class TerminalImplTest {
 	private static Symbol symbol3 = new Symbol("LKOH");
 	private IMocksControl control;
 	private Scheduler schedulerMock;
+	private SchedulerStub schedulerStub;
 	private DataProvider dataProviderMock;
 	private DataProviderStubX dataProviderStub;
 	private ObjectFactory objectFactoryMock;
-	private TerminalImpl terminal, terminalWithMocks;
+	private TerminalImpl terminal, terminalWithMocks, terminalWithStubs;
 	private EventListenerStub listenerStub;
 	Lock lock;
 	
@@ -96,14 +99,24 @@ public class TerminalImplTest {
 		params.setObjectFactory(objectFactoryMock);
 		params.setLock(lock);
 		terminalWithMocks = new TerminalImpl(params);
+		params = new TerminalParams();
+		params.setDataProvider(dataProviderStub);
+		params.setEventQueue(new TestEventQueueImpl());
+		params.setScheduler(schedulerStub = new SchedulerStub());
+		terminalWithStubs = new TerminalImpl(params);
 		listenerStub = new EventListenerStub();
-		
 		terminal.getEditableSecurity(symbol1);
 		terminal.getEditableSecurity(symbol2);
 		terminal.getEditableSecurity(symbol3);
 		terminal.getEditablePortfolio(account1);
 		terminal.getEditablePortfolio(account2);
 		terminal.getEditablePortfolio(account3);
+		terminalWithStubs.getEditableSecurity(symbol1);
+		terminalWithStubs.getEditableSecurity(symbol2);
+		terminalWithStubs.getEditableSecurity(symbol3);
+		terminalWithStubs.getEditablePortfolio(account1);
+		terminalWithStubs.getEditablePortfolio(account2);
+		terminalWithStubs.getEditablePortfolio(account3);
 	}
 	
 	@After
@@ -733,22 +746,43 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder5_NowEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 934L;
-		terminal.onOrderAvailable().addListener(listenerStub);
-		terminal.onOrderUpdate().addListener(listenerStub);
+		schedulerStub.setFixedTime("1997-02-13T20:25:45Z");
+		terminalWithStubs.onOrderAvailable().addListener(listenerStub);
+		terminalWithStubs.onOrderUpdate().addListener(listenerStub);
 		
-		Order order = terminal.createOrder(account1,
+		Order order = terminalWithStubs.createOrder(account1,
 				symbol1,
 				OrderAction.BUY,
-				CDecimalBD.of(20L),
-				CDecimalBD.of("431.15"));
+				of(20L),
+				of("431.15"));
 		
+		
+		assertContainerEvent(listenerStub.getEvent(0),
+				OrderUpdateEvent.class,
+				terminalWithStubs.onOrderUpdate(),
+				order,
+				T("1997-02-13T20:25:45Z"),
+				m(  p(OrderField.TYPE, null),
+					p(OrderField.ACTION, null),
+					p(OrderField.TIME, null),
+					p(OrderField.STATUS, null),
+					p(OrderField.PRICE, null),
+					p(OrderField.INITIAL_VOLUME, null),
+					p(OrderField.CURRENT_VOLUME, null)),
+				m(  p(OrderField.TYPE, OrderType.LMT),
+					p(OrderField.ACTION, OrderAction.BUY),
+					p(OrderField.TIME, T("1997-02-13T20:25:45Z")),
+					p(OrderField.STATUS, OrderStatus.PENDING),
+					p(OrderField.PRICE, of("431.15")),
+					p(OrderField.INITIAL_VOLUME, of(20L)),
+					p(OrderField.CURRENT_VOLUME, of(20L)))
+			);
+		assertContainerEventWUT(listenerStub.getEvent(1),
+				OrderEvent.class,
+				terminalWithStubs.onOrderAvailable(),
+				order,
+				T("1997-02-13T20:25:45Z"));
 		assertEquals(2, listenerStub.getEventCount());
-		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(terminal.onOrderUpdate()));
-		assertSame(order, event.getOrder());
-		event = (OrderEvent) listenerStub.getEvent(1);
-		assertTrue(event.isType(terminal.onOrderAvailable()));
-		assertSame(order, event.getOrder());
 	}
 	
 	@Test
@@ -790,10 +824,10 @@ public class TerminalImplTest {
 				CDecimalBD.of(80L));
 		
 		assertEquals(2, listenerStub.getEventCount());
-		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(terminal.onOrderUpdate()));
-		assertSame(order, event.getOrder());
-		event = (OrderEvent) listenerStub.getEvent(1);
+		assertTrue(listenerStub.getEvent(0).isType(terminal.onOrderUpdate()));
+		OrderUpdateEvent u_event = (OrderUpdateEvent) listenerStub.getEvent(0);
+		assertSame(order, u_event.getOrder());
+		OrderEvent event = (OrderEvent) listenerStub.getEvent(1);
 		assertTrue(event.isType(terminal.onOrderAvailable()));
 		assertSame(order, event.getOrder());
 	}
@@ -831,24 +865,47 @@ public class TerminalImplTest {
 	@Test
 	public void testCreateOrder7_NowEventsProduced() throws Exception {
 		dataProviderStub.nextOrderID = 555L;
-		terminal.onOrderAvailable().addListener(listenerStub);
-		terminal.onOrderUpdate().addListener(listenerStub);
+		schedulerStub.setFixedTime("2020-02-20T20:02:20Z");
+		terminalWithStubs.onOrderAvailable().addListener(listenerStub);
+		terminalWithStubs.onOrderUpdate().addListener(listenerStub);
 		
-		Order order = terminal.createOrder(account3,
+		Order order = terminalWithStubs.createOrder(account3,
 				symbol2,
 				OrderType.MKT,
 				OrderAction.SELL,
-				CDecimalBD.of(400L),
-				CDecimalBD.of("224.13"),
-				"test order");
+				of(400L),
+				of("224.13"),
+				"test order"
+			);
 
+		assertContainerEvent(listenerStub.getEvent(0),
+				OrderUpdateEvent.class,
+				terminalWithStubs.onOrderUpdate(),
+				order,
+				T("2020-02-20T20:02:20Z"),
+				m(  p(OrderField.TYPE, null),
+					p(OrderField.ACTION, null),
+					p(OrderField.TIME, null),
+					p(OrderField.STATUS, null),
+					p(OrderField.PRICE, null),
+					p(OrderField.INITIAL_VOLUME, null),
+					p(OrderField.CURRENT_VOLUME, null),
+					p(OrderField.COMMENT, null)),
+				m(  p(OrderField.TYPE, OrderType.MKT),
+					p(OrderField.ACTION, OrderAction.SELL),
+					p(OrderField.TIME, T("2020-02-20T20:02:20Z")),
+					p(OrderField.STATUS, OrderStatus.PENDING),
+					p(OrderField.PRICE, of("224.13")),
+					p(OrderField.INITIAL_VOLUME, of(400L)),
+					p(OrderField.CURRENT_VOLUME, of(400L)),
+					p(OrderField.COMMENT, "test order"))
+			);
+		assertContainerEventWUT(listenerStub.getEvent(1),
+				OrderEvent.class,
+				terminalWithStubs.onOrderAvailable(),
+				order,
+				T("2020-02-20T20:02:20Z"));
 		assertEquals(2, listenerStub.getEventCount());
-		OrderEvent event = (OrderEvent) listenerStub.getEvent(0);
-		assertTrue(event.isType(terminal.onOrderUpdate()));
-		assertSame(order, event.getOrder());
-		event = (OrderEvent) listenerStub.getEvent(1);
-		assertTrue(event.isType(terminal.onOrderAvailable()));
-		assertSame(order, event.getOrder());
 	}
 	
 	@Test

@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
  * $Id$
  */
 public class PortfolioEvent extends OSCEventImpl {
-	private final Portfolio portfolio;
+	protected final Portfolio portfolio;
 
 	/**
 	 * Создать событие.
@@ -50,8 +50,7 @@ public class PortfolioEvent extends OSCEventImpl {
 			return o.getType() == getType()
 				&& o.getPortfolio() == getPortfolio()
 				&& new EqualsBuilder()
-					.append(o.getTime(), getTime())
-					.append(o.getUpdatedTokens(), getUpdatedTokens())
+					.append(o.time, time)
 					.isEquals();
 		}
 		return false;

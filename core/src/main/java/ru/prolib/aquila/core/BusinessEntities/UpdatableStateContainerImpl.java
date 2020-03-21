@@ -14,12 +14,12 @@ import ru.prolib.aquila.core.concurrency.LID;
  * Updatable state container implementation.
  */
 public class UpdatableStateContainerImpl implements UpdatableStateContainer {
-	private final LID lid;
+	protected final LID lid;
 	protected final Lock lock;
-	private final Map<Integer, Object> values;
-	private final Set<Integer> updated;
-	private final String id;
-	private boolean closed = false;
+	protected final Map<Integer, Object> values;
+	protected final Set<Integer> updated;
+	protected final String id;
+	protected boolean closed = false;
 	
 	public UpdatableStateContainerImpl(String id, Lock lock) {
 		this.id = id;

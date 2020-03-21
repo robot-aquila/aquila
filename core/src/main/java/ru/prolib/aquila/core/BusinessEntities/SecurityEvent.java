@@ -14,7 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.osc.OSCEventImpl;
  * $Id: SecurityEvent.java 250 2012-08-06 03:14:33Z whirlwind $
  */
 public class SecurityEvent extends OSCEventImpl {
-	private final Security security;
+	protected final Security security;
 
 	/**
 	 * Создать событие.
@@ -50,8 +50,7 @@ public class SecurityEvent extends OSCEventImpl {
 			return o.getType() == getType()
 				&& o.security == security
 				&& new EqualsBuilder()
-					.append(o.getTime(), getTime())
-					.append(o.getUpdatedTokens(), getUpdatedTokens())
+					.append(o.time, time)
 					.isEquals();
 		}
 		return false;

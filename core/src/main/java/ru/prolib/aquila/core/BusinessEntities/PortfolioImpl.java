@@ -6,6 +6,7 @@ import java.util.concurrent.locks.Condition;
 
 import ru.prolib.aquila.core.*;
 import ru.prolib.aquila.core.BusinessEntities.osc.OSCController;
+import ru.prolib.aquila.core.BusinessEntities.osc.OSCUpdateEventFactory;
 import ru.prolib.aquila.core.BusinessEntities.osc.impl.PortfolioParams;
 
 /**
@@ -236,6 +237,14 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 		return new PortfolioEventFactory(this, time);
 	}
 	
+	@Override
+	protected EventFactory createEventFactory(Instant time,
+			Map<Integer, Object> old_vals,
+			Map<Integer, Object> new_vals)
+	{
+		return new PortfolioUpdateEventFactory(this, time, old_vals, new_vals);
+	}
+	
 	public static class PortfolioController implements OSCController {
 
 		@Override
@@ -264,20 +273,33 @@ public class PortfolioImpl extends ObservableStateContainerImpl implements Edita
 	static class PortfolioEventFactory implements EventFactory {
 		private final Portfolio portfolio;
 		protected final Instant time;
-		protected final Set<Integer> updatedTokens;
 
 		PortfolioEventFactory(Portfolio portfolio, Instant time) {
 			super();
 			this.portfolio = portfolio;
 			this.time = time;
-			this.updatedTokens = portfolio.getUpdatedTokens();
 		}
 
 		@Override
 		public Event produceEvent(EventType type) {
-			PortfolioEvent e = new PortfolioEvent(type, portfolio, time);
-			e.setUpdatedTokens(updatedTokens);
-			return e;
+			return new PortfolioEvent(type, portfolio, time);
+		}
+		
+	}
+	
+	static class PortfolioUpdateEventFactory extends OSCUpdateEventFactory {
+		private final Portfolio portfolio;
+
+		public PortfolioUpdateEventFactory(Portfolio portfolio, Instant time,
+				Map<Integer, Object> old_values, Map<Integer, Object> new_values)
+		{
+			super(portfolio, time, old_values, new_values);
+			this.portfolio = portfolio;
+		}
+		
+		@Override
+		public Event produceEvent(EventType type) {
+			return new PortfolioUpdateEvent(type, portfolio, time, oldValues, newValues);
 		}
 		
 	}
