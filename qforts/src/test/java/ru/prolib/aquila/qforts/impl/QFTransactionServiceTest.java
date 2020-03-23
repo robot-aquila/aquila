@@ -435,6 +435,29 @@ public class QFTransactionServiceTest {
 		service.updateByMarket(portfolio);
 	}
 	
+	@Test (expected=QFTransactionException.class)
+	public void testUpdateByMarket3_ThrowsIfNotRegistered() throws Exception {
+		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		expect(registryMock.isRegistered(portfolio)).andReturn(false);
+		control.replay();
+		
+		service.updateByMarket(portfolio, symbol1, of("12.34"));
+	}
+
+	@Test
+	public void testUpdateByMarket3() throws Exception {
+		QFPortfolioChangeUpdate updateMock = control.createMock(QFPortfolioChangeUpdate.class);
+		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);
+		expect(registryMock.isRegistered(portfolio)).andReturn(true);
+		expect(calculatorMock.updateByMarket(portfolio, symbol1, of("12.34"))).andReturn(updateMock);
+		assemblerMock.update(portfolio, updateMock);
+		control.replay();
+		
+		service.updateByMarket(portfolio, symbol1, of("12.34"));
+		
+		control.verify();
+	}
+
 	@Test
 	public void testChangeBalance() throws Exception {
 		EditablePortfolio portfolio = terminal.getEditablePortfolio(account);

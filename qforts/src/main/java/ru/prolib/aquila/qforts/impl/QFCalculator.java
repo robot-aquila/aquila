@@ -101,6 +101,38 @@ public class QFCalculator {
 		return updateEquityAndFreeMargin(update);
 	}
 	
+	public QFPortfolioChangeUpdate updateByMarket(Portfolio portfolio, Symbol symbol, CDecimal last_price) {
+		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(portfolio.getAccount());
+		setInitialValues(portfolio, update)
+			.setChangeBalance(ZERO_MONEY5)
+			.setChangeVarMarginClose(ZERO_MONEY5)
+			.setChangeVarMarginInter(ZERO_MONEY5);
+		
+
+		boolean recalculated = false;
+		if ( portfolio.isPositionExists(symbol) ) {
+			Position position = portfolio.getPosition(symbol);
+			if ( position.getCDecimal(PositionField.CURRENT_VOLUME, ZERO).compareTo(ZERO) != 0L ) {
+				QFPositionChangeUpdate pos_update = utils.refreshByCurrentState(position, last_price);
+				update.setPositionUpdate(pos_update);
+				update.setChangeVarMargin(pos_update.getChangeVarMargin())
+					.setChangeProfitAndLoss(pos_update.getChangeProfitAndLoss())
+					.setChangeUsedMargin(pos_update.getChangeUsedMargin())
+					.setChangeEquity(pos_update.getChangeProfitAndLoss())
+					.setFinalFreeMargin(update.getFinalEquity().subtract(update.getFinalUsedMargin()));
+				recalculated = true;
+			}
+		}
+		if ( recalculated == false ) {
+			update.setChangeVarMargin(ZERO_MONEY5)
+				.setChangeProfitAndLoss(ZERO_MONEY5)
+				.setChangeUsedMargin(ZERO_MONEY5)
+				.setChangeEquity(ZERO_MONEY5)
+				.setChangeFreeMargin(ZERO_MONEY5);
+		}
+		return update;
+	}
+	
 	public QFPortfolioChangeUpdate updateMargin(Position position) {
 		QFPortfolioChangeUpdate update = new QFPortfolioChangeUpdate(position.getAccount());
 		setInitialValues(position.getPortfolio(), update)

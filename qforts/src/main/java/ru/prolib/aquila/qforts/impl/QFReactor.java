@@ -263,7 +263,7 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable, L1Upd
 		if ( terminal == null ) {
 			// This is possible if terminal not started.
 			// If Isn't started then no L1 data processing expected.
-			return; 
+			return;
 		}
 		if ( ! terminal.isSecurityExists(symbol) ) {
 			// This is weird because this consumer appears on new order creation.
@@ -272,6 +272,9 @@ public class QFReactor implements EventListener, DataProvider, SPRunnable, L1Upd
 		}
 		try {
 			facade.handleOrders(terminal.getSecurity(symbol), tick.getSize(), tick.getPrice(), tick.getComment());
+			if ( schedule.getCurrentProc(tick.getTime()) == QFSessionProc.UPDATE_BY_MARKET ) {
+				facade.updateByMarket(symbol, tick.getPrice());
+			}
 		} catch ( SecurityException e ) {
 			throw new IllegalStateException("Unexpected exception: ", e);
 		} catch ( QFTransactionException e ) {

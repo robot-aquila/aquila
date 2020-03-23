@@ -548,6 +548,8 @@ public class QFReactorTest {
 	public void testConsume_L1Update_OK() throws Exception {
 		reactor = createAsL1UpdateConsumer();
 		facadeMock.handleOrders(security, of(35L), of("504.12"), "BOOZ5");
+		expect(scheduleMock.getCurrentProc(T("2020-03-02T18:50:00Z"))).andReturn(QFSessionProc.UPDATE_BY_MARKET);
+		facadeMock.updateByMarket(symbol, of("504.12"));
 		control.replay();
 		reactor.setTerminal(terminal);
 		

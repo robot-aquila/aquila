@@ -1,6 +1,7 @@
 package ru.prolib.aquila.qforts.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.easymock.EasyMock.*;
@@ -249,6 +250,23 @@ public class QFortsTest {
 		control.replay();
 		
 		service.updateByMarket();
+		
+		control.verify();
+	}
+	
+	@Test
+	public void testUpdateByMarket2() throws Exception {
+		EditablePortfolio
+			portfolio1 = terminal.getEditablePortfolio(account1),
+			portfolio2 = terminal.getEditablePortfolio(account2),
+			portfolio3 = terminal.getEditablePortfolio(account3);
+		expect(registryMock.getPortfolioList()).andReturn(Arrays.asList(portfolio1, portfolio2, portfolio3));
+		transactionsMock.updateByMarket(portfolio1, symbol1, of("12.34"));
+		transactionsMock.updateByMarket(portfolio2, symbol1, of("12.34"));
+		transactionsMock.updateByMarket(portfolio3, symbol1, of("12.34"));
+		control.replay();
+		
+		service.updateByMarket(symbol1, of("12.34"));
 		
 		control.verify();
 	}

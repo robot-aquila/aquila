@@ -14,6 +14,7 @@ import ru.prolib.aquila.core.BusinessEntities.OrderStatus;
 import ru.prolib.aquila.core.BusinessEntities.Portfolio;
 import ru.prolib.aquila.core.BusinessEntities.Position;
 import ru.prolib.aquila.core.BusinessEntities.Security;
+import ru.prolib.aquila.core.BusinessEntities.Symbol;
 import ru.prolib.aquila.core.concurrency.Lockable;
 import ru.prolib.aquila.core.concurrency.MultilockBuilderBE;
 
@@ -173,6 +174,18 @@ public class QFTransactionService {
 		} finally {
 			lock.unlock();
 		}
+	}
+	
+	public void updateByMarket(EditablePortfolio portfolio, Symbol symbol, CDecimal last_price)
+			throws QFTransactionException
+	{
+		// Locking objects doesn't make a sense.
+		// If someone outside will cause object updates it's restricted and corrupted logic.
+		if ( ! registry.isRegistered(portfolio) ) {
+			throw new QFTransactionException("Portfolio not registered: " + portfolio.getAccount());
+		}
+		QFPortfolioChangeUpdate update = calculator.updateByMarket(portfolio, symbol, last_price);
+		assembler.update(portfolio, update);
 	}
 	
 	public void changeBalance(EditablePortfolio portfolio, CDecimal value) throws QFTransactionException {

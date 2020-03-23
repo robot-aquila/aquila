@@ -101,6 +101,12 @@ public class QForts {
 		}
 	}
 	
+	public void updateByMarket(Symbol symbol, CDecimal last_price) throws QFTransactionException {
+		for ( EditablePortfolio portfolio : registry.getPortfolioList() ) {
+			transactions.updateByMarket(portfolio, symbol, last_price);
+		}
+	}
+	
 	public void updateMargin(Security security) throws QFTransactionException {
 		final Symbol symbol = security.getSymbol();
 		for ( EditablePortfolio portfolio : registry.getPortfolioList() ) {
