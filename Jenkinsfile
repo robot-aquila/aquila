@@ -27,6 +27,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
+                sh 'chmod +x utils/finexp-futures/ci-scripts/deploy-ff-release.sh'
                 sh 'utils/finexp-futures/ci-scripts/deploy-ff-release.sh'
             }
         }
