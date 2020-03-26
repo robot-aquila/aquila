@@ -25,5 +25,10 @@ pipeline {
                 sh 'mvn -B -DskipTests install'
             }
         }
+        stage('Deploy') {
+            steps {
+                sh 'utils/finexp-futures/ci-scripts/deploy-ff-release.sh'
+            }
+        }
     }
 }
