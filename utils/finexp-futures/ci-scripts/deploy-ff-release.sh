@@ -6,11 +6,20 @@
 MY_PATH=`dirname "$0"`
 #RELEASE_TAG="${1}"
 RELEASE_TAG=`git describe --tags`
+if [[ $? -ne 0 ]]; then
+    echo "Error obtaining most recent tag"
+    exit 1
+fi
 GHUB_OWNER="robot-aquila"
 GHUB_REPOS="aquila"
 GHUB_URL="https://api.github.com/repos/${GHUB_OWNER}/${GHUB_REPOS}"
 if [ -z "${GHUB_TOKEN}" ]; then
-    GHUB_TOKEN=`cat "${MY_PATH}/../ght.txt"`
+    GHUB_TOKEN_PATH="${MY_PATH}/../ght.txt"
+    if [ ! -f "${GHUB_TOKEN_PATH}" ]; then
+        echo "GitHub token undefined."
+        exit 1
+    fi
+    GHUB_TOKEN=`cat "${GHUB_TOKEN_PATH}"`
 fi
 RELEASE_PROJ="finexp-futures"
 
