@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # ----------------------------------
 # Ensure GHUB_TOKEN variable defined
 # ----------------------------------
