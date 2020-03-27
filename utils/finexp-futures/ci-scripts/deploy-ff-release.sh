@@ -5,7 +5,7 @@
 
 MY_PATH=`dirname "$0"`
 #RELEASE_TAG="${1}"
-RELEASE_TAG=`git describe --tags`
+RELEASE_TAG=`git describe --tags | sed 's/rc\-[0-9]*\-[^-]*$/rc/'`
 if [[ $? -ne 0 ]]; then
     echo "Error obtaining most recent tag"
     exit 1
