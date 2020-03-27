@@ -4,7 +4,6 @@
 # ----------------------------------
 
 MY_PATH=`dirname "$0"`
-#RELEASE_TAG="${1}"
 RELEASE_TAG=`git describe --tags | sed 's/rc\-[0-9]*\-[^-]*$/rc/'`
 if [[ $? -ne 0 ]]; then
     echo "Error obtaining most recent tag"
@@ -148,11 +147,11 @@ fi
 MSG=`echo ${JSON} | jq -r -e ".[] | select(.name == \"${RELEASE_FILE}\") | .id"`
 if [[ $? -ne 0 ]]; then
     echo "Asset ${RELEASE_FILE} not found in release ID ${RELEASE_ID}. Create new one."
-    MOST_RECENT_TAG=`git describe --tags`
-    if [[ "${MOST_RECENT_TAG}" != "${RELEASE_TAG}" ]]; then
-        echo "Most recent tag [${MOST_RECENT_TAG}] does not equal to release tag [${RELEASE_TAG}]."
-        exit 1
-    fi
+#    MOST_RECENT_TAG=`git describe --tags`
+#    if [[ "${MOST_RECENT_TAG}" != "${RELEASE_TAG}" ]]; then
+#        echo "Most recent tag [${MOST_RECENT_TAG}] does not equal to release tag [${RELEASE_TAG}]."
+#        exit 1
+#    fi
     SOURCE_FILE="${MY_PATH}/../target/${RELEASE_FILE}"
     if [[ ! -f "${SOURCE_FILE}" ]]; then
         echo "Source file expected to be exist: ${SOURCE_FILE}"
