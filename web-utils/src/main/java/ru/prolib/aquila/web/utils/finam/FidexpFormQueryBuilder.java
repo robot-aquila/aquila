@@ -63,6 +63,7 @@ public class FidexpFormQueryBuilder {
 			builder.addParameter("fsp", "1");
 		}
 		String path = builder.getPath();
+		if ( path == null ) path = "/";
 		int index = path.lastIndexOf('/');
 		if ( index >= 0 ) {
 			path = path.substring(0, index + 1);
