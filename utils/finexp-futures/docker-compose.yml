@@ -1,0 +1,41 @@
+# https://github.com/SeleniumHQ/docker-selenium
+# To execute this docker-compose yml file use `docker-compose -f <file_name> up`
+# Add the `-d` flag at the end for detached execution
+version: "3"
+services:
+
+  ff-selenium-hub:
+    image: selenium/hub:3.141.59-zinc
+    container_name: ff-selenium-hub
+    ports:
+      - "4449:4444"
+
+  ff-selenium-chrome:
+    image: selenium/node-chrome:3.141.59-zinc
+    container_name: ff-selenium-chrome
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - ff-selenium-hub
+    environment:
+      - HUB_HOST=ff-selenium-hub
+      - HUB_PORT=4444
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSION=5
+    ports:
+      - "5909:5900"
+
+  ff-app:
+    image: aquila:finexp-futures-0.14.5
+    container_name: ff-app
+    volumes:
+      - /dev/shm:/dev/shm
+      - /var/finexp-futures-data:/var/finexp-futures-data
+      - /var/finexp-futures-logs:/opt/finexp-futures/logs
+    depends_on:
+      - ff-selenium-hub
+    environment:
+      - HUB_HOST=ff-selenium-hub
+      - HUB_PORT=4444
+      - TZ=Europe/Moscow
+
