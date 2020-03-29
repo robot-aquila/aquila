@@ -14,8 +14,7 @@ public class CmdLine {
 	public static final String LOPT_HELP = "help";
 	public static final String LOPT_SKIP_INTEGRITY_TEST = "skip-integrity-test";
 	public static final String LOPT_SHOW_SYMBOL_FILE = "show-symbol-file";
-	public static final String LOPT_JBROWSER_CONFIG = "jbrowser-config";
-	public static final String LOPT_DRIVER = "driver";
+	public static final String LOPT_CONFIG = "config";
 
 	public static Options buildOptions() {
 		Options options = new Options();
@@ -40,16 +39,8 @@ public class CmdLine {
 				.hasArg()
 				.build());
 		options.addOption(Option.builder()
-				.longOpt(LOPT_JBROWSER_CONFIG)
-				.desc("Use JBrowserDriver configuration file. This should be an "
-					+ "ini-file with jbrowser-driver section which contains redefinitions "
-					+ "of one or more configurable JBrowserDriver options. See package "
-					+ "ru.prolib.aquila.web.utils class WebDriverFactoryJBD for more details.")
-				.hasArg()
-				.build());
-		options.addOption(Option.builder()
-				.longOpt(LOPT_DRIVER)
-				.desc("Choose browser driver. Available options are jbd (default) and ff")
+				.longOpt(LOPT_CONFIG)
+				.desc("Path to configuration file. See web-utils for more details.")
 				.hasArg()
 				.build());
 		

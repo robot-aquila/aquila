@@ -10,7 +10,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<powermock.version>1.7.1</powermock.version>
 		<spring.version>5.2.3.RELEASE</spring.version>
-		<selenium.version>3.141.59</selenium.version>
 	</properties>
 
 	<modules>
@@ -22,7 +21,6 @@
 		<module>data</module>
 		<module>web-utils</module>
 		<module>utils/experimental</module>
-		<module>utils/finexp-quotelist</module>
 		<module>utils/finexp-futures</module>
 	</modules>
   

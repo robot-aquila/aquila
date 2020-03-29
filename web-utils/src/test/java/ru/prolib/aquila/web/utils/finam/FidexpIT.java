@@ -24,7 +24,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -46,17 +46,11 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.machinepublishers.jbrowserdriver.JBrowserDriver;
-
 import ru.prolib.aquila.web.utils.WUWebPageException;
-import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentCriteriaBuilder;
-import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentManager;
-import ru.prolib.aquila.web.utils.jbd.JBDAttachmentManager;
-import ru.prolib.aquila.web.utils.jbd.JBDWebDriverFactory;
 
 public class FidexpIT {
 	private static final Logger logger;
-	private static final File	JBROWSER_CONF_FILE = new File("it-config/jbd.ini");
+	private static final File JBROWSER_CONF_FILE = new File("it-config/jbd.ini");
 	private static final File sample = new File("fixture/SPFB.RTS_150701_150731-W1.txt");
 	
 	static {
@@ -414,36 +408,6 @@ public class FidexpIT {
 		}
 		logger.debug("{} of {} URL pattern tests passed. Min. for success is {}", new Object[] { success, testMaxMarkets, testMinSuccess });
 		assertTrue(success >= testMinSuccess);
-	}
-	
-	// TODO: to remove
-	@Ignore
-	@Test
-	public void testDownload_WebDriver() throws Exception {
-		JBDWebDriverFactory factory = new JBDWebDriverFactory();
-		factory.withMoexTestedSettings();
-		factory.loadIni(JBROWSER_CONF_FILE);
-		//factory.getSettingsBuilder()
-		//	.saveAttachments(true)
-		//	.logWire(true);
-		JBrowserDriver webDriver = (JBrowserDriver) factory.createWebDriver();
-		HTTPAttachmentManager attachmentManager = new JBDAttachmentManager(webDriver);
-		File attachmentsDir = webDriver.attachmentsDir();
-		try {
-			HTTPAttachmentCriteriaBuilder criteriaBuilder = new HTTPAttachmentCriteriaBuilder()
-				.withTimeOfStartDownloadCurrent();
-			webDriver.get("http://export.finam.ru/SPFB.RTS_140701_140731.txt?market=14&em=17455&code=SPFB.RTS&apply=0&df=1&mf=6&yf=2014&from=01.07.2014&dt=31&mt=6&yt=2014&to=31.07.2014&p=9&f=SPFB.RTS_140701_140731&e=.txt&cn=SPFB.RTS&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=1&at=1");
-			System.out.println("attachmentsDir: " + attachmentsDir);
-			attachmentManager.getLast(criteriaBuilder.build(), null);
-			Thread.sleep(60000L);
-			//System.out.println("---page source---");
-			//System.out.println(webDriver.getPageSource());
-			//String x = FileUtils.readFileToString(new File("/home/whirlwind/work/tmp/udd-test/SPFB.RTS_140701_140731.txt"));
-			//System.out.println("---file source---");
-			//System.out.println(x);
-		} finally {
-			webDriver.close();
-		}
 	}
 	
 	@Ignore
