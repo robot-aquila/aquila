@@ -14,5 +14,13 @@ public class OrderActionTest {
 		assertEquals("SELL", OrderAction.SELL.toString());
 		assertEquals("SELL_SHORT", OrderAction.SELL_SHORT.toString());
 	}
+	
+	@Test
+	public void testIsBuy() {
+		assertTrue(OrderAction.BUY.isBuy());
+		assertTrue(OrderAction.COVER.isBuy());
+		assertFalse(OrderAction.SELL.isBuy());
+		assertFalse(OrderAction.SELL_SHORT.isBuy());
+	}
 
 }

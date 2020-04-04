@@ -49,12 +49,18 @@ public class OrderType {
 	
 	/**
 	 * Immediate or cancel.
+	 * <p>
+	 * This is not an order type and will be removed in next releases.
 	 */
+	@Deprecated
 	public static final OrderType IOC = registerType("IOC");
 	
 	/**
 	 * Fill or kill.
+	 * <p>
+	 * This is not an order type and will be removed in next releases.
 	 */
+	@Deprecated
 	public static final OrderType FOK = registerType("FOK");
 	
 	private final String code;
