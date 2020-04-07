@@ -16,19 +16,41 @@ public class SMStateHandler {
 	private final List<SMInput> inputs;
 	private SMEnterAction enterAction;
 	private SMExitAction exitAction;
+	private Class<?> incomingDataType = Void.class, resultDataType = Void.class;
+	private Object incomingData, resultData;
 	
 	/**
 	 * Конструктор.
 	 * <p>
 	 * @param enterAction входное действие
 	 * @param exitAction выходное действие
+	 * @param incoming_data_type тип данных, ожидаемых при входе в состояние
+	 * @param result_data_type тип данных, ожидаемых на выходе из состояния
 	 */
-	public SMStateHandler(SMEnterAction enterAction, SMExitAction exitAction) {
+	public SMStateHandler(SMEnterAction enterAction,
+			SMExitAction exitAction,
+			Class<?> incoming_data_type,
+			Class<?> result_data_type)
+	{
 		super();
 		inputs = new Vector<SMInput>();
 		exits = new LinkedHashMap<String, SMExit>();
 		this.enterAction = enterAction;
 		this.exitAction = exitAction;
+		this.incomingDataType = incoming_data_type;
+		this.resultDataType = result_data_type;
+	}
+	
+	/**
+	 * Конструктор.
+	 * <p>
+	 * Создает обработчик состояния не подразумевающий подачи данных на вход и формирование результата.
+	 * <p>
+	 * @param enter_action входное действие
+	 * @param exit_action выходное действие
+	 */
+	public SMStateHandler(SMEnterAction enter_action, SMExitAction exit_action) {
+		this(enter_action, exit_action, Void.class, Void.class);
 	}
 	
 	/**
@@ -112,6 +134,24 @@ public class SMStateHandler {
 	}
 	
 	/**
+	 * Set incoming data type.
+	 * <p> 
+	 * @param type - data type
+	 */
+	protected synchronized void setIncomingDataType(Class<?> type) {
+		this.incomingDataType = type;
+	}
+
+	/**
+	 * Set result data type.
+	 * <p>
+	 * @param type - data type
+	 */
+	protected synchronized void setResultDataType(Class<?> type) {
+		this.resultDataType = type;
+	}
+
+	/**
 	 * Получить список выходов.
 	 * <p>
 	 * @return список выходов из состояния
@@ -167,9 +207,85 @@ public class SMStateHandler {
 		return exitAction;
 	}
 	
+	/**
+	 * Get incoming data type.
+	 * <p>
+	 * @return data type
+	 */
+	public synchronized Class<?> getIncomingDataType() {
+		return incomingDataType;
+	}
+	
+	/**
+	 * Get result data type.
+	 * <p>
+	 * @return data type
+	 */
+	public synchronized Class<?> getResultDataType() {
+		return resultDataType;
+	}
+	
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName();
+	}
+	
+	/**
+	 * Set incoming data before enter the state.
+	 * <p>
+	 * @param data - data. Null values permitted.
+	 * @throws IllegalArgumentException - the type of data mismatch with declared incoming data type
+	 */
+	public synchronized void setIncomingData(Object data) {
+		if ( data == null ) {
+			incomingData = data;
+		} else if ( ! incomingDataType.isInstance(data) ) {
+			throw new IllegalArgumentException("Unexpected data type: " + data.getClass());
+		} else {
+			incomingData = data;
+		}
+	}
+	
+	/**
+	 * Get incoming data.
+	 * <p>
+	 * This method is publicly visible to make the data accessible from other classes
+	 * that represent special actions like an enter action, input action or exit action.
+	 * <p>
+	 * @return data or null if no data
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized <T> T getIncomingData() {
+		return (T) incomingData;
+	}
+
+	/**
+	 * Set result data before exit the state.
+	 * <p>
+	 * This method is publicly visible to make possible a result definition from other classes
+	 * that represent special actions like an enter action, input action or exit action.
+	 * <p>
+	 * @param data - data. Null values permitted.
+	 */
+	public synchronized void setResultData(Object data) {
+		if ( data == null ) {
+			resultData = null;
+		} else if ( ! resultDataType.isInstance(data) ) {
+			throw new IllegalArgumentException("Unexpected data type: " + data.getClass());
+		} else {
+			resultData = data;
+		}
+	}
+	
+	/**
+	 * Get result data.
+	 * <p>
+	 * @return data or null if no data
+	 * @throws IllegalArgumentException - the type of data mismatch with declared result data type
+	 */
+	@SuppressWarnings("unchecked")
+	public synchronized <T> T getResultData() {
+		return (T) resultData;
 	}
 	
 }

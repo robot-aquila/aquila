@@ -8,9 +8,13 @@ import java.util.Vector;
 
 import org.easymock.IMocksControl;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class SMStateHandlerTest {
+	@Rule
+	public ExpectedException eex = ExpectedException.none();
 	private IMocksControl control;
 	private SMInputAction inputAction1, inputAction2;
 	private SMEnterAction enterAction;
@@ -60,6 +64,17 @@ public class SMStateHandlerTest {
 		assertSame(exitAction, state.getExitAction());
 		assertEquals(new Vector<SMExit>(), state.getExits());
 		assertEquals(new Vector<SMInput>(), state.getInputs());
+	}
+	
+	@Test
+	public void testCtor4() {
+		state = new SMStateHandler(enterAction, exitAction, Integer.class, String.class);
+		assertSame(enterAction, state.getEnterAction());
+		assertSame(exitAction, state.getExitAction());
+		assertEquals(new Vector<SMExit>(), state.getExits());
+		assertEquals(new Vector<SMInput>(), state.getInputs());
+		assertEquals(Integer.class, state.getIncomingDataType());
+		assertEquals(String.class, state.getResultDataType());
 	}
 	
 	@Test
@@ -123,6 +138,102 @@ public class SMStateHandlerTest {
 	@Test
 	public void testGetExit_ReturnsNullIfNullID() throws Exception {
 		assertNull(state.getExit(null));
+	}
+	
+	@Test
+	public void testSetIncomingData_NullData() {
+		state.setIncomingDataType(Integer.class);
+		
+		state.setIncomingData(null);
+		
+		assertNull(state.getIncomingData());
+	}
+	
+	@Test
+	public void testSetIncomingData_ThrowsIfUnexpectedType() {
+		state.setIncomingDataType(Integer.class);
+		eex.expect(IllegalArgumentException.class);
+		eex.expectMessage("Unexpected data type: " + Boolean.class);
+		
+		state.setIncomingData(false);
+	}
+	
+	@Test
+	public void testSetIncomingData_OK() {
+		state.setIncomingDataType(Integer.class);
+		
+		state.setIncomingData(100500);
+		
+		Integer actual = state.getIncomingData();
+		assertEquals(Integer.valueOf(100500), actual);
+	}
+	
+	
+	@Test
+	public void testSetIncomingData_SubclassesPermitted() {
+		state.setIncomingDataType(Number.class);
+		
+		state.setIncomingData(Double.valueOf("215.004"));
+		
+		assertEquals(Double.valueOf("215.004"), state.getIncomingData());
+	}
+	
+	@Test
+	public void testGetIncomingData_ThrowsIfCallSignatureMismatchDataType() {
+		state.setIncomingDataType(Integer.class);
+		state.setIncomingData(100500);
+		eex.expect(ClassCastException.class);
+		
+		Boolean actual = state.getIncomingData();
+		assertFalse(actual);
+	}
+	
+	@Test
+	public void testSetResultData_NullData() {
+		state.setResultDataType(String.class);
+		
+		state.setResultData(null);
+		
+		assertNull(state.getResultData());
+	}
+	
+	@Test
+	public void testSetResultData_ThrowsIfUnexpectedType() {
+		state.setResultDataType(String.class);
+		eex.expect(IllegalArgumentException.class);
+		eex.expectMessage("Unexpected data type: " + Integer.class);
+		
+		state.setResultData(24);
+	}
+	
+	@Test
+	public void testSetResultData_OK() {
+		state.setResultDataType(String.class);
+		
+		state.setResultData("Hello, Bobby!");
+		
+		String actual = state.getResultData();
+		assertEquals("Hello, Bobby!", actual);
+	}
+	
+	@Test
+	public void testSetResultData_SubclassesPermitted() {
+		state.setResultDataType(Number.class);
+		
+		state.setResultData(Long.valueOf(2396671256L));
+		
+		Long actual = state.getResultData();
+		assertEquals(Long.valueOf(2396671256L), actual);
+	}
+	
+	@Test
+	public void testGetResultData_ThrowsIfCallSignatyreMismatchDataType() {
+		state.setResultDataType(Integer.class);
+		state.setResultData(429127);
+		eex.expect(ClassCastException.class);
+		
+		Boolean actual = state.getResultData();
+		assertFalse(actual);
 	}
 	
 }

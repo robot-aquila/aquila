@@ -2,6 +2,9 @@ package ru.prolib.aquila.core.sm;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ public class SMStateMachine {
 	private static final Logger logger;
 	private static int lastId = 0;
 	private boolean debug = false;
+	private final CountDownLatch finished;
 	
 	static {
 		logger = LoggerFactory.getLogger(SMStateMachine.class);
@@ -39,6 +43,7 @@ public class SMStateMachine {
 		id = getNextId();
 		this.initialState = initialState;
 		this.transitions = transitions;
+		this.finished = new CountDownLatch(1);
 	}
 	
 	/**
@@ -200,6 +205,12 @@ public class SMStateMachine {
 		return currentState == SMStateHandler.FINAL;
 	}
 	
+	public void waitForFinish(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+		if ( ! finished.await(timeout, unit) ) {
+			throw new TimeoutException();
+		}
+	}
+	
 	/**
 	 * Осуществить выход.
 	 * <p>
@@ -235,11 +246,28 @@ public class SMStateMachine {
 				if ( debug && logger.isDebugEnabled() ) {
 					logger.debug("{}: finished", id);
 				}
+				finished.countDown();
 				return;
 			}
 			if ( currentState == null ) {
 				throw new SMTransitionNotExistsException();
 			}
+			
+			Class<?> i_type = currentState.getIncomingDataType(), r_type = pstate.getResultDataType();
+			if ( i_type != Void.class ) {
+				if ( ! i_type.isAssignableFrom(r_type) ) {
+					throw new SMRuntimeException(new StringBuilder()
+						.append("Data types mismatch while passing data between states.")
+						.append(" Machine ID: ").append(id)
+						.append(" Transition: ").append(pstate).append(".").append(exit)
+						.append(" -> ").append(currentState)
+						.append(" Expected: ").append(i_type)
+						.append(" Actual: ").append(r_type)
+						.toString());
+				}
+				currentState.setIncomingData(pstate.getResultData());
+			}
+			
 			SMEnterAction enterAction = currentState.getEnterAction();
 			createTriggers();
 			exit = null;
