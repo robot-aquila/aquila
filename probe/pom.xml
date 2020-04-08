@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ru.prolib.aquila</groupId>
 	  	<artifactId>aquila</artifactId>
-	  	<version>0.1.56</version>
+	  	<version>0.1.57</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	
@@ -16,17 +16,17 @@
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-core</artifactId>
-			<version>0.1.56</version>
+			<version>0.1.57</version>
 		</dependency>
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-ui</artifactId>
-			<version>0.1.56</version>
+			<version>0.1.57</version>
 		</dependency>
 		<dependency>
 			<groupId>ru.prolib.aquila</groupId>
 			<artifactId>aquila-data</artifactId>
-			<version>0.1.56</version>
+			<version>0.1.57</version>
 		</dependency>
 	</dependencies>
   
