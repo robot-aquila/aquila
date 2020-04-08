@@ -38,9 +38,21 @@ public class SMBuilder {
 	 * @param srcExit - exit ID of state from
 	 * @param tgtState - identifier of the state to transition to
 	 * @return this
+	 * @throws IllegalArgumentException - transition data types mismatch
 	 */
 	public SMBuilder addTrans(String srcState, String srcExit, String tgtState) {
-		transitions.put(new KW<SMExit>(getState(srcState).getExit(srcExit)), getState(tgtState));
+		SMStateHandler src = getState(srcState), tgt = getState(tgtState);
+		Class<?> src_r_type = src.getResultDataType(), tgt_i_type = tgt.getIncomingDataType();
+		if ( tgt_i_type != Void.class && ! tgt_i_type.isAssignableFrom(src_r_type) ) {
+			throw new IllegalArgumentException(new StringBuilder()
+					.append("Transition data types mismatch.")
+					.append(" Transition: ").append(srcState).append(".").append(srcExit)
+					.append(" -> ").append(tgtState)
+					.append(" Expected: ").append(tgt_i_type)
+					.append(" Actual: ").append(src_r_type)
+					.toString());
+		}
+		transitions.put(new KW<SMExit>(src.getExit(srcExit)), tgt);
 		return this;
 	}
 	
