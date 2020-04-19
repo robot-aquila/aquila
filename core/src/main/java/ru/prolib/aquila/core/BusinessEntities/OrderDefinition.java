@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -13,6 +15,7 @@ public class OrderDefinition {
 	protected final CDecimal qty, price;
 	protected final String comment;
 	protected final long maxExecTime;
+	protected final Instant placementTime;
 	
 	public OrderDefinition(Account account,
 			Symbol symbol,
@@ -21,7 +24,8 @@ public class OrderDefinition {
 			CDecimal qty,
 			CDecimal price,
 			String comment,
-			long max_exec_time)
+			long max_exec_time,
+			Instant placement_time)
 	{
 		this.account = account;
 		this.symbol = symbol;
@@ -31,6 +35,7 @@ public class OrderDefinition {
 		this.price = price;
 		this.comment = comment;
 		this.maxExecTime = max_exec_time;
+		this.placementTime = placement_time;
 	}
 	
 	public Account getAccount() {
@@ -65,6 +70,10 @@ public class OrderDefinition {
 		return maxExecTime;
 	}
 	
+	public Instant getPlacementTime() {
+		return placementTime;
+	}
+	
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -81,6 +90,7 @@ public class OrderDefinition {
 				.append(price)
 				.append(comment)
 				.append(maxExecTime)
+				.append(placementTime)
 				.build();
 	}
 	
@@ -102,6 +112,7 @@ public class OrderDefinition {
 				.append(o.price, price)
 				.append(o.comment, comment)
 				.append(o.maxExecTime, maxExecTime)
+				.append(o.placementTime, placementTime)
 				.build();
 	}
 

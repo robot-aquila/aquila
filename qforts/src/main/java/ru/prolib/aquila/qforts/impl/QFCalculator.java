@@ -81,15 +81,16 @@ public class QFCalculator {
 		CDecimal umgn, vmgn, vmgn_c, vmgn_i, pl;
 		umgn = vmgn = vmgn_c = vmgn_i = pl = ZERO_MONEY5;
 		for ( Position pos : portfolio.getPositions() ) {
-			if ( pos.getCDecimal(PositionField.CURRENT_VOLUME, ZERO).compareTo(ZERO) != 0L ) {
-				QFPositionChangeUpdate pos_update = utils.refreshByCurrentState(pos);
+			QFPositionChangeUpdate pos_update = utils.refreshByCurrentState(pos);
+			CDecimal volume = pos.getCurrentVolume();
+			if ( volume != null && volume.compareTo(ZERO) != 0 ) {
 				update.setPositionUpdate(pos_update);
-				umgn = umgn.add(pos_update.getFinalUsedMargin());
-				vmgn = vmgn.add(pos_update.getFinalVarMargin());
-				vmgn_c = vmgn_c.add(pos_update.getFinalVarMarginClose());
-				vmgn_i = vmgn_i.add(pos_update.getFinalVarMarginInter());
-				pl = pl.add(pos_update.getFinalProfitAndLoss());
 			}
+			umgn = umgn.add(pos_update.getFinalUsedMargin());
+			vmgn = vmgn.add(pos_update.getFinalVarMargin());
+			vmgn_c = vmgn_c.add(pos_update.getFinalVarMarginClose());
+			vmgn_i = vmgn_i.add(pos_update.getFinalVarMarginInter());
+			pl = pl.add(pos_update.getFinalProfitAndLoss());
 		}
 		setInitialValues(portfolio, update)
 			.setChangeBalance(ZERO_MONEY5)
@@ -108,12 +109,12 @@ public class QFCalculator {
 			.setChangeVarMarginClose(ZERO_MONEY5)
 			.setChangeVarMarginInter(ZERO_MONEY5);
 		
-
 		boolean recalculated = false;
 		if ( portfolio.isPositionExists(symbol) ) {
 			Position position = portfolio.getPosition(symbol);
-			if ( position.getCDecimal(PositionField.CURRENT_VOLUME, ZERO).compareTo(ZERO) != 0L ) {
-				QFPositionChangeUpdate pos_update = utils.refreshByCurrentState(position, last_price);
+			QFPositionChangeUpdate pos_update = utils.refreshByCurrentState(position, last_price);
+			CDecimal volume = position.getCurrentVolume();
+			if ( volume != null && volume.compareTo(ZERO) != 0 ) {
 				update.setPositionUpdate(pos_update);
 				update.setChangeVarMargin(pos_update.getChangeVarMargin())
 					.setChangeProfitAndLoss(pos_update.getChangeProfitAndLoss())

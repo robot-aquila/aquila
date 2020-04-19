@@ -159,6 +159,9 @@ public class QFCalculatorTest {
 			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE,	ofRUB5("500"))
 			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER,	ofRUB5("190"))
 			.buildUpdate());
+		terminal.getEditableSecurity(symbol1).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE, of("0.01"))
+			.buildUpdate());
 		p.getEditablePosition(symbol1).consume(new DeltaUpdateBuilder()
 			.withToken(PositionField.CURRENT_VOLUME, of(1L))	
 			.buildUpdate());
@@ -182,7 +185,13 @@ public class QFCalculatorTest {
 			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE,	ofRUB5(  "500.0"))
 			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER,	ofRUB5(  "190.0"))
 			.buildUpdate());
+		terminal.getEditableSecurity(symbol1).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.001"))
+			.buildUpdate());
 		p.getEditablePosition(symbol1); // position should be skipped because of null volume
+		terminal.getEditableSecurity(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.01"))
+			.buildUpdate());
 		p.getEditablePosition(symbol2).consume(new DeltaUpdateBuilder()
 			// should be skipped because of zero volume
 			.withToken(PositionField.CURRENT_VOLUME,		of(0L))
@@ -268,6 +277,69 @@ public class QFCalculatorTest {
 					.setInitialVolume(of(-5L)).setFinalVolume(of(-5L))
 					.setInitialTickValue(ofRUB2("0.50")).setFinalTickValue(ofRUB2("0.50"))
 				);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testUpdateByMarket_RealData_ZeroPositionWithNonZeroValuesWillCount() throws Exception {
+		EditablePortfolio p = terminal.getEditablePortfolio(account1);
+		p.consume(new DeltaUpdateBuilder()
+			.withToken(PortfolioField.BALANCE,					ofRUB5("10000.0"))
+			.withToken(PortfolioField.EQUITY,					ofRUB5( "5000.0"))
+			.withToken(PortfolioField.FREE_MARGIN,				ofRUB5( "4500.0"))
+			.withToken(PortfolioField.PROFIT_AND_LOSS,			ofRUB5(  "750.0"))
+			.withToken(PortfolioField.USED_MARGIN,				ofRUB5(  "250.0"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN,			ofRUB5(   "10.9"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE,	ofRUB5(  "500.0"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER,	ofRUB5(  "190.0"))
+			.buildUpdate());
+		terminal.getEditableSecurity(symbol1).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.05"))
+			.buildUpdate());
+		p.getEditablePosition(symbol1).consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_VOLUME,		of(0L))
+			.withToken(PositionField.OPEN_PRICE,			of("0.00"))
+			.withToken(PositionField.CURRENT_PRICE,			of("0.00"))
+			.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("25.98"))
+			.withToken(PositionField.USED_MARGIN,			ofRUB5( "0.00"))
+			.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5( "0.00"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5("25.98"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5( "0.00"))
+			.buildUpdate());
+		terminal.getEditableSecurity(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.01"))
+			.buildUpdate());
+		p.getEditablePosition(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_VOLUME,		null)
+			.withToken(PositionField.OPEN_PRICE,			of("0.00"))
+			.withToken(PositionField.CURRENT_PRICE,			of("0.00"))
+			.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("13.26"))
+			.withToken(PositionField.USED_MARGIN,			ofRUB5( "0.00"))
+			.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5( "0.00"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5( "3.26"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5("10.00"))
+			.buildUpdate());
+		service = new QFCalculator();
+		
+		QFPortfolioChangeUpdate actual = service.updateByMarket(p);
+		
+		QFPortfolioChangeUpdate expected = new QFPortfolioChangeUpdate(account1)
+			.setInitialBalance(ofRUB5("10000.0"))
+			.setInitialEquity(ofRUB5("5000.0"))
+			.setInitialFreeMargin(ofRUB5("4500.0"))
+			.setInitialProfitAndLoss(ofRUB5("750.0"))
+			.setInitialUsedMargin(ofRUB5("250.0"))
+			.setInitialVarMargin(ofRUB5("10.9"))
+			.setInitialVarMarginClose(ofRUB5("500.0"))
+			.setInitialVarMarginInter(ofRUB5("190.0"))
+			.setChangeBalance(ZERO_MONEY5)
+			.setFinalVarMargin(ofRUB5("0.0"))
+			.setFinalVarMarginClose(ofRUB5("29.24"))
+			.setFinalVarMarginInter(ofRUB5("10.00"))
+			.setFinalProfitAndLoss(ofRUB5("39.24"))
+			.setFinalUsedMargin(ofRUB5("0.00"))
+			.setFinalEquity(ofRUB5("10039.24"))
+			.setFinalFreeMargin(ofRUB5("10039.24"));
 		assertEquals(expected, actual);
 	}
 	
@@ -362,48 +434,48 @@ public class QFCalculatorTest {
 	public void testUpdateByMarket3_RealData_OK() throws Exception {
 		EditablePortfolio p = terminal.getEditablePortfolio(account1);
 		p.consume(new DeltaUpdateBuilder()
-				.withToken(PortfolioField.BALANCE,					ofRUB5("10000.0"))
-				.withToken(PortfolioField.EQUITY,					ofRUB5( "5000.0"))
-				.withToken(PortfolioField.FREE_MARGIN,				ofRUB5( "4500.0"))
-				.withToken(PortfolioField.PROFIT_AND_LOSS,			ofRUB5(  "750.0"))
-				.withToken(PortfolioField.USED_MARGIN,				ofRUB5(  "250.0"))
-				.withToken(QFPortfolioField.QF_VAR_MARGIN,			ofRUB5(   "10.9"))
-				.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE,	ofRUB5(  "500.0"))
-				.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER,	ofRUB5(  "190.0"))
-				.buildUpdate());
-			// symbol1 should be completely ignored
-			terminal.getEditableSecurity(symbol1).consume(new DeltaUpdateBuilder()
-				.withToken(SecurityField.TICK_SIZE,				of("0.01"))
-				.withToken(SecurityField.INITIAL_MARGIN,		ofRUB5("1592.03"))
-				.withToken(SecurityField.SETTLEMENT_PRICE,		of("115.00"))
-				.buildUpdate());
-			p.getEditablePosition(symbol1).consume(new DeltaUpdateBuilder()
-				.withToken(PositionField.CURRENT_VOLUME,		of(10L))
-				.withToken(PositionField.OPEN_PRICE,			of("269.20"))
-				.withToken(PositionField.CURRENT_PRICE,			of("274.16"))
-				.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("115.36"))
-				.withToken(PositionField.USED_MARGIN,			ofRUB5("765.92"))
-				.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5("626.12"))
-				.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5("886.22"))
-				.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5("109.05"))
-				.withToken(QFPositionField.QF_TICK_VALUE,		ofRUB5("0.025"))
-				.buildUpdate());
-			terminal.getEditableSecurity(symbol2).consume(new DeltaUpdateBuilder()
-				.withToken(SecurityField.TICK_SIZE,				of("0.02"))
-				.withToken(SecurityField.INITIAL_MARGIN,		ofRUB5("1226.02"))
-				.withToken(SecurityField.SETTLEMENT_PRICE,		of("27.00"))
-				.buildUpdate());
-			p.getEditablePosition(symbol2).consume(new DeltaUpdateBuilder()
-				.withToken(PositionField.CURRENT_VOLUME,		of(25L))
-				.withToken(PositionField.OPEN_PRICE,			of("775.46"))
-				.withToken(PositionField.CURRENT_PRICE,			of("679.12"))
-				.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("112.56"))
-				.withToken(PositionField.USED_MARGIN,			ofRUB5("908.12"))
-				.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5("269.01"))
-				.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5("100.50"))
-				.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5("250.26"))
-				.withToken(QFPositionField.QF_TICK_VALUE,		ofRUB5("0.05"))
-				.buildUpdate());
+			.withToken(PortfolioField.BALANCE,					ofRUB5("10000.0"))
+			.withToken(PortfolioField.EQUITY,					ofRUB5( "5000.0"))
+			.withToken(PortfolioField.FREE_MARGIN,				ofRUB5( "4500.0"))
+			.withToken(PortfolioField.PROFIT_AND_LOSS,			ofRUB5(  "750.0"))
+			.withToken(PortfolioField.USED_MARGIN,				ofRUB5(  "250.0"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN,			ofRUB5(   "10.9"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE,	ofRUB5(  "500.0"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER,	ofRUB5(  "190.0"))
+			.buildUpdate());
+		// symbol1 should be completely ignored
+		terminal.getEditableSecurity(symbol1).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.01"))
+			.withToken(SecurityField.INITIAL_MARGIN,		ofRUB5("1592.03"))
+			.withToken(SecurityField.SETTLEMENT_PRICE,		of("115.00"))
+			.buildUpdate());
+		p.getEditablePosition(symbol1).consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_VOLUME,		of(10L))
+			.withToken(PositionField.OPEN_PRICE,			of("269.20"))
+			.withToken(PositionField.CURRENT_PRICE,			of("274.16"))
+			.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("115.36"))
+			.withToken(PositionField.USED_MARGIN,			ofRUB5("765.92"))
+			.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5("626.12"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5("886.22"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5("109.05"))
+			.withToken(QFPositionField.QF_TICK_VALUE,		ofRUB5("0.025"))
+			.buildUpdate());
+		terminal.getEditableSecurity(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.02"))
+			.withToken(SecurityField.INITIAL_MARGIN,		ofRUB5("1226.02"))
+			.withToken(SecurityField.SETTLEMENT_PRICE,		of("27.00"))
+			.buildUpdate());
+		p.getEditablePosition(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_VOLUME,		of(25L))
+			.withToken(PositionField.OPEN_PRICE,			of("775.46"))
+			.withToken(PositionField.CURRENT_PRICE,			of("679.12"))
+			.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("112.56"))
+			.withToken(PositionField.USED_MARGIN,			ofRUB5("908.12"))
+			.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5("269.01"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5("100.50"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5("250.26"))
+			.withToken(QFPositionField.QF_TICK_VALUE,		ofRUB5("0.05"))
+			.buildUpdate());
 		service = new QFCalculator();
 		
 		QFPortfolioChangeUpdate actual = service.updateByMarket(p, symbol2, of("28.50"));
@@ -437,6 +509,56 @@ public class QFCalculatorTest {
 				.setInitialVarMargin(ofRUB5("269.01")).setFinalVarMargin(ofRUB5("-157.4")) // -62.96/0.02*0.05=
 				.setInitialProfitAndLoss(ofRUB5("112.56")).setFinalProfitAndLoss(ofRUB5("193.36"))
 			);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testUpdateByMarket3_RealData_ZeroPositionWithNonZeroValuesWillCount() throws Exception {
+		EditablePortfolio p = terminal.getEditablePortfolio(account1);
+		p.consume(new DeltaUpdateBuilder()
+			.withToken(PortfolioField.BALANCE,					ofRUB5("10000.0"))
+			.withToken(PortfolioField.EQUITY,					ofRUB5( "5000.0"))
+			.withToken(PortfolioField.FREE_MARGIN,				ofRUB5( "4500.0"))
+			.withToken(PortfolioField.PROFIT_AND_LOSS,			ofRUB5(  "750.0"))
+			.withToken(PortfolioField.USED_MARGIN,				ofRUB5(  "250.0"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN,			ofRUB5(   "10.9"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_CLOSE,	ofRUB5(  "500.0"))
+			.withToken(QFPortfolioField.QF_VAR_MARGIN_INTER,	ofRUB5(  "190.0"))
+			.buildUpdate());
+		terminal.getEditableSecurity(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.TICK_SIZE,				of("0.01"))
+			.buildUpdate());
+		p.getEditablePosition(symbol2).consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_VOLUME,		of(0L))
+			.withToken(PositionField.OPEN_PRICE,			of("0.00"))
+			.withToken(PositionField.CURRENT_PRICE,			of("0.00"))
+			.withToken(PositionField.PROFIT_AND_LOSS,		ofRUB5("13.26"))
+			.withToken(PositionField.USED_MARGIN,			ofRUB5( "0.00"))
+			.withToken(QFPositionField.QF_VAR_MARGIN,		ofRUB5( "0.00"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_CLOSE,	ofRUB5( "3.26"))
+			.withToken(QFPositionField.QF_VAR_MARGIN_INTER,	ofRUB5("10.00"))
+			.buildUpdate());
+		service = new QFCalculator();
+
+		QFPortfolioChangeUpdate actual = service.updateByMarket(p, symbol2, of("28.50"));
+		
+		QFPortfolioChangeUpdate expected = new QFPortfolioChangeUpdate(account1)
+			.setInitialBalance(ofRUB5("10000.0"))
+			.setInitialEquity(ofRUB5("5000.0"))
+			.setInitialFreeMargin(ofRUB5("4500.0"))
+			.setInitialProfitAndLoss(ofRUB5("750.0"))
+			.setInitialUsedMargin(ofRUB5("250.0"))
+			.setInitialVarMargin(ofRUB5("10.9"))
+			.setInitialVarMarginClose(ofRUB5("500.0"))
+			.setInitialVarMarginInter(ofRUB5("190.0"))
+			.setChangeBalance(ZERO_MONEY5)
+			.setChangeVarMargin(ZERO_MONEY5)
+			.setChangeVarMarginClose(ZERO_MONEY5)
+			.setChangeVarMarginInter(ZERO_MONEY5)
+			.setChangeProfitAndLoss(ZERO_MONEY5)
+			.setChangeUsedMargin(ZERO_MONEY5)
+			.setChangeEquity(ZERO_MONEY5)
+			.setChangeFreeMargin(ZERO_MONEY5);
 		assertEquals(expected, actual);
 	}
 	

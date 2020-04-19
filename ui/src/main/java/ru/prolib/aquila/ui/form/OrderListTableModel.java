@@ -227,9 +227,9 @@ public class OrderListTableModel extends AbstractTableModel implements
 		}
 		for ( Terminal terminal : terminalSet ) {
 			if ( event.isType(terminal.onOrderUpdate()) ) {
-				Integer row = getIndexOfOrder(((OrderEvent) event).getOrder());
+				Integer row = getIndexOfOrder(((OrderUpdateEvent) event).getOrder());
 				if ( row == null ) {
-					row = addOrder(((OrderEvent) event).getOrder());
+					row = addOrder(((OrderUpdateEvent) event).getOrder());
 					if ( row != null ) {
 						fireTableRowsInserted(row, row);
 					}

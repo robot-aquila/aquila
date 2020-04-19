@@ -1,5 +1,7 @@
 package ru.prolib.aquila.core.BusinessEntities;
 
+import java.time.Instant;
+
 public class OrderDefinitionBuilder {
 	private Account account;
 	private Symbol symbol;
@@ -8,6 +10,7 @@ public class OrderDefinitionBuilder {
 	private CDecimal qty, price;
 	private String comment;
 	private Long maxExecTime;
+	private Instant placementTime;
 	
 	public OrderDefinitionBuilder withAccount(Account account) {
 		this.account = account;
@@ -47,6 +50,15 @@ public class OrderDefinitionBuilder {
 	public OrderDefinitionBuilder withMaxExecutionTime(long time_millis) {
 		this.maxExecTime = time_millis;
 		return this;
+	}
+	
+	public OrderDefinitionBuilder withPlacementTime(Instant time) {
+		this.placementTime = time;
+		return this;
+	}
+	
+	public OrderDefinitionBuilder withPlacementTime(String time_string) {
+		return withPlacementTime(Instant.parse(time_string));
 	}
 	
 	public OrderDefinitionBuilder withLimitBuy(CDecimal qty, CDecimal price) {
@@ -118,7 +130,8 @@ public class OrderDefinitionBuilder {
 				qty,
 				price,
 				comment,
-				maxExecTime
+				maxExecTime,
+				placementTime
 			);
 		action = null;
 		qty = null;

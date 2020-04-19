@@ -530,6 +530,8 @@ public class SecurityListTableModel extends AbstractTableModel
 	public void onEvent(final Event event) {
 		if ( event instanceof SecurityEvent ) {
 			cache.addUpdate(((SecurityEvent) event).getSecurity());
+		} else if ( event instanceof SecurityUpdateEvent ) {
+			cache.addUpdate(((SecurityUpdateEvent) event).getSecurity());
 		}
 	}
 	

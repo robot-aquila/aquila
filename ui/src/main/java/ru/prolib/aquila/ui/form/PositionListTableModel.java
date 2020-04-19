@@ -225,7 +225,7 @@ public class PositionListTableModel extends AbstractTableModel implements
 		for ( Terminal terminal : terminalSet ) {
 			if ( event.isType(terminal.onPositionUpdate()) ) {
 				int firstRow = positions.size();
-				Position position = ((PositionEvent) event).getPosition();
+				Position position = ((PositionUpdateEvent) event).getPosition();
 				if ( positionMap.containsKey(position) ) {
 					Integer row = positionMap.get(position);
 					fireTableRowsUpdated(row, row);

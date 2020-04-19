@@ -231,7 +231,7 @@ public class PortfolioListTableModel extends AbstractTableModel
 		for ( Terminal terminal : terminalSet ) {
 			if ( event.isType(terminal.onPortfolioUpdate()) ) {
 				int firstRow = portfolios.size();
-				Portfolio portfolio = ((PortfolioEvent) event).getPortfolio();
+				Portfolio portfolio = ((PortfolioUpdateEvent) event).getPortfolio();
 				if ( portfolioMap.containsKey(portfolio) ) {
 					Integer row = portfolioMap.get(portfolio);
 					fireTableRowsUpdated(row, row);

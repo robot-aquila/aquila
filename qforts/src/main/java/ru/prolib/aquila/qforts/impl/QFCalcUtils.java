@@ -1,5 +1,6 @@
 package ru.prolib.aquila.qforts.impl;
 
+import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 import java.math.RoundingMode;
 
 import ru.prolib.aquila.core.BusinessEntities.Account;
@@ -30,6 +31,9 @@ public class QFCalcUtils {
 	
 	private CDecimal getUsedMargin(Security security, CDecimal volume) {
 		try {
+			if ( volume == null || volume.compareTo(ZERO) == 0 ) {
+				return ZERO_RUB5;
+			}
 			return security.getInitialMargin().multiply(volume).abs();
 		} catch ( NullPointerException e ) {
 			throw new IllegalStateException(new StringBuilder()
@@ -247,7 +251,17 @@ public class QFCalcUtils {
 	 * @return calculated changes
 	 */
 	public QFPositionChangeUpdate refreshByCurrentState(Position position) {
-		 return refreshByCurrentState(position, getCurrentPrice(position.getSecurity()));
+		CDecimal volume = position.getCurrentVolume(), last_price = null;
+		if ( volume != null && volume.compareTo(CDecimalBD.ZERO) != 0 ) {
+			last_price = getCurrentPrice(position.getSecurity());
+		} else {
+			last_price = position.getSecurity().getTickSize();
+			if ( last_price == null ) {
+				throw new NullPointerException("Tick size was not defined: " + position.getSymbol());
+			}
+			last_price = last_price.withZero();
+		}
+		return refreshByCurrentState(position, last_price);
 	}
 	
 	/**

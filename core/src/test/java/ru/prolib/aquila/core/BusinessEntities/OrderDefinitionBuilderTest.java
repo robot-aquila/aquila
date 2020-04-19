@@ -3,6 +3,8 @@ package ru.prolib.aquila.core.BusinessEntities;
 import static org.junit.Assert.*;
 import static ru.prolib.aquila.core.BusinessEntities.CDecimalBD.*;
 
+import java.time.Instant;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -11,6 +13,10 @@ import org.junit.rules.ExpectedException;
 public class OrderDefinitionBuilderTest {
 	static Account ACCOUNT = new Account("TEST_ACCOUNT");
 	static Symbol SYMBOL = new Symbol("MSFT");
+	
+	static Instant T(String time_string) {
+		return Instant.parse(time_string);
+	}
 	
 	@Rule public ExpectedException eex = ExpectedException.none();
 	OrderDefinitionBuilder service;
@@ -30,6 +36,7 @@ public class OrderDefinitionBuilderTest {
 		assertSame(service, service.withPrice(of("120.57")));
 		assertSame(service, service.withComment("test order"));
 		assertSame(service, service.withMaxExecutionTime(3000L));
+		assertSame(service, service.withPlacementTime(T("2020-01-13T20:35:14Z")));
 		
 		OrderDefinition actual = service.buildDefinition();
 		
@@ -41,7 +48,35 @@ public class OrderDefinitionBuilderTest {
 				of(100L),
 				of("120.57"),
 				"test order",
-				3000L
+				3000L,
+				T("2020-01-13T20:35:14Z")
+			);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testBuildDefinition_WithPlacementTime_Str() {
+		service.withAccount(ACCOUNT)
+			.withSymbol(SYMBOL)
+			.withType(OrderType.LMT)
+			.withAction(OrderAction.COVER)
+			.withQty(of(10L))
+			.withPrice(of("200.15"))
+			.withMaxExecutionTime(2500L)
+			.withPlacementTime("2014-12-31T23:59:00Z");
+		
+		OrderDefinition actual = service.buildDefinition();
+		
+		OrderDefinition expected = new OrderDefinition(
+				ACCOUNT,
+				SYMBOL,
+				OrderType.LMT,
+				OrderAction.COVER,
+				of(10L),
+				of("200.15"),
+				null,
+				2500L,
+				T("2014-12-31T23:59:00Z")
 			);
 		assertEquals(expected, actual);
 	}
@@ -96,7 +131,8 @@ public class OrderDefinitionBuilderTest {
 				of(1L),
 				of("203.26"),
 				"new order",
-				5000L
+				5000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -198,7 +234,8 @@ public class OrderDefinitionBuilderTest {
 				of(10L),
 				of("200.15"),
 				null,
-				2500L
+				2500L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -293,7 +330,8 @@ public class OrderDefinitionBuilderTest {
 				of(100L),
 				of("24.2701"),
 				"zulu 15",
-				25000L
+				25000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -316,7 +354,8 @@ public class OrderDefinitionBuilderTest {
 				of(100L),
 				of("24.2701"),
 				"zulu 15",
-				25000L
+				25000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -339,7 +378,8 @@ public class OrderDefinitionBuilderTest {
 				of(100L),
 				of("24.2701"),
 				"zulu 15",
-				25000L
+				25000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -362,7 +402,8 @@ public class OrderDefinitionBuilderTest {
 				of(100L),
 				of("24.2701"),
 				"zulu 15",
-				25000L
+				25000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -385,7 +426,8 @@ public class OrderDefinitionBuilderTest {
 				of(200L),
 				null,
 				"zyama",
-				1000L
+				1000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -408,7 +450,8 @@ public class OrderDefinitionBuilderTest {
 				of(200L),
 				null,
 				"zyama",
-				1000L
+				1000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -431,7 +474,8 @@ public class OrderDefinitionBuilderTest {
 				of(200L),
 				null,
 				"zyama",
-				1000L
+				1000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}
@@ -454,7 +498,8 @@ public class OrderDefinitionBuilderTest {
 				of(200L),
 				null,
 				"zyama",
-				1000L
+				1000L,
+				null
 			);
 		assertEquals(expected, actual);
 	}

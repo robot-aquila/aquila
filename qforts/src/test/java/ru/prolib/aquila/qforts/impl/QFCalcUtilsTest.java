@@ -546,6 +546,110 @@ public class QFCalcUtilsTest {
 			.setFinalTickValue(ofRUB5("0.20"));
 		assertEquals(expected, actual);
 	}
+	
+	@Test
+	public void testRefreshByCurrentState1_OK_ZeroPositionAndNoLastPrice() {
+		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.SETTLEMENT_PRICE,	null)
+				.buildUpdate());
+		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
+		p.consume(new DeltaUpdateBuilder()
+			.withToken(PositionField.CURRENT_VOLUME, of(0L))
+			.buildUpdate());
+		
+		QFPositionChangeUpdate actual = service.refreshByCurrentState(p);
+		
+		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
+			.setChangeBalance(ZERO_MONEY5)
+			.setInitialCurrentPrice(ZERO_PRICE)
+			.setInitialOpenPrice(ZERO_PRICE)
+			.setInitialProfitAndLoss(ZERO_MONEY5)
+			.setInitialUsedMargin(ZERO_MONEY5)
+			.setInitialVarMargin(ZERO_MONEY5)
+			.setInitialVarMarginClose(ZERO_MONEY5)
+			.setInitialVarMarginInter(ZERO_MONEY5)
+			.setInitialVolume(ZERO)
+			.setInitialTickValue(null)
+			.setFinalCurrentPrice(ZERO_PRICE)
+			.setFinalOpenPrice(ZERO_PRICE)
+			.setFinalProfitAndLoss(ZERO_MONEY5)
+			.setFinalUsedMargin(ZERO_MONEY5)
+			.setFinalVarMargin(ZERO_MONEY5)
+			.setFinalVarMarginClose(ZERO_MONEY5)
+			.setFinalVarMarginInter(ZERO_MONEY5)
+			.setFinalVolume(ZERO)
+			.setFinalTickValue(null);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testRefreshByCurrentState1_OK_NullPositionAndNoLastPrice() {
+		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
+				.withToken(SecurityField.SETTLEMENT_PRICE,	null)
+				.buildUpdate());
+		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
+		
+		QFPositionChangeUpdate actual = service.refreshByCurrentState(p);
+		
+		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
+			.setChangeBalance(ZERO_MONEY5)
+			.setInitialCurrentPrice(ZERO_PRICE)
+			.setInitialOpenPrice(ZERO_PRICE)
+			.setInitialProfitAndLoss(ZERO_MONEY5)
+			.setInitialUsedMargin(ZERO_MONEY5)
+			.setInitialVarMargin(ZERO_MONEY5)
+			.setInitialVarMarginClose(ZERO_MONEY5)
+			.setInitialVarMarginInter(ZERO_MONEY5)
+			.setInitialVolume(ZERO)
+			.setInitialTickValue(null)
+			.setFinalCurrentPrice(ZERO_PRICE)
+			.setFinalOpenPrice(ZERO_PRICE)
+			.setFinalProfitAndLoss(ZERO_MONEY5)
+			.setFinalUsedMargin(ZERO_MONEY5)
+			.setFinalVarMargin(ZERO_MONEY5)
+			.setFinalVarMarginClose(ZERO_MONEY5)
+			.setFinalVarMarginInter(ZERO_MONEY5)
+			.setFinalVolume(ZERO)
+			.setFinalTickValue(null);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testRefreshByCurrentState1_PositionNotInitialized() {
+		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
+		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
+			.withTrade()
+			.withPrice("51.16")
+			.withSize(100L)
+			.buildL1Update());
+		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.INITIAL_MARGIN,		ofRUB2("14"))
+			.buildUpdate());
+		
+		QFPositionChangeUpdate actual = service.refreshByCurrentState(p);
+		
+		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
+			.setChangeBalance(ZERO_MONEY5)
+			.setInitialCurrentPrice(of("0.00"))
+			.setInitialOpenPrice(of("0.00"))
+			.setInitialProfitAndLoss(ZERO_MONEY5)
+			.setInitialUsedMargin(ZERO_MONEY5)
+			.setInitialVarMargin(ZERO_MONEY5)
+			.setInitialVarMarginClose(ZERO_MONEY5)
+			.setInitialVarMarginInter(ZERO_MONEY5)
+			.setInitialVolume(of(0L))
+			.setInitialTickValue(null)
+			.setFinalCurrentPrice(of("0.00"))
+			.setFinalOpenPrice(of("0.00"))
+			.setFinalProfitAndLoss(ZERO_MONEY5)
+			.setFinalUsedMargin(ZERO_MONEY5)
+			.setFinalVarMargin(ZERO_MONEY5)
+			.setFinalVarMarginClose(ZERO_MONEY5)
+			.setFinalVarMarginInter(ZERO_MONEY5)
+			.setFinalVolume(of(0L))
+			.setFinalTickValue(null);
+		assertEquals(expected, actual);
+	}
 
 	@Test
 	public void testRefreshByCurrentState2_ThrowsIfPosTickValNotSpecified() {
@@ -621,6 +725,43 @@ public class QFCalcUtilsTest {
 			.setFinalVarMarginInter(ofRUB5("52.82"))
 			.setFinalVolume(of(-5L))
 			.setFinalTickValue(ofRUB2("0.4"));
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void testRefreshByCurrentState2_PositionNotInitialized() {
+		EditablePosition p = terminal.getEditablePortfolio(account).getEditablePosition(symbol);
+		terminal.getEditableSecurity(symbol).consume(new L1UpdateBuilder(symbol)
+			.withTrade()
+			.withPrice("51.16")
+			.withSize(100L)
+			.buildL1Update());
+		terminal.getEditableSecurity(symbol).consume(new DeltaUpdateBuilder()
+			.withToken(SecurityField.INITIAL_MARGIN, ofRUB2("14"))
+			.buildUpdate());
+		
+		QFPositionChangeUpdate actual = service.refreshByCurrentState(p, CDecimalBD.of("51.08"));
+
+		QFPositionChangeUpdate expected = new QFPositionChangeUpdate(account, symbol)
+			.setChangeBalance(ZERO_MONEY5)
+			.setInitialCurrentPrice(of("0.00"))
+			.setInitialOpenPrice(of("0.00"))
+			.setInitialProfitAndLoss(ZERO_MONEY5)
+			.setInitialUsedMargin(ZERO_MONEY5)
+			.setInitialVarMargin(ZERO_MONEY5)
+			.setInitialVarMarginClose(ZERO_MONEY5)
+			.setInitialVarMarginInter(ZERO_MONEY5)
+			.setInitialVolume(of(0L))
+			.setInitialTickValue(null)
+			.setFinalCurrentPrice(of("0.00"))
+			.setFinalOpenPrice(of("0.00"))
+			.setFinalProfitAndLoss(ZERO_MONEY5)
+			.setFinalUsedMargin(ZERO_MONEY5)
+			.setFinalVarMargin(ZERO_MONEY5)
+			.setFinalVarMarginClose(ZERO_MONEY5)
+			.setFinalVarMarginInter(ZERO_MONEY5)
+			.setFinalVolume(of(0L))
+			.setFinalTickValue(null);
 		assertEquals(expected, actual);
 	}
 
