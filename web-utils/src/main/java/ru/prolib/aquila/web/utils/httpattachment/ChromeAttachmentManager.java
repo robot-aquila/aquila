@@ -66,9 +66,6 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 	public HTTPAttachment getLast(HTTPAttachmentCriteria criteria, HTTPDownloadInitiator initiator)
 			throws HTTPAttachmentException, IOException
 	{
-		File dummy = new File(targetDir, "test.dat");
-		logger.debug("Dummy file: {}", dummy);
-		logger.debug("File {} creation result: {}", dummy, dummy.createNewFile());
 		String files[] = targetDir.list();
 		if ( files == null ) {
 			throw new NullPointerException("Unable to obtain list of files: " + targetDir);
