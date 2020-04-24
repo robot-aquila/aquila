@@ -84,7 +84,7 @@ public class FidexpIT {
 	@After
 	public void tearDown() throws Exception {
 		IOUtils.closeQuietly(facade);
-		Thread.sleep(ThreadLocalRandom.current().nextLong(1000L, 1000L));
+		Thread.sleep(ThreadLocalRandom.current().nextLong(5000L, 10000L));
 	}
 	
 	private LocalDate nextFuturesDate(LocalDate date) {
