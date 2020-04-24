@@ -67,6 +67,7 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 			throws HTTPAttachmentException, IOException
 	{
 		File dummy = new File(targetDir, "test.dat");
+		logger.debug("Dummy file: {}", dummy);
 		logger.debug("File {} creation result: {}", dummy, dummy.createNewFile());
 		String files[] = targetDir.list();
 		if ( files == null ) {
