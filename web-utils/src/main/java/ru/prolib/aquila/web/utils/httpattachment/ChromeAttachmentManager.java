@@ -66,11 +66,13 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 	public HTTPAttachment getLast(HTTPAttachmentCriteria criteria, HTTPDownloadInitiator initiator)
 			throws HTTPAttachmentException, IOException
 	{
-		logger.debug("Entered attachment manager. Target dir: " + targetDir);
+		File dummy = new File(targetDir, "test.dat");
+		logger.debug("File {} creation result: {}", dummy, dummy.createNewFile());
 		String files[] = targetDir.list();
-		logger.debug("File list obtained: " + (files == null ? null : files.length));
-		Set<String> init_files = new HashSet<>(Arrays.asList(targetDir.list()));
-		logger.debug("Initial file list obtained");
+		if ( files == null ) {
+			throw new NullPointerException("Unable to obtain list of files: " + targetDir);
+		}
+		Set<String> init_files = new HashSet<>(Arrays.asList(files));
 		long end_time = System.currentTimeMillis() + timeout;
 		CompletableFuture<Void> task = CompletableFuture.runAsync(() -> {
 			try {
@@ -79,7 +81,6 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 				throw new IllegalStateException(e);
 			}
 		});
-		logger.debug("Start waiting for initiator finish");
 		try {
 			task.get(timeout, TimeUnit.MILLISECONDS);
 		} catch ( TimeoutException e ) {
@@ -87,14 +88,12 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 		} catch ( ExecutionException|InterruptedException e ) {
 			throw new HTTPAttachmentException("Unexpected exception: ", e);
 		}
-		logger.debug("Initiator finished, start scanning for changes");
 		//try {
 		//	Thread.sleep(60000);
 		//} catch ( InterruptedException e ) {
 		//	throw new IOException(e);
 		//}
 		do {
-			logger.debug("Scan...");
 			HTTPAttachment result = scan(criteria, init_files);
 			if ( result != null ) {
 				return result;

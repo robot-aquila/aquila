@@ -136,7 +136,7 @@ public class RWDOptionsLoader {
 				hub_url = config.getOrDefault(INI_KEY_HUB_URL, hub_url);
 				driver = config.getOrDefault(INI_KEY_DRIVER, driver);
 				download_dir_str = config.getOrDefault(INI_KEY_DOWNLOAD_DIR, download_dir_str);
-				download_dir_local_str = config.getOrDefault(INI_KEY_DOWNLOAD_DIR_LOCAL, download_dir_local_str);
+				download_dir_local_str = config.getOrDefault(INI_KEY_DOWNLOAD_DIR_LOCAL, download_dir_str);
 				download_timeout_str = config.getOrDefault(INI_KEY_DOWNLOAD_TIMEOUT, null);
 			}
 		}
