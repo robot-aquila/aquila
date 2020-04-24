@@ -24,7 +24,7 @@ public class RWDOptionsLoader {
 	public static final String INI_KEY_DOWNLOAD_TIMEOUT = "download.timeout";
 	public static final String DEFAULT_HUB_URL = "http://localhost:4444/wd/hub";
 	public static final String DEFAULT_DRIVER = DRIVER_CHROME;
-	public static final String DEFAULT_DOWNLOAD_DIR = "/var/aquila-rwd-download";
+	public static final String DEFAULT_DOWNLOAD_DIR = "/var/aquila-download-default";
 	public static final String DEFAULT_DOWNLOAD_DIR_LOCAL = DEFAULT_DOWNLOAD_DIR;
 	public static final long   DEFAULT_DOWNLOAD_TIMEOUT = 600000; // 10 minutes
 	public static final String ENV_KEY_DRIVER = "AQUILA_IT_DRIVER";
