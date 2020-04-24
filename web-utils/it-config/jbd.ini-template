@@ -1,4 +1,4 @@
-; rev0.7
+; rev0.8
 ;
 ; This file contains configuration of transport layer to use for integration
 ; tests. If this file has an extension equal to ini-template then this is
@@ -48,8 +48,9 @@
 [remote-driver]
 driver = chrome
 hub.url = http://localhost:4444/wd/hub
-
-
+;download.dir = /var/aquila-rwd-download
+;download.dir.local = C:/data/aquila-rwd-downloads
+;download.timeout = 360000
 
 ; This section contains configuration properties of Apache HTTP Client (AHC).
 ; AHC used for most critical areas when WebDriver cannot be used. 

@@ -10,6 +10,8 @@
 [remote-webdriver]
 driver=chrome
 hub.url=http://selenium-hub:4444/wd/hub
+download.dir=/var/aquila-rwd-downloads
+download.timeout=600000
 
 [apache-http-client]
 socketTimeout=

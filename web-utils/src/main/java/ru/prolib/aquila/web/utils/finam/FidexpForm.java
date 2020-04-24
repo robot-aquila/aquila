@@ -316,6 +316,10 @@ public class FidexpForm {
 			.click();
 		return this;
 	}
+	
+	private By getFilenameXPath() {
+		return By.id("issuer-profile-export-file-name");
+	}
 
 	/**
 	 * Select output filename.
@@ -326,7 +330,17 @@ public class FidexpForm {
 	 */
 	public FidexpForm selectFilename(String fileName) throws WUWebPageException {
 		checkDriverIsReady();
-		return fillTextbox(By.id("issuer-profile-export-file-name"), fileName);
+		return fillTextbox(getFilenameXPath(), fileName);
+	}
+	
+	/**
+	 * Get value of filename field.
+	 * <p>
+	 * @return filename currently selected
+	 * @throws WUWebPageException - an error occurred
+	 */
+	public String getFilename() throws WUWebPageException {
+		return getFieldValue(getFilenameXPath());
 	}
 
 	/**
@@ -347,6 +361,15 @@ public class FidexpForm {
 		return this;
 	}
 
+	private String getFieldValue(By xpath) throws WUWebPageException {
+		checkDriverIsReady();
+		return new SearchWebElement(driver).find(xpath).get().getAttribute("value");
+	}
+	
+	private By getContractNameXPath() {
+		return By.id("issuer-profile-export-contract");
+	}
+	
 	/**
 	 * Select the contract name.
 	 * <p>
@@ -360,7 +383,17 @@ public class FidexpForm {
 	 */
 	public FidexpForm selectContractName(String name) throws WUWebPageException {
 		checkDriverIsReady();
-		return fillTextbox(By.id("issuer-profile-export-contract"), name);
+		return fillTextbox(getContractNameXPath(), name);
+	}
+	
+	/**
+	 * Get current value of contract name field.
+	 * <p>
+	 * @return contract name currently selected
+	 * @throws WUWebPageException - an error occurred
+	 */
+	public String getContractName() throws WUWebPageException {
+		return getFieldValue(getContractNameXPath());
 	}
 
 	/**

@@ -14,6 +14,7 @@ services:
     image: selenium/node-chrome-debug:3.141.59-zinc
     volumes:
       - /dev/shm:/dev/shm
+      - /var/aquila-rwd-downloads:/var/aquila-rwd-downloads
     depends_on:
       - selenium-hub
     environment:
@@ -24,19 +25,19 @@ services:
     ports:
       - "5900:5900"
 
-  firefox:
-    image: selenium/node-firefox-debug:3.141.59-zinc
-    volumes:
-      - /dev/shm:/dev/shm
-    depends_on:
-      - selenium-hub
-    environment:
-      - HUB_HOST=selenium-hub
-      - HUB_PORT=4444
-      - NODE_MAX_INSTANCES=5
-      - NODE_MAX_SESSION=5
-    ports:
-      - "5901:5900"
+#  firefox:
+#    image: selenium/node-firefox-debug:3.141.59-zinc
+#    volumes:
+#      - /dev/shm:/dev/shm
+#    depends_on:
+#      - selenium-hub
+#    environment:
+#      - HUB_HOST=selenium-hub
+#      - HUB_PORT=4444
+#      - NODE_MAX_INSTANCES=5
+#      - NODE_MAX_SESSION=5
+#    ports:
+#      - "5901:5900"
 
   jenkins-docker:
     image: docker:dind
@@ -48,6 +49,7 @@ services:
       - jenkins-docker-certs:/certs/client
       - jenkins-data:/var/jenkins_home
       - /root/.m2:/root/.m2
+      - /var/aquila-rwd-downloads:/var/aquila-rwd-downloads
 
   jenkins:
     image: jenkinsci/blueocean

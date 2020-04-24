@@ -42,10 +42,8 @@ public class FidexpFactorySTD implements FidexpFactory {
 	}
 	
 	public static FidexpFactory newFactoryRemote(File config, boolean config_required) throws IOException {
-		return new FidexpFactorySTD(
-				new RWDFactory().loadIni(config, config_required),
-				new AHCAttachmentManagerFactory().loadIni(config, config_required)
-			);
+		RWDFactory factory = new RWDFactory().loadIni(config, config_required);
+		return new FidexpFactorySTD(factory, factory);
 	}
 
 }

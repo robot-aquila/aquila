@@ -11,10 +11,11 @@ services:
       - "4449:4444"
 
   ff-selenium-chrome:
-    image: selenium/node-chrome:3.141.59-zinc
+    image: selenium/node-chrome-debug:3.141.59-zinc
     container_name: ff-selenium-chrome
     volumes:
       - /dev/shm:/dev/shm
+      - /var/aquila-rwd-downloads:/var/aquila-rwd-downloads
     depends_on:
       - ff-selenium-hub
     environment:
@@ -26,7 +27,7 @@ services:
       - "5909:5900"
 
   ff-app:
-    image: aquila:finexp-futures-0.14.5
+    image: aquila:finexp-futures-0.14.6
     container_name: ff-app
     volumes:
       - /dev/shm:/dev/shm

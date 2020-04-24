@@ -1,10 +1,14 @@
 package ru.prolib.aquila.web.utils.finam;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -13,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -33,8 +38,6 @@ import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachment;
 import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentCriteriaBuilder;
 import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentException;
 import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentManager;
-import ru.prolib.aquila.web.utils.httpattachment.HTTPAttachmentNotFoundException;
-import ru.prolib.aquila.web.utils.httpattachment.di.WebDriverGet;
 
 /**
  * The facade of FINAM data export system.
@@ -51,6 +54,21 @@ public class Fidexp implements Closeable {
 	
 	static {
 		logger = LoggerFactory.getLogger(Fidexp.class);
+	}
+	
+	/**
+	 * Create reader of CP1251 encoding text file (possible gzipped).
+	 * <p>
+	 * @param file - path to file
+	 * @return reader
+	 * @throws IOException - an error occurred
+	 */
+	public static BufferedReader createReaderCP1251(File file) throws IOException {
+		InputStream is = new FileInputStream(file);
+		if ( file.getName().endsWith(".gz") ) {
+			is = new GZIPInputStream(is);
+		}
+		return new BufferedReader(new InputStreamReader(is, "CP1251"));
 	}
 	
 	private final WebDriver webDriver;
@@ -349,110 +367,65 @@ public class Fidexp implements Closeable {
 			logger.error("Parking failed: ", e);
 		}
 	}
-	
-	/**
-	 * Download a market data file from FINAM web-site.
-	 * <p>
-	 * @param uri - fully-formed URI to download from. The URI uses "as is". No additional checks performed.
-	 * @param output - the output stream to store the downloaded data
-	 * @throws WUException - an error occurred
-	 */
-	@Deprecated
-	public void download(URI uri, OutputStream output) throws WUException {
-		HTTPAttachmentCriteriaBuilder builder = new HTTPAttachmentCriteriaBuilder()
-			.withURL(uri.toString())
-			.withContentType("finam/expotfile")
-			.withTimeOfStartDownloadCurrent();
-		try {
-			HTTPAttachment attachment = attachmentManager.getLast(builder.build(), new WebDriverGet(webDriver, uri));
-			FileUtils.copyFile(attachment.getFile(), output);
-			attachment.remove();
-		} catch ( IOException e ) {
-			throw new WUIOException(e);
-		} catch ( HTTPAttachmentNotFoundException e ) {	
-			throw new WUIOException(e);
-		} catch ( HTTPAttachmentException e ) {
-			throw new WUIOException(e);
-		} catch ( WebDriverException e ) {
-			throw new WUIOException(e);
-		}
-	}
-	
-	/**
-	 * Download a market data file from FINAM web-site.
-	 * <p>
-	 * @param baseUri - base URI to resolve address of downloading file. It used
-	 * to combine with the query string which was built from the export parameters.
-	 * @param params - the data export parameters
-	 * @param output - the output stream to store the downloaded data
-	 * @throws WUException - an error occurred
-	 */
-	@Deprecated
-	public void download(URI baseUri, FidexpFormParams params, OutputStream output)
+			
+	public void downloadTickData(int marketId, int quoteId, LocalDate date, OutputStream output)
 			throws WUException
 	{
-		download(combine(baseUri, params), output);
-	}
-
-	/**
-	 * Download a market data file from FINAM web-site.
-	 * <p>
-	 * @param baseUri - base URI to resolve address of downloading file. It used
-	 * to combine with the query string which was built from the export parameters.
-	 * @param params - the data export parameters
-	 * @param target - the target file. If the filename ends with .gz suffix
-	 * then output will be gzipped.
-	 * @throws WUException - an error occurred
-	 */
-	@Deprecated
-	public void download(URI baseUri, FidexpFormParams params, File target)
-			throws WUException
-	{
-		OutputStream output;
+		checkFormIsReady(true);
+		webForm.selectMarket(marketId)
+			.selectQuote(quoteId)
+			.selectDateFrom(date)
+			.selectDateTo(date)
+			.selectPeriod(FidexpPeriod.TICKS)
+			.selectFileExt(FidexpFileExt.CSV)
+			.selectDateFormat(FidexpDateFormat.YYYYMMDD)
+			.selectTimeFormat(FidexpTimeFormat.HHMMSS)
+			.useCandleStartTime(true)
+			.useMoscowTime(true)
+			.selectFieldSeparator(FidexpFieldSeparator.COMMA)
+			.selectDigitSeparator(FidexpDigitSeparator.NONE)
+			.selectDataFormat(FidexpDataFormat.DATE_TIME_LAST_VOL)
+			.useAddHeader(true)
+			.useFillEmptyPeriods(false);
+		HTTPAttachment attachment;
 		try {
-			output = new BufferedOutputStream(new FileOutputStream(target));
-			if ( target.getName().endsWith(".gz") ) {
-				output = new GZIPOutputStream(output);
+			attachment = attachmentManager.getLast(new HTTPAttachmentCriteriaBuilder()
+				.withContentType("finam/expotfile")
+				.withTimeOfStartDownloadCurrent()
+				.withFileName(webForm.getFilename() + ".csv")
+				.build(), () -> {
+						try {
+							webForm.send();
+							webForm.ensurePageLoaded();
+							Thread.sleep(10000L);
+						} catch ( Exception e ) {
+							throw new IOException(e);
+						}
+					});
+			try {
+				Thread.sleep(2000L);
+				try ( BufferedReader reader = createReaderCP1251(attachment.getFile()) ) {
+					String first_line = reader.readLine();
+					if ( first_line == null ) {
+						throw new WUException("Empty file received. Downloading mechanism possible broken.");
+					}
+					if ( first_line.startsWith("Автоматическая загрузка недоступна") ) {
+						throw new WUException("Protection message detected.");
+					}
+					if ( ! first_line.startsWith("<DATE>,<TIME>,<LAST>,<VOL>") ) {
+						throw new WUException(new StringBuilder()
+							.append("Unidentified header format.")
+							.append(" Possible new protection measures.: ")
+							.append(first_line)
+							.toString());
+					}
+				}
+				FileUtils.copyFile(attachment.getFile(), output);
+			} finally {
+				attachment.remove();
 			}
-		} catch ( IOException e ) {
-			throw new WUIOException("Error creating output stream", e);
-		}
-		try {
-			download(baseUri, params, output);
-		} finally {
-			IOUtils.closeQuietly(output);
-		}
-	}
-	
-	public void download(FidexpFormParams params, OutputStream output) throws WUException {
-		download(paramsToURIUsingQueryBuilder(params), output);
-	}
-	
-	/**
-	 * Download a market data file from FINAM web site.
-	 * <p>
-	 * Note: The call of this method may use several minutes to execute and will
-	 * lock the facade until done.
-	 * <p>
-	 * @param params - the data export parameters
-	 * @param target - the target file. If the filename ends with .gz suffix
-	 * then output will be gzipped.
-	 * @throws WUException - an error occurred
-	 */
-	public void download(FidexpFormParams params, File target) throws WUException {
-		OutputStream output;
-		try {
-			output = new BufferedOutputStream(new FileOutputStream(target));
-			if ( target.getName().endsWith(".gz") ) {
-				output = new GZIPOutputStream(output);
-			}
-		} catch ( IOException e ) {
-			throw new WUIOException("Error creating output stream", e);
-		}
-		try {
-			download(params, output);
-		} finally {
-			IOUtils.closeQuietly(output);
+		} catch ( InterruptedException|IOException|HTTPAttachmentException|WebDriverException e ) {
+			throw new WUIOException(e);
 		}
 	}
 	
@@ -466,35 +439,24 @@ public class Fidexp implements Closeable {
 	 * then output will be gzipped.
 	 * @throws WUException - an error occurred
 	 */
-	public void downloadTickData(int marketId, int quoteId, LocalDate date,
-			File target) throws WUException
+	public void downloadTickData(int marketId, int quoteId, LocalDate date, File target)
+			throws WUException
 	{
-		download(new FidexpFormParams()
-			.setMarketId(marketId)
-			.setQuoteID(quoteId)
-			.setDateFrom(date)
-			.setDateTo(date)
-			.setPeriod(FidexpPeriod.TICKS)
-			.setFileName("dummy-file") // TODO: make better filename
-			.setFileExt(FidexpFileExt.CSV)
-			.setDateFormat(FidexpDateFormat.YYYYMMDD)
-			.setTimeFormat(FidexpTimeFormat.HHMMSS)
-			.setCandleTime(FidexpCandleTime.START_OF_CANDLE)
-			.setUseMoscowTime(true)
-			.setFieldSeparator(FidexpFieldSeparator.COMMA)
-			.setDigitSeparator(FidexpDigitSeparator.NONE)
-			.setDataFormat(FidexpDataFormat.DATE_TIME_LAST_VOL)
-			.setAddHeader(true)
-			.setFillEmptyPeriods(false), target);
-	}
-	
-	@Deprecated
-	private URI combine(URI baseUri, FidexpFormParams params) throws WUException {
+		OutputStream output;
 		try {
-			return new FidexpFormQueryBuilder().buildQuery(baseUri, params);
-		} catch ( URISyntaxException e ) {
-			throw new WUUnexpectedException("Error building a query", e);
+			output = new BufferedOutputStream(new FileOutputStream(target));
+			if ( target.getName().endsWith(".gz") ) {
+				output = new GZIPOutputStream(output);
+			}
+		} catch ( IOException e ) {
+			throw new WUIOException("Error creating output stream", e);
 		}
+		try {
+			downloadTickData(marketId, quoteId, date, output);
+		} finally {
+			IOUtils.closeQuietly(output);
+		}
+
 	}
 	
 	private Map<Integer, String> toMap(List<NameValuePair> pairs) throws WUException {	

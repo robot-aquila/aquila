@@ -2,16 +2,10 @@ package ru.prolib.aquila.web.utils.finam;
 
 import static org.junit.Assert.*;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,21 +14,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
@@ -51,7 +34,7 @@ import ru.prolib.aquila.web.utils.WUWebPageException;
 public class FidexpIT {
 	private static final Logger logger;
 	private static final File JBROWSER_CONF_FILE = new File("it-config/jbd.ini");
-	private static final File sample = new File("fixture/SPFB.RTS_150701_150731-W1.txt");
+	//private static final File sample = new File("fixture/SPFB.RTS_150701_150731-W1.txt");
 	
 	static {
 		logger = LoggerFactory.getLogger(FidexpIT.class);
@@ -258,62 +241,6 @@ public class FidexpIT {
 			assertEquals("Unexpected symbol: " + symbol, 1, StringUtils.countMatches(symbol, "-"));
 		}
 	}
-
-	@Test
-	@Ignore
-	public void testDownload2_UriOs() throws Exception {
-		fail("TODO: incomplete");
-	}
-	
-	@Test
-	@Ignore
-	public void testDownload3_UriParamsOs() throws Exception {
-		fail("TODO: incomplete");
-	}
-	
-	@Test
-	@Ignore
-	public void testDownload3_UriParamsFile() throws Exception {
-		fail("TODO: incomplete");
-	}
-	
-	@Test
-	@Ignore
-	public void testDownload3_UriParamsFile_Gzipped() throws Exception {
-		fail("TODO: incomplete");
-	}
-	
-	@Test
-	public void testDownload2_ParamsFile() throws Exception {
-		File target = File.createTempFile("download-test-", ".csv");
-		target.deleteOnExit();
-		
-		//System.out.println(new FidexpFormQueryBuilder().buildQuery(new URI("http://hahaha/"), params));
-		facade.download(params, target);
-		
-		assertEquals(FileUtils.readLines(sample), FileUtils.readLines(target));
-	}
-	
-	@Test
-	public void testDownload2_ParamsFile_Gzipped() throws Exception {		
-		File target = File.createTempFile("download-test-gz-", ".csv.gz");
-		target.deleteOnExit();
-		
-		facade.download(params, target);
-
-		File sampleGz = File.createTempFile("download-test-gz-sample-", ".csv.gz");
-		sampleGz.deleteOnExit();
-		OutputStream output = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(sampleGz)));
-		FileUtils.copyFile(sample, output);
-		IOUtils.closeQuietly(output);
-		
-		assertEquals(sampleGz.length(), target.length());
-		byte[] sampleBytes = FileUtils.readFileToByteArray(sampleGz);
-		byte[] targetBytes = FileUtils.readFileToByteArray(target);
-		for ( int i = 0; i < sampleBytes.length; i ++ ) {
-			assertEquals("byte #" + i, sampleBytes[i], targetBytes[i]);
-		}
-	}
 	
 	@Test
 	public void testDownloadTickData4() throws Exception {
@@ -331,9 +258,14 @@ public class FidexpIT {
 			break;
 		}
 		
+		// <a href="#" index="139" value="17451" class="">GAZP</a>
 		facade.downloadTickData(14, 17455, start, target);
+		//facade.downloadTickData(14, 17451, start, target);
 		
 		assertTrue(target.length() > 0);
+		try ( BufferedReader reader = Fidexp.createReaderCP1251(target) ) {
+			assertEquals("<DATE>,<TIME>,<LAST>,<VOL>", reader.readLine());
+		}
 	}
 	
 	@Test
@@ -410,32 +342,4 @@ public class FidexpIT {
 		assertTrue(success >= testMinSuccess);
 	}
 	
-	@Ignore
-	@Test
-	public void testDownload_AHC() throws Exception {
-		String url = "http://export.finam.ru/SPFB.RTS_180413_180413.txt?market=14&em=17455&code=SPFB.RTS&apply=0&df=13&mf=3&yf=2018&from=13.04.2018&dt=13&mt=3&yt=2018&to=13.04.2018&p=1&f=SPFB.RTS_180413_180413&e=.txt&cn=SPFB.RTS&dtf=1&tmf=1&MSOR=1&mstime=on&mstimever=1&sep=1&sep2=1&datf=6&at=1";
-		
-		List<Header> defaultHeaders = new ArrayList<>();
-		defaultHeaders.add(new BasicHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"));
-		defaultHeaders.add(new BasicHeader(HttpHeaders.ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"));
-		defaultHeaders.add(new BasicHeader(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en;q=0.5"));
-		defaultHeaders.add(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate"));
-		
-		try ( CloseableHttpClient httpClient = HttpClients.custom()
-			.setDefaultHeaders(defaultHeaders)
-			.setProxy(new HttpHost("localhost", 3128))
-			.build() )
-		{
-			try ( CloseableHttpResponse response = httpClient.execute(new HttpGet(url))) {
-				InputStream input = new BufferedInputStream(response.getEntity().getContent());
-				FileUtils.copyInputStreamToFile(input, new File("/home/whirlwind/work/tmp/download-ahc-test.txt"));
-				
-			} catch ( ClientProtocolException e ) {
-				throw new Exception("Error: ", e);
-			} catch ( IOException e ) {
-				throw new Exception("Error: ", e);
-			}
-		}
-	}
-
 }
