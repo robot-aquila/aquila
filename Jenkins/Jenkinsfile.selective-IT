@@ -22,7 +22,7 @@ pipeline {
         stage('IT') {
             steps {
                 sh 'cp -u web-utils/it-config/jbd.ini-docker web-utils/it-config/jbd.ini'
-                sh 'mvn -B -DskipTests -DskipITs=false -DfailIfNoTests=false -Dit.test=${AQUILA_SELECTED_TEST} verify'
+                sh 'mvn -XX:-OmitStackTraceInFastThrow -B -DskipTests -DskipITs=false -DfailIfNoTests=false -Dit.test=${AQUILA_SELECTED_TEST} verify'
             }
             post {
                 always {
