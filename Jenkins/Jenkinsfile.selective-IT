@@ -11,7 +11,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh 'printenv | sort'
-				sh 'java -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+PrintFlagsFinal -version'
+				sh 'java -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+PrintFlagsFinal -XX:-OmitStackTraceInFastThrow -version'
             }
         }
         stage('Build') { 
