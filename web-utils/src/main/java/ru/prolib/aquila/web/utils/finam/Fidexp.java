@@ -395,6 +395,8 @@ public class Fidexp implements Closeable {
 				.withFileName(webForm.getFilename() + ".csv")
 				.build(), () -> {
 						try {
+							webForm.ensurePageLoaded();
+							Thread.sleep(10000L);
 							webForm.send();
 							webForm.ensurePageLoaded();
 							Thread.sleep(10000L);
@@ -403,7 +405,7 @@ public class Fidexp implements Closeable {
 						}
 					});
 			try {
-				Thread.sleep(2000L);
+				Thread.sleep(1000L);
 				try ( BufferedReader reader = createReaderCP1251(attachment.getFile()) ) {
 					String first_line = reader.readLine();
 					if ( first_line == null ) {
