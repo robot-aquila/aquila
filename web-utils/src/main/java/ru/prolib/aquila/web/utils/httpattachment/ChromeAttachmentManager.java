@@ -66,7 +66,7 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 	public HTTPAttachment getLast(HTTPAttachmentCriteria criteria, HTTPDownloadInitiator initiator)
 			throws HTTPAttachmentException, IOException
 	{
-		logger.debug("Entered attachment manager");
+		logger.debug("Entered attachment manager. Target dir: " + targetDir);
 		Set<String> init_files = new HashSet<>(Arrays.asList(targetDir.list()));
 		logger.debug("Initial file list obtained");
 		long end_time = System.currentTimeMillis() + timeout;
