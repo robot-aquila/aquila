@@ -11,8 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ChromeAttachmentManager implements HTTPAttachmentManager {
+	static final Logger logger = LoggerFactory.getLogger(ChromeAttachmentManager.class);
+	
 	private final File targetDir;
 	private final long timeout;
 	
@@ -71,6 +75,7 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 				throw new IllegalStateException(e);
 			}
 		});
+		logger.debug("Start waiting for initiator finish");
 		try {
 			task.get(timeout, TimeUnit.MILLISECONDS);
 		} catch ( TimeoutException e ) {
@@ -78,12 +83,14 @@ public class ChromeAttachmentManager implements HTTPAttachmentManager {
 		} catch ( ExecutionException|InterruptedException e ) {
 			throw new HTTPAttachmentException("Unexpected exception: ", e);
 		}
+		logger.debug("Initiator finished, start scanning for changes");
 		//try {
 		//	Thread.sleep(60000);
 		//} catch ( InterruptedException e ) {
 		//	throw new IOException(e);
 		//}
 		do {
+			logger.debug("Scan...");
 			HTTPAttachment result = scan(criteria, init_files);
 			if ( result != null ) {
 				return result;

@@ -389,6 +389,7 @@ public class Fidexp implements Closeable {
 			.useFillEmptyPeriods(false);
 		HTTPAttachment attachment;
 		try {
+			logger.debug("Calling attachment manager");
 			attachment = attachmentManager.getLast(new HTTPAttachmentCriteriaBuilder()
 				.withContentType("finam/expotfile")
 				.withTimeOfStartDownloadCurrent()

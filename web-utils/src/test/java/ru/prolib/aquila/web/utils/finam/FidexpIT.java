@@ -261,7 +261,9 @@ public class FidexpIT {
 		
 		// <a href="#" index="139" value="17451" class="">GAZP</a>
 		//facade.downloadTickData(14, 17455, start, target);
+		logger.debug("Before test");
 		facade.downloadTickData(14, 17451, start, target);
+		logger.debug("After test");
 		
 		assertTrue(target.length() > 0);
 		try ( BufferedReader reader = Fidexp.createReaderCP1251(target) ) {
