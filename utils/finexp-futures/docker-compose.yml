@@ -33,6 +33,7 @@ services:
       - /dev/shm:/dev/shm
       - /var/finexp-futures-data:/var/finexp-futures-data
       - /var/finexp-futures-logs:/opt/finexp-futures/logs
+      - /var/aquila-rwd-downloads:/var/aquila-rwd-downloads
     depends_on:
       - ff-selenium-hub
     environment:

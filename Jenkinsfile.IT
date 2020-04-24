@@ -4,6 +4,9 @@ pipeline {
             args '-v /root/.m2:/root/.m2'
         }
     }
+	environment {
+		MAVEN_OPTS='-XX:-OmitStackTraceInFastThrow'
+	}
     stages {
         stage('Build') { 
             steps {
