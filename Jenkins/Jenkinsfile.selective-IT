@@ -11,6 +11,7 @@ pipeline {
         stage('Prepare') {
             steps {
                 sh 'printenv | sort'
+				sh 'java -version'
             }
         }
         stage('Build') { 
