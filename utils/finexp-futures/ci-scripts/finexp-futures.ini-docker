@@ -7,7 +7,7 @@
 ; Those variables will replace configuration described in this file.
 ;
 
-[remote-webdriver]
+[remote-driver]
 driver=chrome
 hub.url=http://selenium-hub:4444/wd/hub
 download.dir=/var/aquila-rwd-downloads
