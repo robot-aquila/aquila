@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -83,6 +84,7 @@ public class FidexpIT {
 	@After
 	public void tearDown() throws Exception {
 		IOUtils.closeQuietly(facade);
+		Thread.sleep(ThreadLocalRandom.current().nextLong(1000L, 1000L));
 	}
 	
 	private LocalDate nextFuturesDate(LocalDate date) {
