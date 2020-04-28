@@ -9,8 +9,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -22,6 +24,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableRowSorter;
+
+import org.apache.commons.lang3.StringUtils;
 
 import net.miginfocom.swing.MigLayout;
 import ru.prolib.aquila.core.BusinessEntities.MDLevel;
@@ -145,12 +149,15 @@ public class SSDescDialog extends JDialog implements ActionListener, ListSelecti
 	}
 	
 	private void subscribe() {
-		String term_id = formPanel.getSelectedTermID();
-		String str_symbol = formPanel.getSelectedSymbol();
+		String term_id = formPanel.getSelectedTermID(), str_symbol = null;
+		String[] str_symbol_list = StringUtils.split(formPanel.getSelectedSymbol());
 		MDLevel level = formPanel.getSelectedLevel();
-		Symbol symbol = null;
+		Set<Symbol> symbol_list = new LinkedHashSet<>();
 		try {
-			symbol = new Symbol(str_symbol);
+			for ( String s : str_symbol_list ) {
+				str_symbol = s;
+				symbol_list.add(new Symbol(str_symbol));
+			}
 		} catch ( IllegalArgumentException e ) {
 			JOptionPane.showMessageDialog(frame,
 					messages.format(CommonMsg.MSG_ERR_ILLEGAL_SYMBOL, str_symbol),
@@ -158,7 +165,9 @@ public class SSDescDialog extends JDialog implements ActionListener, ListSelecti
 					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		repository.subscribe(term_id, symbol, level);
+		for ( Symbol symbol : symbol_list ) {
+			repository.subscribe(term_id, symbol, level);
+		}
 	}
 	
 	private void unsubscribe() {
