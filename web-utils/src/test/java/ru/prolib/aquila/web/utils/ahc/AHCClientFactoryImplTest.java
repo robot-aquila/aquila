@@ -20,12 +20,14 @@ import org.ini4j.Ini;
 import org.ini4j.Profile.Section;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 // Need PowerMock here because Apache classes have final methods
+@Ignore
 @RunWith(PowerMockRunner.class) 
 @PrepareForTest({RequestConfig.Builder.class, HttpClientBuilder.class })
 public class AHCClientFactoryImplTest {

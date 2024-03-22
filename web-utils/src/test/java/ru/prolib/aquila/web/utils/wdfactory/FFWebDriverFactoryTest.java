@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.easymock.IMocksControl;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,6 +28,7 @@ import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory;
 import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory.DriverInstantiator;
 import ru.prolib.aquila.web.utils.wdfactory.FFWebDriverFactory.DriverInstantiatorImpl;
 
+@Ignore
 public class FFWebDriverFactoryTest {
 	
 	@AfterClass

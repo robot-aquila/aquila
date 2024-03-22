@@ -80,7 +80,7 @@ public class EventSystemImplTest {
 		assertTrue(eventSystem.equals(new EventSystemImpl(queue)));
 		assertFalse(eventSystem.equals(null));
 		assertFalse(eventSystem.equals(this));
-		assertFalse(eventSystem.equals(new EventSystemImpl(control
+		assertFalse(eventSystem.equals(new EventSystemImpl((EventQueue)control
 				.createMock(EventQueue.class))));
 	}
 	

@@ -191,7 +191,7 @@ public class V4QueueTest {
 		eex.expect(UnsupportedOperationException.class);
 		control.replay();
 		
-		service.toArray(null);
+		service.toArray((Object[])null);
 	}
 
 	@Test
